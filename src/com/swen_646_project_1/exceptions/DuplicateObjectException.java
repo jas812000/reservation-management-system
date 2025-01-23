@@ -1,3 +1,6 @@
+// Declares the package name for the project, grouping related classes together.
+package com.swen_646_project_1.exceptions;
+
 /**
  * Exception thrown when a duplicate object is encountered.
  * This can occur when attempting to insert an object that already exists
