@@ -50,13 +50,27 @@ public class CabinReservation extends Reservation {
      * Retrieves whether a full kitchen is available in the cabin.
      * @return True if the cabin has a full kitchen, otherwise false.
      */
-    public boolean isFullKitchenAvailable() {return fullKitchenAvailable;} // End isFullKitchenAvailable method
+    public boolean isFullKitchenAvailable() {
+
+        /*
+         * return true if full kitchen is available, otherwise return false
+         */
+        return fullKitchenAvailable;
+
+    } // End isFullKitchenAvailable method
 
     /**
      * Retrieves whether a loft is available in the cabin.
      * @return True if the cabin has a loft, otherwise false.
      */
-    public boolean isLoftAvailable() {return loftAvailable;} // End isLoftAvailable method
+    public boolean isLoftAvailable() {
+
+        /*
+         * return true if loft is available, otherwise return false
+         */
+        return loftAvailable;
+
+    } // End isLoftAvailable method
 
     /**
      * Calculates the price per night for the cabin.
@@ -64,20 +78,44 @@ public class CabinReservation extends Reservation {
      * @return The price per night as a double
      */
     @Override
-    public double calculatePricePerNight(){return 0.0d;} // End calculatePricePerNight method
+    public double calculatePricePerNight(){
+
+        /*
+         * return price per night for the cabin
+         * may include additional cost if full kitchen or loft is available
+         */
+        return 0.0d;
+
+    } // End calculatePricePerNight method
 
     /**
      * Returns a string representation of the cabin reservation details.
      * @return A formatted string containing reservation details
      */
     @Override
-    public String toString(){return null;} // End toString method
+    public String toString(){
+
+        /*
+         * format and return cabin reservation details as a string
+         */
+        return null;
+
+    } // End toString method
 
     /**
      * Creates a CabinReservation object from a formatted string.
      * @param data A string containing cabin reservation details in a predefined format
      * @return A CabinReservation object created from the provided data
      */
-    public static CabinReservation fromString(String data){return null;} // End fromString method
+    public static CabinReservation fromString(String data){
+
+        /*
+         * parse data string
+         * extract cabin reservation details
+         * return new CabinReservation object with extracted details
+         */
+        return null;
+
+    } // End fromString method
 
 } // end class CabinReservation

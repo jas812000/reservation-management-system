@@ -29,16 +29,25 @@ public class Account {
      */
     public Account(String accountNumber, String mailingAddress, String phoneNumber, String email) {
 
-        // Throws Illegal Argument Exception if any parameter is null or empty.
-        if (accountNumber == null || accountNumber.isEmpty()) {
-            throw new IllegalArgumentException("Account number cannot be empty.");
-        } else if (mailingAddress == null || mailingAddress.isEmpty()) {
-            throw new IllegalArgumentException("Mailing address cannot be empty.");
-        } else if (phoneNumber == null || phoneNumber.isEmpty()) {
-            throw new IllegalArgumentException("Phone number cannot be empty.");
-        } else if (email == null || email.isEmpty()) {
-            throw new IllegalArgumentException("Email cannot be empty.");
-        } // end if/else statements
+        /*
+         * Validate input parameters to ensure they are not null or empty.
+		 *
+ 		 * 1. Check if the account number is null or empty.
+ 		 *      If true, throw an IllegalArgumentException with a message
+ 		 *          indicating the account number cannot be empty.
+ 		 *
+ 		 * 2. Check if the mailing address is null or empty.
+ 		 *      If true, throw an IllegalArgumentException with a message
+ 		 *          indicating the mailing address cannot be empty.
+ 		 *
+ 		 * 3. Check if the phone number is null or empty.
+ 		 *      If true, throw an IllegalArgumentException with a message
+ 		 *          indicating the phone number cannot be empty.
+ 	     *
+ 		 * 4. Check if the email is null or empty.
+ 		 *      If true, throw an IllegalArgumentException with a message
+ 		 *          indicating the email cannot be empty.
+ 	     */
 
         // Assign values after validation
         this.accountNumber = accountNumber;
@@ -53,44 +62,95 @@ public class Account {
      * Retrieves the unique account number.
      * @return Account number as a String
      */
-    public String getAccountNumber() {return null;} // End getAccountNumber method
+    public String getAccountNumber() {
+
+        /*
+         * return the account number
+         */
+        return null;
+
+    } // End getAccountNumber method
 
     /**
      * Updates the mailing address of the account holder.
      * @param newMailingAddress The new mailing address to be set
      */
-    public void updateMailingAddress(String newMailingAddress) {} // End updateMailingAddress method
+    public void updateMailingAddress(String newMailingAddress) {
+
+        /*
+         * if newMailingAddress is not null or empty
+         *      update mailingAddress attribute
+         */
+
+    } // End updateMailingAddress method
 
     /**
      * Updates the phone number associated with the account.
      * @param newPhoneNumber The new phone number to be set
      */
-    public void updatePhoneNumber(String newPhoneNumber) {} // End updatePhoneNumber method
+    public void updatePhoneNumber(String newPhoneNumber) {
+
+        /*
+         * if newPhoneNumber is not null or empty
+         *      update phoneNumber attribute
+         */
+
+    } // End updatePhoneNumber method
 
     /**
      * Updates the email address associated with the account.
      * @param newEmail The new email address to be set
      */
-    public void updateEmail(String newEmail) {} // End updateEmail method
+    public void updateEmail(String newEmail) {
+
+        /*
+         * if newEmail is not null or empty
+         *      update email attribute
+         */
+
+    } // End updateEmail method
 
     /**
      * Adds a new reservation number to the list of associated reservations.
      * @param reservationNumber The reservation number to be added
      */
-    public void addReservation(String reservationNumber) {} // End addReservation method
+    public void addReservation(String reservationNumber) {
+
+        /*
+         * if reservationNumber is not null or empty
+         *      add reservationNumber to reservationNumbers list
+         */
+
+    } // End addReservation method
 
     /**
      * Returns a string representation of the account details.
      * @return A formatted string containing account details
      */
     @Override
-    public String toString() {return null;} // End toString method
+    public String toString() {
+
+        /*
+         * format and return a string containing account details
+         */
+        return null;
+
+    } // End toString method
 
     /**
      * Creates an Account object from a formatted string.
      * @param data A string containing account details in a predefined format
      * @return An Account object constructed from the provided data
      */
-    public static Account fromString(String data) {return null;} // End fromString method
+    public static Account fromString(String data) {
+
+        /*
+         * parse data string
+         * extract account details
+         * return new Account object with extracted details
+         */
+        return null;
+
+    } // End fromString method
 
 } // end class Account

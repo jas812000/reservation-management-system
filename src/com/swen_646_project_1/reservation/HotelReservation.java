@@ -11,7 +11,7 @@ import java.time.LocalDate;     // Import for handing reservation start dates
 public class HotelReservation extends Reservation {
 
     // Attributes
-    private boolean hasKitchenette;     // Indicates whether the hotel room includes a kitchenette
+    private boolean kitchenetteAvailable;     // Indicates whether the hotel room includes a kitchenette
 
     /**
      * Constructor to initialize a HotelReservation object.
@@ -39,7 +39,7 @@ public class HotelReservation extends Reservation {
                 numBeds, numBedrooms, numBathrooms, lodgingSizeSqFt, lodgingPrice);
 
         // Assign specific attributes for HotelReservation.
-        this.hasKitchenette = kitchenetteAvailable;
+        this.kitchenetteAvailable = kitchenetteAvailable;
 
     } // End HotelReservation constructor
 
@@ -47,7 +47,14 @@ public class HotelReservation extends Reservation {
      * Retrieves whether the hotel room has a kitchenette.
      * @return True if the hotel room has a kitchenette, otherwise false.
      */
-    public boolean hasKitchenette() {return hasKitchenette;} // end hasKitchenette method
+    public boolean hasKitchenette() {
+
+        /*
+         * return true if the hotel room has a kitchenette, otherwise return false
+         */
+        return kitchenetteAvailable;
+
+    } // end hasKitchenette method
 
     /**
      * Calculates the price per night for the hotel reservation.
@@ -55,20 +62,43 @@ public class HotelReservation extends Reservation {
      * @return The price per night as a double
      */
     @Override
-    public double calculatePricePerNight() {return 0.0d;} // End calculatePricePerNight method
+    public double calculatePricePerNight() {
+
+        /*
+         * return price per night for the hotel room * may include additional cost if kitchenette is available
+         */
+        return 0.0d;
+
+    } // End calculatePricePerNight method
 
     /**
      * Returns a string representation of the hotel reservation details.
      * @return A formatted string containing reservation details
      */
     @Override
-    public String toString() {return null;} // End toString method
+    public String toString() {
+
+        /*
+         * format and return hotel reservation details as a string
+         */
+        return null;
+
+    } // End toString method
 
     /**
      * Creates a HotelReservation object from a formatted string.
      * @param data A string containing hotel reservation details in a predefined format
      * @return A HotelReservation object created from the provided data
      */
-    public static HotelReservation fromString(String data) {return null;} // End fromString method
+    public static HotelReservation fromString(String data) {
+
+        /*
+         * parse data string
+         * extract hotel reservation details
+         * return new HotelReservation object with extracted details
+         */
+        return null;
+
+    } // End fromString method
 
 } // end class HotelReservation

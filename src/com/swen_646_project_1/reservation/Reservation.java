@@ -44,22 +44,31 @@ public abstract class Reservation {
                        String lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                        int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice) {
 
-        // Throws Illegal Argument Exception if any parameter is null or empty.
-        if (reservationNumber == null || reservationNumber.isEmpty()) {
-            throw new IllegalArgumentException("Reservation number cannot be null or empty.");
-        } else if (accountNumber == null || accountNumber.isEmpty()) {
-            throw new IllegalArgumentException("Account number cannot be null or empty.");
-        } else if (lodgingPhysicalAddress == null || lodgingPhysicalAddress.isEmpty()) {
-            throw new IllegalArgumentException("Lodging physical address cannot be null or empty.");
-        } else if (startDate == null) {
-            throw new IllegalArgumentException("Start date cannot be null.");
-        } else if (numNights < 0) {
-            throw new IllegalArgumentException("Number of nights must be positive.");
-        } else if (lodgingSizeSqFt <= 0) {
-            throw new IllegalArgumentException("Lodging size must be positive.");
-        } else if (lodgingPrice < 0) {
-            throw new IllegalArgumentException("Lodging price cannot be negative.");
-        } // end if/else statements
+            /*
+ 			 * Validate input parameters to ensure they are not null, empty, or
+				invalid.
+ 			 *
+ 			 * 1. Check if the reservation number is null or empty.
+ 			 *      If true, throw an IllegalArgumentException with an appropriate message.
+ 			 *
+ 			 * 2. Check if the account number is null or empty.
+			 *      If true, throw an IllegalArgumentException with an appropriate message.
+		 	 *
+ 			 * 3. Check if the lodging physical address is null or empty.
+ 			 *      If true, throw an IllegalArgumentException with an appropriate message.
+ 			 *
+ 			 * 4. Check if the start date is null.
+ 			 *      If true, throw an IllegalArgumentException with an appropriate message.
+ 			 *
+ 			 * 5. Check if the number of nights is negative.
+ 			 *      If true, throw an IllegalArgumentException with an appropriate message.
+ 			 *
+ 			 * 6. Check if the lodging size in square feet is zero or negative.
+ 			 *      If true, throw an IllegalArgumentException with an appropriate message.
+ 			 *
+ 			 * 7. Check if the lodging price is negative.
+ 			 *      If true, throw an IllegalArgumentException with an appropriate message.
+ 			 */
 
         // Assign values after validation
         this.reservationNumber = reservationNumber;
@@ -81,40 +90,74 @@ public abstract class Reservation {
      * Retrieves the unique reservation number.
      * @return The reservation number as a String.
      */
-    public String getReservationNumber() {return null;} // End getReservationNumber method
+    public String getReservationNumber() {
+
+        /*
+         * return reservationNumber
+         */
+        return null;
+
+    } // End getReservationNumber method
 
     /**
      * Marks the reservation as completed.
      * Throws IllegalStateException if the reservation is already completed or cancelled.
      */
-    public void completeReservation() {} // End completeReservation method
+    public void completeReservation() {
+
+        /*
+         * if reservation is already completed or cancelled
+         * 	    throw IllegalStateException
+         * else
+         * 	    update reservation status to completed
+         */
+
+    } // End completeReservation method
 
     /**
      * Cancels the reservation.
      * Throws IllegalStateException if the reservation is already completed or cancelled.
      */
-    public void cancelReservation() {} // End cancelReservation method
+    public void cancelReservation() {
+
+        /*
+         * if reservation is already completed or cancelled
+         * 	    throw IllegalStateException
+         * else
+         * 	    update reservation status to cancelled
+         */
+
+    } // End cancelReservation method
 
     /**
      * Abstract method to calculate the price per night for the reservation.
      * Must be implemented by subclasses.
      * @return The price per night as a double.
      */
-    public double calculatePricePerNight() {return 0.0d;} // End calculatePricePerNight method
+    public abstract double calculatePricePerNight();
 
     /**
-     * Returns a string representation of the reservation details.
+     * Abstract method that creates a string representation of the reservation details.
+     * Must be implemented by subclasses.
      * @return A formatted string containing reservation details.
      */
     @Override
-    public String toString() {return null;} // End toString method
+    public abstract String toString();
 
     /**
-     * Creates a Reservation object from a formatted string.
-     * This method may return different reservation subtypes based on the data.
-     * @param data A string containing reservation details in a predefined format.
-     * @return A Reservation object constructed from the provided data.
+     * Method for creating a Reservation object from a string.
+     * Subclasses must implement this method to handle their unique data formats.
+     * @param data A string containing reservation details.
+     * Calling this method from the base class will result in an IllegalOperationException.
      */
-    public static Reservation fromString(String data) {return null;} // End fromString method
+    public static Reservation fromString(String data) {
+
+        /*
+         * throw IllegalOperationException
+         * fromString() must be implemented by subclasses.
+         */
+        return null;
+
+    } // End fromString method
 
 } // end abstract class Reservation

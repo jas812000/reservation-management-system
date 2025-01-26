@@ -39,9 +39,10 @@ public class HouseReservation extends Reservation {
                 numBeds, numBedrooms, numBathrooms, lodgingSizeSqFt, lodgingPrice);
 
         // Validate numFloors to ensure it is a positive number.
-        if (numFloors <= 0) {
-            throw new IllegalArgumentException("Number of floors must be positive.");
-        } // end if statement
+        /*
+         * if numFloors is less than or equal to 0
+         *      throw an IllegalArgumentException: "Number of floors must be positive."
+         */
 
         // Assign specific attributes for HouseReservation.
         this.numFloors = numFloors;
@@ -52,7 +53,14 @@ public class HouseReservation extends Reservation {
      * Retrieves the number of floors in the reserved house.
      * @return The number of floors.
      */
-    public int getNumFloors() {return numFloors;} // End getNumFloors method
+    public int getNumFloors() {
+
+        /*
+         * return the number of floors in the reserved house
+         */
+        return numFloors;
+
+    } // End getNumFloors method
 
     /**
      * Calculates the price per night for the house reservation.
@@ -60,20 +68,44 @@ public class HouseReservation extends Reservation {
      * @return The price per night as a double
      */
     @Override
-    public double calculatePricePerNight(){return 0.0d;} // End calculatePricePerNight method
+    public double calculatePricePerNight(){
+
+        /*
+         * return price per night for the house
+         * may include additional cost based on the number of floors
+         */
+        return 0.0d;
+
+    } // End calculatePricePerNight method
 
     /**
      * Returns a string representation of the house reservation details.
      * @return A formatted string containing reservation details
      */
     @Override
-    public String toString(){return null;} // End toString method
+    public String toString(){
+
+        /*
+         * format and return house reservation details as a string
+         */
+        return null;
+
+    } // End toString method
 
     /**
      * Creates a HouseReservation object from a formatted string.
      * @param data A string containing house reservation details in a predefined format
      * @return A HouseReservation object created from the provided data
      */
-    public static HouseReservation fromString(String data){return null;} // End fromString method
+    public static HouseReservation fromString(String data){
+
+        /*
+         * parse data string
+         * extract house reservation details
+         * return new HouseReservation object with extracted details
+         */
+        return null;
+
+    } // End fromString method
 
 } // end class HouseReservation
