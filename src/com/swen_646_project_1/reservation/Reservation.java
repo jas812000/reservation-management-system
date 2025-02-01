@@ -87,7 +87,7 @@ public abstract class Reservation {
     } // End Reservation constructor
 
     /**
-     * Retrieves the unique reservation number.
+     * Getter that retrieves the unique reservation number.
      * @return The reservation number as a String.
      */
     public String getReservationNumber() {
@@ -98,6 +98,24 @@ public abstract class Reservation {
         return null;
 
     } // End getReservationNumber method
+
+    /**
+     * Getter that retrieves the account number associated with this reservation.
+     */
+    public String getAccountNumber() {
+        return accountNumber;
+    } // End getAccountNumber method
+
+    /**
+     * Setter that updates the account number.
+     */
+    public void setAccountNumber(String accountNumber) {
+
+        if (accountNumber != null && !accountNumber.isEmpty()) {
+            this.accountNumber = accountNumber;
+        } // End if statement
+
+    } // End setAccountNumber method
 
     /**
      * Marks the reservation as completed.
