@@ -1,8 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1;
 
-import java.util.ArrayList; // Import used for storing dynamic lists of reservations.
-import java.util.List;      // Import to handle a list of reservation numbers.
+import java.util.*;		// Import used to store and manage collections, such as lists, sets, and maps.
 
 /**
  * Represents a user account in the system.
@@ -10,7 +9,7 @@ import java.util.List;      // Import to handle a list of reservation numbers.
  */
 public class Account {
 
-    // Attributes
+    // Encapsulated Attributes
     private final String accountNumber;         // Unique identifier for account that cannot be changed
     private String mailingAddress;              // Stores the mailing address
     private String phoneNumber;                 // Stores the phone number
@@ -59,7 +58,7 @@ public class Account {
     } // End Account constructor
 
     /**
-     * Retrieves the unique account number.
+     * Getter that retrieves the unique account number.
      * @return Account number as a String
      */
     public String getAccountNumber() {
@@ -70,6 +69,15 @@ public class Account {
         return null;
 
     } // End getAccountNumber method
+
+    /**
+     * Getter that retrieves the mailing address.
+     */
+    public String getMailingAddress() {
+
+        return mailingAddress;
+
+    } // End getMailingAddress method
 
     /**
      * Updates the mailing address of the account holder.
@@ -85,6 +93,15 @@ public class Account {
     } // End updateMailingAddress method
 
     /**
+     * Getter that retrieves the phone number.
+     */
+    public String getPhoneNumber() {
+
+        return phoneNumber;
+
+    } // End getPhoneNumber method
+
+    /**
      * Updates the phone number associated with the account.
      * @param newPhoneNumber The new phone number to be set
      */
@@ -98,6 +115,15 @@ public class Account {
     } // End updatePhoneNumber method
 
     /**
+     * Getter that retrieves the email address.
+     */
+    public String getEmail() {
+
+        return email;
+
+    } // End getEmail method
+
+    /**
      * Updates the email address associated with the account.
      * @param newEmail The new email address to be set
      */
@@ -109,6 +135,15 @@ public class Account {
          */
 
     } // End updateEmail method
+
+    /**
+     * Getter that retrieves the list of reservation numbers.
+     */
+    public List<String> getReservationNumbers() {
+
+        return new ArrayList<>(reservationNumbers);
+
+    } // End getReservationNumbers method
 
     /**
      * Adds a new reservation number to the list of associated reservations.

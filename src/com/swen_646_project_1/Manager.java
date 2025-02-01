@@ -4,10 +4,8 @@ package com.swen_646_project_1;
 // Imports the Reservation class to allow the Manager class to work with different types of reservations.
 import com.swen_646_project_1.reservation.Reservation;
 
-import java.io.File;        // Import used to handle file and directory operations.
-import java.util.HashMap;   // Import used to store and manage key-value pairs (accounts and account numbers).
-import java.util.List;      // Import used to store and manage collections of accounts.
-import java.util.Map;       // Import used to store accounts using a key-value pair structure.
+import java.io.*;		// Import used to handle input and output operations, including file handling.
+import java.util.*;		// Import used to store and manage collections, such as lists, sets, and maps.
 
 /**
  * The Manager class serves as the main controller for managing accounts and reservations.
@@ -16,11 +14,12 @@ import java.util.Map;       // Import used to store accounts using a key-value p
  */
 public class Manager {
 
-    // Attributes
-    // Constant representing the directory path where account and reservation data is stored
+    // Encapsulated Attributes
+    // Constant representing the directory path where account and reservation data is stored.
+    // Internal use only (no setter method needed)
     private static final String DATA_DIRECTORY = "/path/to/data";
 
-    // A map storing accounts, where the key is the account number and the value is the Account object
+    // Initialize a map storing accounts, where the key is the account number and the value is the Account object.
     private Map<String, Account> accounts;
 
     /**
@@ -28,9 +27,9 @@ public class Manager {
      * Responsible for loading existing accounts and reservations from storage.
      */
     public Manager() {
-        this.accounts = new HashMap<>();    // Initialize the accounts map
+        this.accounts = new HashMap<>();    // Initialize the accounts map.
 
-        // Load all the existing accounts and reservations from storage
+        // Load all the existing accounts and reservations from storage.
         loadAccountsAndReservations();
 
     } // End Manager constructor
@@ -76,20 +75,20 @@ public class Manager {
     } // End loadReservationsForAccount method
 
     /**
-     * Retrieves a list of all accounts in the system.
-     * @return A list of Account objects.
+     * Getter that retrieves a list of all accounts in the system.
+     * @return An immutable list of Account numbers and associated account objects.
      */
     public List<Account> getAccounts() {
 
         /*
          * return list of all accounts from the system
          */
-        return null;
+        return Collections.unmodifiableList(new ArrayList<>(accounts.values()));
 
     } // End getAccounts method
 
     /**
-     * Retrieves an account based on the provided account number.
+     * getter that retrieves an account based on the provided account number.
      * @param accountNumber The unique identifier of the account.
      * @return The Account object associated with the given account number.
      */
@@ -101,7 +100,7 @@ public class Manager {
          * else
          * 	    return null
          */
-        return null;
+        return accounts.getOrDefault(accountNumber, null);
 
     } // End getAccount method
 
