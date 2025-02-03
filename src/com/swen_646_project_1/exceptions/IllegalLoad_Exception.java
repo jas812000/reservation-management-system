@@ -10,4 +10,18 @@ package com.swen_646_project_1.exceptions;
  * The exception message should indicate what failed (account file versus reservation file) and
  * the filename that could not be loaded. The message should include the account’s number that was being loaded.
  */
-public class IllegalLoadException extends RuntimeException {}
+public class IllegalLoad_Exception extends RuntimeException {
+    public IllegalLoad_Exception(String failedObject, String fileName, String accountNumber) {
+        super("Failed to load " + failedObject + " from file: " + fileName + " | Account: " + accountNumber);
+    } // End IllegalLoad_Exception constructor
+
+    /**
+     * Returns a string representation of the exception.
+     * @return A formatted string containing the exception message.
+     */
+    @Override
+    public String toString() {
+        return getMessage();
+    } // End toString method
+} // End IllegalLoad_Exception class
+

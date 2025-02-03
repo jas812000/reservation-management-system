@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
-
-import java.time.LocalDate;     // Import for handing reservation start dates
+// Import for handing reservation start dates
+import java.time.LocalDate;
 
 /**
  * Represents a cabin reservation.
@@ -51,12 +51,7 @@ public class CabinReservation extends Reservation {
      * @return True if the cabin has a full kitchen, otherwise false.
      */
     public boolean isFullKitchenAvailable() {
-
-        /*
-         * return true if full kitchen is available, otherwise return false
-         */
         return fullKitchenAvailable;
-
     } // End isFullKitchenAvailable method
 
     /**
@@ -64,13 +59,24 @@ public class CabinReservation extends Reservation {
      * @return True if the cabin has a loft, otherwise false.
      */
     public boolean isLoftAvailable() {
-
-        /*
-         * return true if loft is available, otherwise return false
-         */
         return loftAvailable;
-
     } // End isLoftAvailable method
+
+    /**
+     * Updates the availability of a full kitchen in the cabin.
+     * @param fullKitchenAvailable True if the cabin has a full kitchen, false otherwise.
+     */
+    public void setFullKitchenAvailable(boolean fullKitchenAvailable) {
+        this.fullKitchenAvailable = fullKitchenAvailable;
+    } // End setFullKitchenAvailable method
+
+    /**
+     * Updates the availability of a loft in the cabin.
+     * @param loftAvailable True if the cabin has a loft, false otherwise.
+     */
+    public void setLoftAvailable(boolean loftAvailable) {
+        this.loftAvailable = loftAvailable;
+    } // End setLoftAvailable method
 
     /**
      * Calculates the price per night for the cabin.

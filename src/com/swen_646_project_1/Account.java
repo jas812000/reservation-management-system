@@ -1,7 +1,17 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1;
-
-import java.util.*;		// Import used to store and manage collections, such as lists, sets, and maps.
+/*
+ * Imports the following:
+ * - Reservation class to allow the Manager class to work with different types of reservations.
+ * - Custom exception classes to handle various error scenarios related to reservations.
+ * - ReservationStatus enum to manage different states of reservations.
+ * - Java utility classes for handling data structures and operations like lists, maps, etc.
+ */
+import com.swen_646_project_1.reservation.Reservation;
+import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
+import com.swen_646_project_1.exceptions.IllegalState_Exception;
+import com.swen_646_project_1.enums.ReservationStatus;
+import java.util.*;
 
 /**
  * Represents a user account in the system.
@@ -48,6 +58,20 @@ public class Account {
  		 *          indicating the email cannot be empty.
  	     */
 
+        // Validate input parameters to ensure they are not null or empty.
+        if (accountNumber == null || accountNumber.isEmpty()) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
+        } // End if statement
+        if (mailingAddress == null || mailingAddress.isEmpty()) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Mailing address cannot be empty.");
+        } // End if statement
+        if (phoneNumber == null || phoneNumber.isEmpty()) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Phone number cannot be empty.");
+        } // End if statement
+        if (email == null || !email.contains("@")) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Invalid email address.");
+        } // End if statement
+
         // Assign values after validation
         this.accountNumber = accountNumber;
         this.mailingAddress = mailingAddress;
@@ -63,10 +87,7 @@ public class Account {
      */
     public String getAccountNumber() {
 
-        /*
-         * return the account number
-         */
-        return null;
+        return this.accountNumber;
 
     } // End getAccountNumber method
 
@@ -75,7 +96,7 @@ public class Account {
      */
     public String getMailingAddress() {
 
-        return mailingAddress;
+        return this.mailingAddress;
 
     } // End getMailingAddress method
 
@@ -84,11 +105,15 @@ public class Account {
      * @param newMailingAddress The new mailing address to be set
      */
     public void updateMailingAddress(String newMailingAddress) {
-
         /*
          * if newMailingAddress is not null or empty
          *      update mailingAddress attribute
          */
+        if (newMailingAddress != null && !newMailingAddress.isEmpty()) {
+            this.mailingAddress = newMailingAddress;
+        } else {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Mailing address cannot be empty.");
+        } // End if-else statements
 
     } // End updateMailingAddress method
 
@@ -97,7 +122,7 @@ public class Account {
      */
     public String getPhoneNumber() {
 
-        return phoneNumber;
+        return this.phoneNumber;
 
     } // End getPhoneNumber method
 
@@ -111,6 +136,11 @@ public class Account {
          * if newPhoneNumber is not null or empty
          *      update phoneNumber attribute
          */
+        if (newPhoneNumber != null && !newPhoneNumber.isEmpty()) {
+            this.phoneNumber = newPhoneNumber;
+        } else {
+            throw new IllegalArgumentException("Phone number cannot be empty.");
+        } // End if-else statements
 
     } // End updatePhoneNumber method
 
@@ -119,7 +149,7 @@ public class Account {
      */
     public String getEmail() {
 
-        return email;
+        return this.email;
 
     } // End getEmail method
 
@@ -133,6 +163,14 @@ public class Account {
          * if newEmail is not null or empty
          *      update email attribute
          */
+        try {
+            if (newEmail == null || !newEmail.contains("@")) {
+                throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email format.");
+            }
+            this.email = newEmail;
+        } catch (IllegalParameter_Exception e) {
+            System.out.println("Error: " + e);
+        } // End try-catch statements
 
     } // End updateEmail method
 
@@ -141,7 +179,7 @@ public class Account {
      */
     public List<String> getReservationNumbers() {
 
-        return new ArrayList<>(reservationNumbers);
+        return new ArrayList<>(this.reservationNumbers);
 
     } // End getReservationNumbers method
 
@@ -155,8 +193,43 @@ public class Account {
          * if reservationNumber is not null or empty
          *      add reservationNumber to reservationNumbers list
          */
-
+        if (reservationNumber != null && !reservationNumber.isEmpty()) {
+            this.reservationNumbers.add(reservationNumber);
+        } else {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
+        } // End if-else statements
     } // End addReservation method
+
+    /**
+     * Cancels an existing reservation for this account.
+     * @param reservationNumber The reservation number to be cancelled.
+     * @throws IllegalState_Exception if the reservation does not exist or is already cancelled/completed.
+     */
+    public void cancelReservation(String reservationNumber) {
+
+        /*
+         * 1. Check if reservation exists in the account's reservation list
+         * 2. Load the Reservation object from storage
+         * 3. If reservation is already cancelled or completed, throw IllegalState_Exception
+         * 4. Otherwise, update status to CANCELLED and save it
+         */
+
+        if (!reservationNumbers.contains(reservationNumber)) {
+            throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Reservation does not exist.");
+        } // End if statement
+
+        // Load the actual Reservation object
+        Reservation reservation = Manager.loadReservationFromFile(this.accountNumber, reservationNumber);
+
+        if (reservation.getStatus() == ReservationStatus.COMPLETED || reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Cannot cancel a completed or already cancelled reservation.");
+        } // End if statement
+
+        // Mark reservation as cancelled
+        reservation.cancelReservation();
+        Manager.saveReservationToFile(reservation); // Save the updated reservation
+
+    } // End cancelReservation method
 
     /**
      * Returns a string representation of the account details.

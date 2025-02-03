@@ -1,7 +1,9 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
-
-import java.time.LocalDate;     // Import for handing reservation start dates
+// Imports the custom exception class for handling invalid parameter inputs.
+import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
+// Import for handing reservation start dates
+import java.time.LocalDate;
 
 /**
  * Represents a house reservation with multiple floors.
@@ -43,6 +45,10 @@ public class HouseReservation extends Reservation {
          * if numFloors is less than or equal to 0
          *      throw an IllegalArgumentException: "Number of floors must be positive."
          */
+        if (numFloors <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A",
+                    "A house cannot have zero or negative floors. Please enter a valid number..");
+        } // End if statement
 
         // Assign specific attributes for HouseReservation.
         this.numFloors = numFloors;
@@ -54,13 +60,20 @@ public class HouseReservation extends Reservation {
      * @return The number of floors.
      */
     public int getNumFloors() {
-
-        /*
-         * return the number of floors in the reserved house
-         */
         return numFloors;
-
     } // End getNumFloors method
+
+    /**
+     * Updates the number of floors in the reserved house.
+     * @param numFloors The new number of floors.
+     */
+    public void setNumFloors(int numFloors) {
+        if (numFloors <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A",
+                    "A house cannot have zero or negative floors. Please enter a valid number..");
+        }
+        this.numFloors = numFloors;
+    } // End setNumFloors method
 
     /**
      * Calculates the price per night for the house reservation.

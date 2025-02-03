@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
-
-import java.time.LocalDate;     // Import for handing reservation start dates
+// Import for handing reservation start dates
+import java.time.LocalDate;
 
 /**
  * Represents a hotel reservation.
@@ -48,13 +48,16 @@ public class HotelReservation extends Reservation {
      * @return True if the hotel room has a kitchenette, otherwise false.
      */
     public boolean hasKitchenette() {
-
-        /*
-         * return true if the hotel room has a kitchenette, otherwise return false
-         */
         return kitchenetteAvailable;
-
     } // end hasKitchenette method
+
+    /**
+     * Updates the kitchenette availability in the hotel room.
+     * @param kitchenetteAvailable True if the room has a kitchenette, false otherwise.
+     */
+    public void setKitchenetteAvailable(boolean kitchenetteAvailable) {
+        this.kitchenetteAvailable = kitchenetteAvailable;
+    } // End setKitchenetteAvailable method
 
     /**
      * Calculates the price per night for the hotel reservation.

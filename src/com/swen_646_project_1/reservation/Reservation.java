@@ -1,9 +1,14 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
-
-// Imports the ReservationStatus enum which defines different statuses a reservation can have.
+/*
+ * Imports the following:
+ * - Custom exception class to handle various error scenarios related to reservations.
+ * - ReservationStatus enum to manage different states of reservations.
+ * - Time utility for handling reservation start dates
+ */
+import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.enums.ReservationStatus;
-import java.time.LocalDate;     // Import for handling reservation start dates
+import java.time.LocalDate;
 
 /**
  * Abstract base class representing a reservation.
@@ -44,31 +49,54 @@ public abstract class Reservation {
                        String lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                        int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice) {
 
-            /*
- 			 * Validate input parameters to ensure they are not null, empty, or
-				invalid.
- 			 *
- 			 * 1. Check if the reservation number is null or empty.
- 			 *      If true, throw an IllegalArgumentException with an appropriate message.
- 			 *
- 			 * 2. Check if the account number is null or empty.
-			 *      If true, throw an IllegalArgumentException with an appropriate message.
-		 	 *
- 			 * 3. Check if the lodging physical address is null or empty.
- 			 *      If true, throw an IllegalArgumentException with an appropriate message.
- 			 *
- 			 * 4. Check if the start date is null.
- 			 *      If true, throw an IllegalArgumentException with an appropriate message.
- 			 *
- 			 * 5. Check if the number of nights is negative.
- 			 *      If true, throw an IllegalArgumentException with an appropriate message.
- 			 *
- 			 * 6. Check if the lodging size in square feet is zero or negative.
- 			 *      If true, throw an IllegalArgumentException with an appropriate message.
- 			 *
- 			 * 7. Check if the lodging price is negative.
- 			 *      If true, throw an IllegalArgumentException with an appropriate message.
- 			 */
+        /*
+ 		 * Validate input parameters to ensure they are not null, empty, or	invalid.
+ 		 *
+ 		 * 1. Check if the reservation number is null or empty.
+ 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+ 		 *
+ 		 * 2. Check if the account number is null or empty.
+		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+		 *
+ 		 * 3. Check if the lodging physical address is null or empty.
+ 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+ 		 *
+ 		 * 4. Check if the start date is null.
+ 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+ 		 *
+ 		 * 5. Check if the number of nights is negative.
+ 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+ 		 *
+ 		 * 6. Check if the lodging size in square feet is zero or negative.
+ 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+ 		 *
+ 		 * 7. Check if the lodging price is negative.
+ 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
+ 		 */
+
+
+        // Validate input parameters
+        if (reservationNumber == null || reservationNumber.isEmpty()) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
+        } // End if statement
+        if (accountNumber == null || accountNumber.isEmpty()) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
+        } // End if statement
+        if (lodgingPhysicalAddress == null || lodgingPhysicalAddress.isEmpty()) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging physical address cannot be empty.");
+        } // End if statement
+        if (startDate == null) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Start date cannot be null.");
+        } // End if statement
+        if (numNights <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of nights must be positive.");
+        } // End if statement
+        if (lodgingSizeSqFt <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging size must be positive.");
+        } // End if statement
+        if (lodgingPrice < 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging price cannot be negative.");
+        } // End if statement
 
         // Assign values after validation
         this.reservationNumber = reservationNumber;
@@ -91,20 +119,95 @@ public abstract class Reservation {
      * @return The reservation number as a String.
      */
     public String getReservationNumber() {
-
-        /*
-         * return reservationNumber
-         */
-        return null;
-
+        return this.reservationNumber;
     } // End getReservationNumber method
 
     /**
      * Getter that retrieves the account number associated with this reservation.
      */
     public String getAccountNumber() {
-        return accountNumber;
+        return this.accountNumber;
     } // End getAccountNumber method
+
+    /**
+     * Getter that retrieves the reservation status.
+     * @return The current status of the reservation.
+     */
+    public ReservationStatus getStatus() {
+        return this.status;
+    } // End getStatus method
+
+    /**
+     * Getter that retrieves the lodging physical address.
+     * @return The lodging physical address as a String.
+     */
+    public String getLodgingPhysicalAddress() {
+        return this.lodgingPhysicalAddress;
+    } // End getLodgingPhysicalAddress method
+
+    /**
+     * Getter that retrieves the lodging mailing address.
+     * @return The lodging mailing address as a String.
+     */
+    public String getLodgingMailingAddress() {
+        return this.lodgingMailingAddress;
+    } // End getLodgingMailingAddress method
+
+    /**
+     * Getter that retrieves the start date of the reservation.
+     * @return The start date as a LocalDate.
+     */
+    public LocalDate getStartDate() {
+        return this.startDate;
+    } // End getStartDate method
+
+    /**
+     * Getter that retrieves the number of nights for the stay.
+     * @return The number of nights as an integer.
+     */
+    public int getNumNights() {
+        return this.numNights;
+    } // End getNumNights method
+
+    /**
+     * Getter that retrieves the number of beds available.
+     * @return The number of beds as an integer.
+     */
+    public int getNumBeds() {
+        return this.numBeds;
+    } // End getNumBeds method
+
+    /**
+     * Getter that retrieves the number of bedrooms in the lodging.
+     * @return The number of bedrooms as an integer.
+     */
+    public int getNumBedrooms() {
+        return this.numBedrooms;
+    } // End getNumBedrooms method
+
+    /**
+     * Getter that retrieves the number of bathrooms in the lodging.
+     * @return The number of bathrooms as an integer.
+     */
+    public int getNumBathrooms() {
+        return this.numBathrooms;
+    } // End getNumBathrooms method
+
+    /**
+     * Getter that retrieves the size of the lodging in square feet.
+     * @return The lodging size in square feet as an integer.
+     */
+    public int getLodgingSizeSqFt() {
+        return this.lodgingSizeSqFt;
+    } // End getLodgingSizeSqFt method
+
+    /**
+     * Getter that retrieves the price per night.
+     * @return The price per night as a double.
+     */
+    public double getLodgingPrice() {
+        return this.lodgingPrice;
+    } // End getLodgingPrice method
 
     /**
      * Setter that updates the account number.
@@ -118,14 +221,42 @@ public abstract class Reservation {
     } // End setAccountNumber method
 
     /**
+     * Setter that updates the lodging physical address.
+     */
+    public void setLodgingPhysicalAddress(String lodgingPhysicalAddress) {
+        this.lodgingPhysicalAddress = lodgingPhysicalAddress;
+    } // End setLodgingPhysicalAddress method
+
+    /**
+     * Setter that updates the lodging mailing address.
+     */
+    public void setLodgingMailingAddress(String lodgingMailingAddress) {
+        this.lodgingMailingAddress = lodgingMailingAddress;
+    } // End setLodgingMailingAddress method
+
+    /**
+     * Setter that updates the start date.
+     */
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    } // End setStartDate method
+
+    /**
+     * Setter that updates the reservation status.
+     */
+    public void setStatus(ReservationStatus status) {
+        this.status = status;
+    } // End setStatus method
+
+    /**
      * Marks the reservation as completed.
-     * Throws IllegalStateException if the reservation is already completed or cancelled.
+     * Throws IllegalState_Exception if the reservation is already completed or cancelled.
      */
     public void completeReservation() {
 
         /*
          * if reservation is already completed or cancelled
-         * 	    throw IllegalStateException
+         * 	    throw IllegalState_Exception
          * else
          * 	    update reservation status to completed
          */
@@ -134,18 +265,34 @@ public abstract class Reservation {
 
     /**
      * Cancels the reservation.
-     * Throws IllegalStateException if the reservation is already completed or cancelled.
+     * Throws IllegalState_Exception if the reservation is already completed or cancelled.
      */
     public void cancelReservation() {
 
         /*
          * if reservation is already completed or cancelled
-         * 	    throw IllegalStateException
+         * 	    throw IllegalState_Exception
          * else
          * 	    update reservation status to cancelled
          */
 
     } // End cancelReservation method
+
+    /**
+     * Updates reservation details with new data.
+     * @param newReservationData The new Reservation object containing updated details.
+     */
+    public void updateReservation(Reservation newReservationData) {
+        this.lodgingPhysicalAddress = newReservationData.lodgingPhysicalAddress;
+        this.lodgingMailingAddress = newReservationData.lodgingMailingAddress;
+        this.startDate = newReservationData.startDate;
+        this.numNights = newReservationData.numNights;
+        this.numBeds = newReservationData.numBeds;
+        this.numBedrooms = newReservationData.numBedrooms;
+        this.numBathrooms = newReservationData.numBathrooms;
+        this.lodgingSizeSqFt = newReservationData.lodgingSizeSqFt;
+        this.lodgingPrice = newReservationData.lodgingPrice;
+    } // End updateReservation method
 
     /**
      * Abstract method to calculate the price per night for the reservation.
@@ -166,12 +313,12 @@ public abstract class Reservation {
      * Method for creating a Reservation object from a string.
      * Subclasses must implement this method to handle their unique data formats.
      * @param data A string containing reservation details.
-     * Calling this method from the base class will result in an IllegalOperationException.
+     * Calling this method from the base class will result in an IllegalOperation_Exception.
      */
     public static Reservation fromString(String data) {
 
         /*
-         * throw IllegalOperationException
+         * throw IllegalOperation_Exception
          * fromString() must be implemented by subclasses.
          */
         return null;
