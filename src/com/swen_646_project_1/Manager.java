@@ -314,7 +314,7 @@ public class Manager {
      * Throws DuplicateObject_Exception if the account already exists.
      * @param account The Account object to be added.
      */
-    public void addAccount(Account account) {
+    public void addAccount(Account account) throws DuplicateObject_Exception, IllegalSave_Exception {
         /*
          * if account number exists in accounts map
          * 	    throw DuplicateObject_Exception
@@ -348,7 +348,7 @@ public class Manager {
      * Throws IllegalArgumentException if the account does not exist.
      * @param accountNumber The unique identifier of the account to update.
      */
-    public void updateAccount(String accountNumber) {
+    public void updateAccount(String accountNumber) throws IllegalArgumentException, IllegalSave_Exception {
         /*
          * if account exists in accounts map
          * 	    retrieve account details
@@ -376,7 +376,7 @@ public class Manager {
      * @param accountNumber The unique identifier of the account.
      * @param reservation The Reservation object to be added.
      */
-    public void addReservation(String accountNumber, Reservation reservation) {
+    public void addReservation(String accountNumber, Reservation reservation) throws IllegalState_Exception, IllegalSave_Exception {
         /*
          * if account exists in accounts map
          *      ensures reservation is valid
@@ -408,7 +408,7 @@ public class Manager {
      * @param accountNumber The unique identifier of the account.
      * @param reservationNumber The unique identifier of the reservation.
      */
-    public void completeReservation(String accountNumber, String reservationNumber) {
+    public void completeReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception, IllegalOperation_Exception, IllegalSave_Exception {
         /*
          * Retrieve the account from the system.
          * If the account does not exist, throw an IllegalState_Exception.
@@ -466,7 +466,7 @@ public class Manager {
      * @param accountNumber The unique identifier of the account.
      * @param reservationNumber The unique identifier of the reservation.
      */
-    public void cancelReservation(String accountNumber, String reservationNumber) {
+    public void cancelReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception, IllegalSave_Exception {
         /*
          * Retrieve the account from the system.
          * If the account does not exist, throw an IllegalState_Exception.
@@ -495,7 +495,7 @@ public class Manager {
      * @param reservationNumber The unique identifier of the reservation to update.
      * @param newReservationData The new Reservation object containing updated details.
      */
-    public void updateReservation(String accountNumber, String reservationNumber, Reservation newReservationData) {
+    public void updateReservation(String accountNumber, String reservationNumber, Reservation newReservationData) throws IllegalState_Exception, IllegalOperation_Exception, IllegalSave_Exception {
         /*
          * Retrieve the reservation using accountNumber and reservationNumber.
          * If the reservation does not exist, throw an IllegalOperation_Exception.
@@ -574,7 +574,7 @@ public class Manager {
      * @param account The Account object to be saved.
      * @throws IllegalSave_Exception If there is an issue writing the account to a file.
      */
-    private void saveAccountToFile(Account account){
+    private void saveAccountToFile(Account account) throws IllegalSave_Exception {
         /*
          * Convert the Account object into a formatted string for storage.
          * Write the formatted data to a file in the data directory.
@@ -603,7 +603,7 @@ public class Manager {
      * @param reservation The Reservation object to be saved.
      * @throws IllegalSave_Exception If there is an issue writing the reservation to a file.
      */
-    protected static void saveReservationToFile(Reservation reservation){
+    protected static void saveReservationToFile(Reservation reservation) throws IllegalSave_Exception {
         /*
          * Convert the Reservation object into a formatted string for storage.
          * Write the formatted data to a file in the data directory.

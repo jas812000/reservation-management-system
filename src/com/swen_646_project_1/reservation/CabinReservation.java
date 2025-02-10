@@ -2,6 +2,8 @@
 package com.swen_646_project_1.reservation;
 // Import for handing reservation start dates
 import java.time.LocalDate;
+// Import Address class to handle lodging and mailing addresses in reservations
+import com.swen_646_project_1.Address;
 
 /**
  * Represents a cabin reservation.
@@ -31,8 +33,8 @@ public class CabinReservation extends Reservation {
      * @param fullKitchenAvailable   Indicates if the cabin includes a full kitchen
      * @param loftAvailable          Indicates if the cabin includes a loft
      */
-    public CabinReservation(String reservationNumber, String accountNumber, String lodgingPhysicalAddress,
-                            String lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
+    public CabinReservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
+                            Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                             int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice,
                             boolean fullKitchenAvailable, boolean loftAvailable){
 

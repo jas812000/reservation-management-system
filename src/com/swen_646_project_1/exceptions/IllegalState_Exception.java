@@ -17,7 +17,7 @@ public class IllegalState_Exception extends RuntimeException {
      * @param reason The reason why the operation is not allowed.
      */
     public IllegalState_Exception(String accountNumber, String reservationNumber, String reason) {
-        super("Illegal operation: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
+        super(STR."Illegal operation: \{reason} | Account: \{accountNumber}, Reservation: \{reservationNumber}");
     } // End IllegalState_Exception constructor
 
     /**

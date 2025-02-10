@@ -15,7 +15,7 @@ public class NullAccount_Exception extends RuntimeException {
      * @param reason The reason why the operation is not allowed.
      */
     public NullAccount_Exception(String accountNumber, String reason) {
-        super("Account error: " + reason + " | Account: " + accountNumber);
+        super(STR."Account error: \{reason} | Account: \{accountNumber}");
     } // End NullAccount_Exception constructor
 
     /**

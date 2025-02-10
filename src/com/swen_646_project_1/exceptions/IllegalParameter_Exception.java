@@ -10,7 +10,7 @@ package com.swen_646_project_1.exceptions;
  */
 public class IllegalParameter_Exception extends RuntimeException {
     public IllegalParameter_Exception(String accountNumber, String reservationNumber, String reason) {
-        super("Invalid Parameter: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
+        super(STR."Invalid Parameter: \{reason} | Account: \{accountNumber}, Reservation: \{reservationNumber}");
     } // End IllegalParameter_Exception constructor
 
     /**

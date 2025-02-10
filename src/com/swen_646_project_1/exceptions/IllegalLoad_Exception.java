@@ -12,7 +12,7 @@ package com.swen_646_project_1.exceptions;
  */
 public class IllegalLoad_Exception extends RuntimeException {
     public IllegalLoad_Exception(String failedObject, String fileName, String accountNumber) {
-        super("Failed to load " + failedObject + " from file: " + fileName + " | Account: " + accountNumber);
+        super(STR."Failed to load \{failedObject} from file: \{fileName} | Account: \{accountNumber}");
     } // End IllegalLoad_Exception constructor
 
     /**

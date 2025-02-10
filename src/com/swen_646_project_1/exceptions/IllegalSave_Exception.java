@@ -17,7 +17,7 @@ public class IllegalSave_Exception extends RuntimeException {
    * @param accountNumber The account number related to the operation.
    */
   public IllegalSave_Exception(String failedObject, String fileName, String accountNumber) {
-    super("Failed to save " + failedObject + " to file: " + fileName + " | Account: " + accountNumber);
+    super(STR."Failed to save \{failedObject} to file: \{fileName} | Account: \{accountNumber}");
   } // End IllegalSave_Exception constructor
 
   /**

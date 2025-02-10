@@ -2,10 +2,12 @@
 package com.swen_646_project_1.reservation;
 /*
  * Imports the following:
+ * - Address class to handle lodging and mailing addresses in reservations
  * - Custom exception class to handle various error scenarios related to reservations.
  * - ReservationStatus enum to manage different states of reservations.
  * - Time utility for handling reservation start dates
  */
+import com.swen_646_project_1.Address;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.enums.ReservationStatus;
 import java.time.LocalDate;
@@ -20,8 +22,8 @@ public abstract class Reservation {
     // Attributes
     protected final String reservationNumber;   // Unique identifier for reservation that cannot be changed
     protected String accountNumber;             // Account number associated with this reservation
-    protected String lodgingPhysicalAddress;    // Physical address of the lodging for this reservation
-    protected String lodgingMailingAddress;     // Mailing address of the lodging if different from physical address
+    protected Address lodgingPhysicalAddress;    // Physical address of the lodging for this reservation
+    protected Address lodgingMailingAddress;     // Mailing address of the lodging if different from physical address
     protected LocalDate startDate;              // Start date of the reservation
     protected int numNights;                    // Number of nights for the stay
     protected int numBeds;                      // Number of beds available in the lodging
@@ -45,8 +47,8 @@ public abstract class Reservation {
      * @param lodgingSizeSqFt        Size of the lodging in square feet (must be positive).
      * @param lodgingPrice           Price per night for the lodging (must be positive).
      */
-    public Reservation(String reservationNumber, String accountNumber, String lodgingPhysicalAddress,
-                       String lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
+    public Reservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
+                       Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                        int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice) {
 
         /*
@@ -82,7 +84,7 @@ public abstract class Reservation {
         if (accountNumber == null || accountNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
         } // End if statement
-        if (lodgingPhysicalAddress == null || lodgingPhysicalAddress.isEmpty()) {
+        if (lodgingPhysicalAddress == null) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Lodging physical address cannot be empty.");
         } // End if statement
         if (startDate == null) {
@@ -141,7 +143,7 @@ public abstract class Reservation {
      * Getter that retrieves the lodging physical address.
      * @return The lodging physical address as a String.
      */
-    public String getLodgingPhysicalAddress() {
+    public Address getLodgingPhysicalAddress() {
         return this.lodgingPhysicalAddress;
     } // End getLodgingPhysicalAddress method
 
@@ -149,7 +151,7 @@ public abstract class Reservation {
      * Getter that retrieves the lodging mailing address.
      * @return The lodging mailing address as a String.
      */
-    public String getLodgingMailingAddress() {
+    public Address getLodgingMailingAddress() {
         return this.lodgingMailingAddress;
     } // End getLodgingMailingAddress method
 
@@ -221,14 +223,14 @@ public abstract class Reservation {
     /**
      * Setter that updates the lodging physical address.
      */
-    public void setLodgingPhysicalAddress(String lodgingPhysicalAddress) {
+    public void setLodgingPhysicalAddress(Address lodgingPhysicalAddress) {
         this.lodgingPhysicalAddress = lodgingPhysicalAddress;
     } // End setLodgingPhysicalAddress method
 
     /**
      * Setter that updates the lodging mailing address.
      */
-    public void setLodgingMailingAddress(String lodgingMailingAddress) {
+    public void setLodgingMailingAddress(Address lodgingMailingAddress) {
         this.lodgingMailingAddress = lodgingMailingAddress;
     } // End setLodgingMailingAddress method
 

@@ -21,7 +21,7 @@ public class Account {
 
     // Encapsulated Attributes
     private final String accountNumber;         // Unique identifier for account that cannot be changed
-    private String mailingAddress;              // Stores the mailing address
+    private Address address;                    // Stores the address object
     private String phoneNumber;                 // Stores the phone number
     private String email;                       // Stores the email address
     private List<String> reservationNumbers;    // List of reservation numbers associated with this account
@@ -32,11 +32,11 @@ public class Account {
      * Assigns the provided attribute to the instance variable.
      * Initialize an empty list to store reservation numbers associated with this account.
      * @param accountNumber Unique identifier for the account
-     * @param mailingAddress Mailing address of the user
+     * @param address Address object containing street, city, state and zip code
      * @param phoneNumber Contact phone number of the user
      * @param email Email address of the user
      */
-    public Account(String accountNumber, String mailingAddress, String phoneNumber, String email) {
+    public Account(String accountNumber, Address address, String phoneNumber, String email) {
 
         /*
          * Validate input parameters to ensure they are not null or empty.
@@ -62,7 +62,7 @@ public class Account {
         if (accountNumber == null || accountNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
         } // End if statement
-        if (mailingAddress == null || mailingAddress.isEmpty()) {
+        if (address == null) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Mailing address cannot be empty.");
         } // End if statement
         if (phoneNumber == null || phoneNumber.isEmpty()) {
@@ -74,12 +74,28 @@ public class Account {
 
         // Assign values after validation
         this.accountNumber = accountNumber;
-        this.mailingAddress = mailingAddress;
+        this.address = address;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.reservationNumbers = new ArrayList<>();
 
     } // End Account constructor
+
+    /**
+     * Creates an Account object from a formatted string.
+     * @param data A string containing account details in a predefined format
+     * @return An Account object constructed from the provided data
+     */
+    public static Account fromString(String data) {
+
+        /*
+         * parse data string
+         * extract account details
+         * return new Account object with extracted details
+         */
+        return null;
+
+    } // End fromString method
 
     /**
      * Getter that retrieves the unique account number.
@@ -92,30 +108,26 @@ public class Account {
     } // End getAccountNumber method
 
     /**
-     * Getter that retrieves the mailing address.
+     * Getter that retrieves the account's address
      */
-    public String getMailingAddress() {
-
-        return this.mailingAddress;
-
-    } // End getMailingAddress method
+    public Address getAddress() { return address; } // End getAddress method
 
     /**
-     * Updates the mailing address of the account holder.
-     * @param newMailingAddress The new mailing address to be set
+     * Updates the address of the account holder.
+     * @param newAddress The new mailing address to be set.
      */
-    public void updateMailingAddress(String newMailingAddress) {
+    public void setAddress(Address newAddress) {
         /*
-         * if newMailingAddress is not null or empty
-         *      update mailingAddress attribute
+         * if newAddress is not null or empty
+         *      throw IllegalParameter_Exception with a message indication the address cannot be empty.
+         * update mailingAddress attribute
          */
-        if (newMailingAddress != null && !newMailingAddress.isEmpty()) {
-            this.mailingAddress = newMailingAddress;
-        } else {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Mailing address cannot be empty.");
+        if (newAddress == null) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Address cannot be empty.");
         } // End if-else statements
+        this.address = newAddress;
 
-    } // End updateMailingAddress method
+    } // End setAddressAddress method
 
     /**
      * Getter that retrieves the phone number.
@@ -130,19 +142,19 @@ public class Account {
      * Updates the phone number associated with the account.
      * @param newPhoneNumber The new phone number to be set
      */
-    public void updatePhoneNumber(String newPhoneNumber) {
+    public void setPhoneNumber(String newPhoneNumber) {
 
         /*
          * if newPhoneNumber is not null or empty
-         *      update phoneNumber attribute
+         *      throw IllegalParameter_Exception with a message indication the phone number cannot be empty.
+         * update phoneNumber attribute
          */
-        if (newPhoneNumber != null && !newPhoneNumber.isEmpty()) {
-            this.phoneNumber = newPhoneNumber;
-        } else {
+        if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
             throw new IllegalArgumentException("Phone number cannot be empty.");
         } // End if-else statements
+        this.phoneNumber = newPhoneNumber;
 
-    } // End updatePhoneNumber method
+    } // End setPhoneNumber method
 
     /**
      * Getter that retrieves the email address.
@@ -157,22 +169,19 @@ public class Account {
      * Updates the email address associated with the account.
      * @param newEmail The new email address to be set
      */
-    public void updateEmail(String newEmail) {
+    public void setEmail(String newEmail) {
 
         /*
          * if newEmail is not null or empty
-         *      update email attribute
+         *      throw IllegalParameter_Exception with a message indication the email cannot be empty.
+         * update email attribute
          */
-        try {
-            if (newEmail == null || !newEmail.contains("@")) {
-                throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email format.");
-            }
-            this.email = newEmail;
-        } catch (IllegalParameter_Exception e) {
-            System.out.println("Error: " + e);
-        } // End try-catch statements
+        if (newEmail == null || !newEmail.contains("@")) {
+            throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email format.");
+        } // End if statements
+        this.email = newEmail;
 
-    } // End updateEmail method
+    } // End setEmail method
 
     /**
      * Getter that retrieves the list of reservation numbers.
@@ -191,13 +200,14 @@ public class Account {
 
         /*
          * if reservationNumber is not null or empty
-         *      add reservationNumber to reservationNumbers list
+         *      throw IllegalParameter_Exception with a message indication the reservationNumber cannot be empty.
+         * add reservationNumber to reservationNumbers list
          */
-        if (reservationNumber != null && !reservationNumber.isEmpty()) {
-            this.reservationNumbers.add(reservationNumber);
-        } else {
+        if (reservationNumber == null || reservationNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
         } // End if-else statements
+        this.reservationNumbers.add(reservationNumber);
+
     } // End addReservation method
 
     /**
@@ -244,21 +254,5 @@ public class Account {
         return null;
 
     } // End toString method
-
-    /**
-     * Creates an Account object from a formatted string.
-     * @param data A string containing account details in a predefined format
-     * @return An Account object constructed from the provided data
-     */
-    public static Account fromString(String data) {
-
-        /*
-         * parse data string
-         * extract account details
-         * return new Account object with extracted details
-         */
-        return null;
-
-    } // End fromString method
 
 } // end class Account
