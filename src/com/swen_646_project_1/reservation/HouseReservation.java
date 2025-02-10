@@ -4,6 +4,8 @@ package com.swen_646_project_1.reservation;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 // Import for handing reservation start dates
 import java.time.LocalDate;
+// Import Address class to handle lodging and mailing addresses in reservations
+import com.swen_646_project_1.Address;
 
 /**
  * Represents a house reservation with multiple floors.
@@ -31,8 +33,8 @@ public class HouseReservation extends Reservation {
      * @param lodgingPrice           Price per night for the lodging (must be positive).
      * @param numFloors              Number of floors in the reserved house (must be positive).
      */
-    public HouseReservation(String reservationNumber, String accountNumber, String lodgingPhysicalAddress,
-                            String lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
+    public HouseReservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
+                            Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                             int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice,
                             int numFloors){
 

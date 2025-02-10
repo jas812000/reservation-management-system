@@ -2,6 +2,8 @@
 package com.swen_646_project_1.reservation;
 // Import for handing reservation start dates
 import java.time.LocalDate;
+// Import Address class to handle lodging and mailing addresses in reservations
+import com.swen_646_project_1.Address;
 
 /**
  * Represents a hotel reservation.
@@ -29,8 +31,8 @@ public class HotelReservation extends Reservation {
      * @param lodgingPrice           Price per night for the hotel room (must be positive).
      * @param kitchenetteAvailable   Indicates if the hotel room includes a kitchenette
      */
-    public HotelReservation(String reservationNumber, String accountNumber, String lodgingPhysicalAddress,
-                            String lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
+    public HotelReservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
+                            Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                             int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice,
                             boolean kitchenetteAvailable) {
 
