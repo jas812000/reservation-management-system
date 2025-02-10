@@ -157,9 +157,7 @@ public abstract class Reservation {
      * Getter that retrieves the start date of the reservation.
      * @return The start date as a LocalDate.
      */
-    public LocalDate getStartDate() {
-        return this.startDate;
-    } // End getStartDate method
+    public LocalDate getStartDate() {return this.startDate; } // End getStartDate method
 
     /**
      * Getter that retrieves the number of nights for the stay.
