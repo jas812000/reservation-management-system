@@ -231,8 +231,10 @@ public class Account {
         // Load the actual Reservation object
         Reservation reservation = Manager.loadReservationFromFile(this.accountNumber, reservationNumber);
 
-        if (reservation.getStatus() == ReservationStatus.COMPLETED || reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Cannot cancel a completed or already cancelled reservation.");
+        if (reservation.getStatus() == ReservationStatus.COMPLETED ||
+                reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(this.accountNumber, reservationNumber,
+                    "Cannot cancel a completed or already cancelled reservation.");
         } // End if statement
 
         // Mark reservation as cancelled

@@ -16,7 +16,7 @@ public class NullReservation_Exception extends RuntimeException {
    * @param reason The reason why the operation is not allowed.
    */
   public NullReservation_Exception(String accountNumber, String reservationNumber, String reason) {
-    super(STR."Reservation error: \{reason} | Account: \{accountNumber}, Reservation: \{reservationNumber}");
+    super("Reservation error: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
   } // End NullReservation_Exception constructor
 
   /**

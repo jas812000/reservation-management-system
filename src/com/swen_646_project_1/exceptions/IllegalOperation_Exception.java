@@ -8,8 +8,10 @@ package com.swen_646_project_1.exceptions;
  * account ID, reservation number, and details why exactly it failed.
  */
 public class IllegalOperation_Exception extends RuntimeException {
-    public IllegalOperation_Exception(String operation, String accountNumber, String reservationNumber, String details) {
-        super(STR."Illegal operation: \{operation} | Account: \{accountNumber}, Reservation: \{reservationNumber} | \{details}");
+    public IllegalOperation_Exception(String operation, String accountNumber, String reservationNumber,
+                                      String details) {
+        super("Illegal operation: " + operation + " | Account: " + accountNumber + ", Reservation: " +
+                reservationNumber + " | " + details);
     } // End IllegalOperation_Exception constructor
 
     /**

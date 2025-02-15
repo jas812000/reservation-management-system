@@ -1,3 +1,4 @@
+// Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1;
 
 // Custom exception classes to handle various error scenarios related to addresses.
@@ -72,7 +73,7 @@ public class Address {
      */
     @Override
     public String toString() {
-        return STR."\{street}, \{city}, \{state} \{zipCode}";
+        return street + ", " + city + ", " + state + " " + zipCode;
     } // End toString method
 
 } // End Address class

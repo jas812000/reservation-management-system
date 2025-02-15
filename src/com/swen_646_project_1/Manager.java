@@ -82,7 +82,8 @@ public class Manager {
 
             // Retrieve a list of all account files in the data directory.
             // The files must follow the naming pattern "acc-ACCOUNTNUMBER.txt" to be recognized as valid account files.
-            File[] accountFiles = dataDir.listFiles((dir, name) -> name.startsWith("acc-") && name.endsWith(".txt"));
+            File[] accountFiles = dataDir.listFiles((dir, name) ->
+                    name.startsWith("acc-") && name.endsWith(".txt"));
 
             // If account files exist, process each one
             if (accountFiles != null) {
@@ -151,7 +152,8 @@ public class Manager {
             // Check if account is null before accessing its methods
             if (account == null) {
                 // Throw a NullAccount_Exception when an account is expected but not found.
-                throw new NullAccount_Exception("N/A", "Account information is missing. Unable to create the directory.");
+                throw new NullAccount_Exception("N/A", "Account information is missing. " +
+                        "Unable to create the directory.");
 
             } // End if statement
 
@@ -185,12 +187,14 @@ public class Manager {
         if (!accountDir.exists() || !accountDir.isDirectory()) {
 
             // Throw an IllegalLoad_Exception when the system fails to load an account's reservation directory.
-            throw new IllegalLoad_Exception("Account Reservation Directory", accountDir.getAbsolutePath(), account.getAccountNumber());
+            throw new IllegalLoad_Exception("Account Reservation Directory", accountDir.getAbsolutePath(),
+                    account.getAccountNumber());
         } // End if statement
 
         // Retrieve all reservation files from the account's directory
         // Reservation files must follow the naming convention "res-RESERVATIONNUMBER.txt"
-        File[] reservationFiles = accountDir.listFiles((dir, name) -> name.startsWith("res-") && name.endsWith(".txt"));
+        File[] reservationFiles = accountDir.listFiles((dir, name) ->
+                name.startsWith("res-") && name.endsWith(".txt"));
 
         // Check if reservation files exist
         if (reservationFiles != null) {
@@ -211,7 +215,8 @@ public class Manager {
                     // Check if reservation is null before accessing its methods
                     if (reservation == null) {
                         // Throw a NullReservation_Exception when attempting to add a reservation that does not exist.
-                        throw new NullReservation_Exception(account.getAccountNumber(), "N/A", "No reservation found. Unable to add it to account.");
+                        throw new NullReservation_Exception(account.getAccountNumber(), "N/A",
+                                "No reservation found. " + "Unable to add it to account.");
                     } // End if Statement
 
                     // Link the reservation to the account
@@ -230,10 +235,12 @@ public class Manager {
      * @return The Reservation object created from the file data.
      * @throws IllegalLoad_Exception If the file cannot be read or is corrupted.
      */
-    protected static Reservation loadReservationFromFile(String accountNumber, String reservationNumber) throws IllegalLoad_Exception {
+    protected static Reservation loadReservationFromFile(String accountNumber, String reservationNumber)
+            throws IllegalLoad_Exception {
 
         // New file path for the reservation file based on account and reservation numbers
-        File reservationFile = new File(DATA_DIRECTORY + "/" + accountNumber + "/res-" + reservationNumber + ".txt");
+        File reservationFile = new File(DATA_DIRECTORY + "/" + accountNumber + "/res-" +
+                reservationNumber + ".txt");
 
         // Check if the reservation file exists; if not, throw an exception
         if (!reservationFile.exists()) {
@@ -376,7 +383,8 @@ public class Manager {
      * @param accountNumber The unique identifier of the account.
      * @param reservation The Reservation object to be added.
      */
-    public void addReservation(String accountNumber, Reservation reservation) throws IllegalState_Exception, IllegalSave_Exception {
+    public void addReservation(String accountNumber, Reservation reservation) throws IllegalState_Exception,
+            IllegalSave_Exception {
         /*
          * if account exists in accounts map
          *      ensures reservation is valid
@@ -391,7 +399,8 @@ public class Manager {
 
             // If the account does not exist, throw an exception
             if (account == null) {
-                throw new IllegalState_Exception(accountNumber, reservation.getReservationNumber(), "Account does not exist.");
+                throw new IllegalState_Exception(accountNumber, reservation.getReservationNumber(),
+                        "Account does not exist.");
             } // End if statement
 
             // Save the reservation details to a file
@@ -408,7 +417,8 @@ public class Manager {
      * @param accountNumber The unique identifier of the account.
      * @param reservationNumber The unique identifier of the reservation.
      */
-    public void completeReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception, IllegalOperation_Exception, IllegalSave_Exception {
+    public void completeReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception,
+            IllegalOperation_Exception, IllegalSave_Exception {
         /*
          * Retrieve the account from the system.
          * If the account does not exist, throw an IllegalState_Exception.
@@ -440,12 +450,15 @@ public class Manager {
 
             // If the reservation does not exist, throw an exception
             if (reservation == null) {
-                throw new IllegalOperation_Exception("Complete Reservation", accountNumber, reservationNumber, "Reservation does not exist.");
+                throw new IllegalOperation_Exception("Complete Reservation", accountNumber, reservationNumber,
+                        "Reservation does not exist.");
             } // End if statement
 
             // If the reservation is already completed or cancelled, throw an exception
-            if (reservation.getStatus() == ReservationStatus.COMPLETED || reservation.getStatus() == ReservationStatus.CANCELLED) {
-                throw new IllegalState_Exception(accountNumber, reservationNumber, "Cannot complete a cancelled or already completed reservation.");
+            if (reservation.getStatus() == ReservationStatus.COMPLETED ||
+                    reservation.getStatus() == ReservationStatus.CANCELLED) {
+                throw new IllegalState_Exception(accountNumber, reservationNumber,
+                        "Cannot complete a cancelled or already completed reservation.");
             } // End if statement
 
             // Mark the reservation as completed
@@ -466,7 +479,8 @@ public class Manager {
      * @param accountNumber The unique identifier of the account.
      * @param reservationNumber The unique identifier of the reservation.
      */
-    public void cancelReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception, IllegalSave_Exception {
+    public void cancelReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception,
+            IllegalSave_Exception {
         /*
          * Retrieve the account from the system.
          * If the account does not exist, throw an IllegalState_Exception.
@@ -495,7 +509,8 @@ public class Manager {
      * @param reservationNumber The unique identifier of the reservation to update.
      * @param newReservationData The new Reservation object containing updated details.
      */
-    public void updateReservation(String accountNumber, String reservationNumber, Reservation newReservationData) throws IllegalState_Exception, IllegalOperation_Exception, IllegalSave_Exception {
+    public void updateReservation(String accountNumber, String reservationNumber, Reservation newReservationData)
+            throws IllegalState_Exception, IllegalOperation_Exception, IllegalSave_Exception {
         /*
          * Retrieve the reservation using accountNumber and reservationNumber.
          * If the reservation does not exist, throw an IllegalOperation_Exception.
@@ -516,12 +531,15 @@ public class Manager {
 
             // If the reservation does not exist, throw an exception
             if (reservation == null) {
-                throw new IllegalOperation_Exception("Update Reservation", accountNumber, reservationNumber, "Reservation does not exist.");
+                throw new IllegalOperation_Exception("Update Reservation", accountNumber, reservationNumber,
+                        "Reservation does not exist.");
             } // End if statement
 
             // If the reservation is already completed or cancelled, throw an exception
-            if (reservation.getStatus() == ReservationStatus.COMPLETED || reservation.getStatus() == ReservationStatus.CANCELLED) {
-                throw new IllegalState_Exception(accountNumber, reservationNumber, "Cannot update a completed or cancelled reservation.");
+            if (reservation.getStatus() == ReservationStatus.COMPLETED ||
+                    reservation.getStatus() == ReservationStatus.CANCELLED) {
+                throw new IllegalState_Exception(accountNumber, reservationNumber,
+                        "Cannot update a completed or cancelled reservation.");
             } // End if statement
 
             // Update the reservation details with new reservation data

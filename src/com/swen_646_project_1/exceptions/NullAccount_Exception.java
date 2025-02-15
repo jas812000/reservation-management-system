@@ -3,8 +3,8 @@ package com.swen_646_project_1.exceptions;
 
 /**
  * Throws NullAccount_Exception if an account is missing or not found.
- *      - User tries to perform an action on a non-existent account. ("Account not found.")
- *      - User tries to create a directory or save data for a missing account. ("Cannot proceed with a missing account.")
+ *    - User tries to perform an action on a non-existent account. ("Account not found.")
+ *    - User tries to create a directory or save data for a missing account. ("Cannot proceed with a missing account.")
  * The generated exception message should indicate the account number (if available) and why it failed.
  */
 public class NullAccount_Exception extends RuntimeException {
@@ -15,7 +15,7 @@ public class NullAccount_Exception extends RuntimeException {
      * @param reason The reason why the operation is not allowed.
      */
     public NullAccount_Exception(String accountNumber, String reason) {
-        super(STR."Account error: \{reason} | Account: \{accountNumber}");
+        super("Account error: " + reason + " | Account: " + accountNumber);
     } // End NullAccount_Exception constructor
 
     /**

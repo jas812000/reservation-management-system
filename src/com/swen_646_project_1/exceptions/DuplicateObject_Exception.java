@@ -9,7 +9,7 @@ package com.swen_646_project_1.exceptions;
  */
 public class DuplicateObject_Exception extends RuntimeException {
     public DuplicateObject_Exception(String accountNumber, String reservationNumber) {
-        super(STR."Duplicate entry detected | Account: \{accountNumber}, Reservation: \{reservationNumber}");
+        super("Duplicate entry detected | Account: " + accountNumber + ", Reservation: " + reservationNumber);
     } // End DuplicateObject_Exception constructor
 
     /**
