@@ -8,6 +8,7 @@ package com.swen_646_project_1.reservation;
  * - Time utility for handling reservation start dates
  */
 import com.swen_646_project_1.Address;
+import com.swen_646_project_1.exceptions.IllegalOperation_Exception;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.enums.ReservationStatus;
 import java.time.LocalDate;
@@ -75,8 +76,6 @@ public abstract class Reservation {
  		 * 7. Check if the lodging price is negative.
  		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
  		 */
-
-
         // Validate input parameters
         if (reservationNumber == null || reservationNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
@@ -132,12 +131,32 @@ public abstract class Reservation {
     } // End getAccountNumber method
 
     /**
+     * Setter that updates the account number.
+     */
+    public void setAccountNumber(String accountNumber) {
+        if (accountNumber != null && !accountNumber.isEmpty()) {
+            this.accountNumber = accountNumber;
+        } // End if statement
+
+    } // End setAccountNumber method
+
+    /**
      * Getter that retrieves the reservation status.
      * @return The current status of the reservation.
      */
     public ReservationStatus getStatus() {
         return this.status;
     } // End getStatus method
+
+    /**
+     * Setter that updates the reservation status.
+     */
+    public void setStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Status cannot be null.");
+        } // End if statement
+        this.status = status;
+    } // End setStatus method
 
     /**
      * Getter that retrieves the lodging physical address.
@@ -148,6 +167,13 @@ public abstract class Reservation {
     } // End getLodgingPhysicalAddress method
 
     /**
+     * Setter that updates the lodging physical address.
+     */
+    public void setLodgingPhysicalAddress(Address lodgingPhysicalAddress) {
+        this.lodgingPhysicalAddress = lodgingPhysicalAddress;
+    } // End setLodgingPhysicalAddress method
+
+    /**
      * Getter that retrieves the lodging mailing address.
      * @return The lodging mailing address as a String.
      */
@@ -156,10 +182,24 @@ public abstract class Reservation {
     } // End getLodgingMailingAddress method
 
     /**
+     * Setter that updates the lodging mailing address.
+     */
+    public void setLodgingMailingAddress(Address lodgingMailingAddress) {
+        this.lodgingMailingAddress = lodgingMailingAddress;
+    } // End setLodgingMailingAddress method
+
+    /**
      * Getter that retrieves the start date of the reservation.
      * @return The start date as a LocalDate.
      */
     public LocalDate getStartDate() {return this.startDate; } // End getStartDate method
+
+    /**
+     * Setter that updates the start date.
+     */
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    } // End setStartDate method
 
     /**
      * Getter that retrieves the number of nights for the stay.
@@ -208,45 +248,6 @@ public abstract class Reservation {
     public double getLodgingPrice() {
         return this.lodgingPrice;
     } // End getLodgingPrice method
-
-    /**
-     * Setter that updates the account number.
-     */
-    public void setAccountNumber(String accountNumber) {
-
-        if (accountNumber != null && !accountNumber.isEmpty()) {
-            this.accountNumber = accountNumber;
-        } // End if statement
-
-    } // End setAccountNumber method
-
-    /**
-     * Setter that updates the lodging physical address.
-     */
-    public void setLodgingPhysicalAddress(Address lodgingPhysicalAddress) {
-        this.lodgingPhysicalAddress = lodgingPhysicalAddress;
-    } // End setLodgingPhysicalAddress method
-
-    /**
-     * Setter that updates the lodging mailing address.
-     */
-    public void setLodgingMailingAddress(Address lodgingMailingAddress) {
-        this.lodgingMailingAddress = lodgingMailingAddress;
-    } // End setLodgingMailingAddress method
-
-    /**
-     * Setter that updates the start date.
-     */
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    } // End setStartDate method
-
-    /**
-     * Setter that updates the reservation status.
-     */
-    public void setStatus(ReservationStatus status) {
-        this.status = status;
-    } // End setStatus method
 
     /**
      * Marks the reservation as completed.
@@ -321,7 +322,7 @@ public abstract class Reservation {
          * throw IllegalOperation_Exception
          * fromString() must be implemented by subclasses.
          */
-        return null;
+        throw new IllegalOperation_Exception("fromString", "N/A", "N/A", "Must be implemented by subclasses.");
 
     } // End fromString method
 

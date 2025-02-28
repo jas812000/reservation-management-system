@@ -7,6 +7,7 @@ package com.swen_646_project_1;
  * - ReservationStatus enum to manage different states of reservations.
  * - Java utility classes for handling data structures and operations like lists, maps, etc.
  */
+import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.exceptions.IllegalState_Exception;
@@ -93,7 +94,12 @@ public class Account {
          * extract account details
          * return new Account object with extracted details
          */
-        return null;
+        String[] parts = data.split(",");
+        if (parts.length < 4){
+            throw new IllegalLoad_Exception("Account", "N/A", "Data corrupted");
+        }
+        Address address = new Address(parts[1], parts[2], parts[3], Integer.parseInt(parts[4]));
+        return new Account(parts[0], address, parts[5], parts[6]);
 
     } // End fromString method
 
@@ -102,9 +108,7 @@ public class Account {
      * @return Account number as a String
      */
     public String getAccountNumber() {
-
         return this.accountNumber;
-
     } // End getAccountNumber method
 
     /**
@@ -132,18 +136,13 @@ public class Account {
     /**
      * Getter that retrieves the phone number.
      */
-    public String getPhoneNumber() {
-
-        return this.phoneNumber;
-
-    } // End getPhoneNumber method
+    public String getPhoneNumber() {return this.phoneNumber;} // End getPhoneNumber method
 
     /**
      * Updates the phone number associated with the account.
      * @param newPhoneNumber The new phone number to be set
      */
     public void setPhoneNumber(String newPhoneNumber) {
-
         /*
          * if newPhoneNumber is not null or empty
          *      throw IllegalParameter_Exception with a message indication the phone number cannot be empty.
@@ -153,24 +152,18 @@ public class Account {
             throw new IllegalArgumentException("Phone number cannot be empty.");
         } // End if-else statements
         this.phoneNumber = newPhoneNumber;
-
     } // End setPhoneNumber method
 
     /**
      * Getter that retrieves the email address.
      */
-    public String getEmail() {
-
-        return this.email;
-
-    } // End getEmail method
+    public String getEmail() {return this.email;} // End getEmail method
 
     /**
      * Updates the email address associated with the account.
      * @param newEmail The new email address to be set
      */
     public void setEmail(String newEmail) {
-
         /*
          * if newEmail is not null or empty
          *      throw IllegalParameter_Exception with a message indication the email cannot be empty.
@@ -180,16 +173,13 @@ public class Account {
             throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email format.");
         } // End if statements
         this.email = newEmail;
-
     } // End setEmail method
 
     /**
      * Getter that retrieves the list of reservation numbers.
      */
     public List<String> getReservationNumbers() {
-
         return new ArrayList<>(this.reservationNumbers);
-
     } // End getReservationNumbers method
 
     /**
@@ -223,7 +213,6 @@ public class Account {
          * 3. If reservation is already cancelled or completed, throw IllegalState_Exception
          * 4. Otherwise, update status to CANCELLED and save it
          */
-
         if (!reservationNumbers.contains(reservationNumber)) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Reservation does not exist.");
         } // End if statement
