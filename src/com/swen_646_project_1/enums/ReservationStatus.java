@@ -7,5 +7,5 @@ package com.swen_646_project_1.enums;
 public enum ReservationStatus {
     DRAFT,          // The reservation is in draft mode and has not been finalized.
     COMPLETED,      // The reservation has been completed successfully.
-    CANCELLED;      // The reservation has been cancelled and is no longer active.
+    CANCELLED      // The reservation has been cancelled and is no longer active.
 } // End Enum

@@ -9,17 +9,16 @@ package com.swen_646_project_1.exceptions;
  * The generated exception message should indicate the account number and/or reservation number and why it failed.
  */
 public class IllegalParameter_Exception extends RuntimeException {
+
+    /**
+     * Constructor for IllegalParameter_Exception.
+     * @param accountNumber The account number associated with the invalid parameter.
+     * @param reservationNumber The reservation number associated with the invalid parameter.
+     * @param reason The reason why the parameter is invalid.
+     */
     public IllegalParameter_Exception(String accountNumber, String reservationNumber, String reason) {
         super("Invalid Parameter: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
     } // End IllegalParameter_Exception constructor
 
-    /**
-     * Returns a string representation of the exception.
-     * @return A formatted string containing the exception message.
-     */
-    @Override
-    public String toString() {
-        return getMessage();
-    } // End toString method
 } // End IllegalParameter_Exception class
 

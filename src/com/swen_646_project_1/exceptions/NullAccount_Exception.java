@@ -18,12 +18,4 @@ public class NullAccount_Exception extends RuntimeException {
         super("Account error: " + reason + " | Account: " + accountNumber);
     } // End NullAccount_Exception constructor
 
-    /**
-     * Returns a string representation of the exception.
-     * @return A formatted string containing the exception message.
-     */
-    @Override
-    public String toString() {
-        return getMessage();
-    } // End toString method
 } // End NullAccount_Exception class

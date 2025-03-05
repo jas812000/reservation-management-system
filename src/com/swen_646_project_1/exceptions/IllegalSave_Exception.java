@@ -20,12 +20,4 @@ public class IllegalSave_Exception extends RuntimeException {
     super("Failed to save " + failedObject + " to file: " + fileName + " | Account: " + accountNumber);
   } // End IllegalSave_Exception constructor
 
-  /**
-   * Returns a string representation of the exception.
-   * @return A formatted string containing the exception message.
-   */
-  @Override
-  public String toString() {
-    return getMessage();
-  } // End toString method
 } // End IllegalSave_Exception class

@@ -11,6 +11,8 @@ import com.swen_646_project_1.Address;
 import com.swen_646_project_1.exceptions.IllegalOperation_Exception;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.enums.ReservationStatus;
+import com.swen_646_project_1.exceptions.IllegalState_Exception;
+
 import java.time.LocalDate;
 
 /**
@@ -261,6 +263,12 @@ public abstract class Reservation {
          * else
          * 	    update reservation status to completed
          */
+        if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
+                    "Cannot complete a cancelled or already completed reservation.");
+        } // End if statement
+
+        this.status = ReservationStatus.COMPLETED;
 
     } // End completeReservation method
 
@@ -276,6 +284,12 @@ public abstract class Reservation {
          * else
          * 	    update reservation status to cancelled
          */
+        if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
+                    "Cannot cancel a completed or already cancelled reservation.");
+        } // End if statement
+
+        this.status = ReservationStatus.CANCELLED;
 
     } // End cancelReservation method
 
@@ -316,7 +330,7 @@ public abstract class Reservation {
      * @param data A string containing reservation details.
      * Calling this method from the base class will result in an IllegalOperation_Exception.
      */
-    public static Reservation fromString(String data) {
+    public static Reservation fromString(String data) throws IllegalOperation_Exception {
 
         /*
          * throw IllegalOperation_Exception

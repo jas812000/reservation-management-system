@@ -19,12 +19,4 @@ public class NullReservation_Exception extends RuntimeException {
     super("Reservation error: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
   } // End NullReservation_Exception constructor
 
-  /**
-   * Returns a string representation of the exception.
-   * @return A formatted string containing the exception message.
-   */
-  @Override
-  public String toString() {
-    return getMessage();
-  } // End toString method
 } // End NullReservation_Exception class

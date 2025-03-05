@@ -8,19 +8,19 @@ package com.swen_646_project_1.exceptions;
  * account ID, reservation number, and details why exactly it failed.
  */
 public class IllegalOperation_Exception extends RuntimeException {
+
+    /**
+     * Constructor for IllegalOperation_Exception.
+     * @param operation The operation that was attempted (e.g., "Cancel", "Complete").
+     * @param accountNumber The account number associated with the operation.
+     * @param reservationNumber The reservation number associated with the operation.
+     * @param details Additional details explaining why the operation failed.
+     */
     public IllegalOperation_Exception(String operation, String accountNumber, String reservationNumber,
                                       String details) {
         super("Illegal operation: " + operation + " | Account: " + accountNumber + ", Reservation: " +
                 reservationNumber + " | " + details);
     } // End IllegalOperation_Exception constructor
 
-    /**
-     * Returns a string representation of the exception.
-     * @return A formatted string containing the exception message.
-     */
-    @Override
-    public String toString() {
-        return getMessage();
-    } // End toString method
 } // End IllegalOperation_Exception class
 

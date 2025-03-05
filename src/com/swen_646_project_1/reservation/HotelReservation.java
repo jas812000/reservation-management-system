@@ -86,8 +86,19 @@ public class HotelReservation extends Reservation {
         /*
          * format and return hotel reservation details as a string
          */
-        return null;
-
+        return "ReservationNumber: " + this.reservationNumber +
+                ", AccountNumber: " + this.accountNumber +
+                ", LodgingPhysicalAddress: " + this.lodgingPhysicalAddress +
+                ", LodgingMailingAddress: " + (this.lodgingMailingAddress != null ? this.lodgingMailingAddress : "N/A") +
+                ", StartDate: " + this.startDate +
+                ", NumNights: " + this.numNights +
+                ", NumBeds: " + this.numBeds +
+                ", NumBedrooms: " + this.numBedrooms +
+                ", NumBathrooms: " + this.numBathrooms +
+                ", LodgingSizeSqFt: " + this.lodgingSizeSqFt +
+                ", LodgingPrice: " + this.lodgingPrice +
+                ", Status: " + this.status +
+                ", KitchenetteAvailable: " + this.kitchenetteAvailable;
     } // End toString method
 
     /**
@@ -102,8 +113,19 @@ public class HotelReservation extends Reservation {
          * extract hotel reservation details
          * return new HotelReservation object with extracted details
          */
-        return null;
+        String[] parts = data.split(",");
+        if (parts.length < 12) {
+            throw new IllegalArgumentException("Invalid data format for HotelReservation.");
+        } // End if statement
 
+        Address lodgingPhysicalAddress = new Address(parts[2], parts[3], parts[4], Integer.parseInt(parts[5]));
+        Address lodgingMailingAddress = parts[6].equals("null") ? null :
+                new Address(parts[6], parts[7], parts[8], Integer.parseInt(parts[9]));
+
+        return new HotelReservation(parts[0], parts[1], lodgingPhysicalAddress, lodgingMailingAddress,
+                LocalDate.parse(parts[10]), Integer.parseInt(parts[11]), Integer.parseInt(parts[12]),
+                Integer.parseInt(parts[13]), Integer.parseInt(parts[14]), Integer.parseInt(parts[15]),
+                Double.parseDouble(parts[16]), Boolean.parseBoolean(parts[17]));
     } // End fromString method
 
-} // end class HotelReservation
+} // End class HotelReservation

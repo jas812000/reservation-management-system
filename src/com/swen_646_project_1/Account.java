@@ -8,6 +8,7 @@ package com.swen_646_project_1;
  * - Java utility classes for handling data structures and operations like lists, maps, etc.
  */
 import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
+import com.swen_646_project_1.exceptions.IllegalSave_Exception;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.exceptions.IllegalState_Exception;
@@ -87,7 +88,7 @@ public class Account {
      * @param data A string containing account details in a predefined format
      * @return An Account object constructed from the provided data
      */
-    public static Account fromString(String data) {
+    public static Account fromString(String data) throws IllegalLoad_Exception {
 
         /*
          * parse data string
@@ -95,7 +96,7 @@ public class Account {
          * return new Account object with extracted details
          */
         String[] parts = data.split(",");
-        if (parts.length < 4){
+        if (parts.length < 7){
             throw new IllegalLoad_Exception("Account", "N/A", "Data corrupted");
         }
         Address address = new Address(parts[1], parts[2], parts[3], Integer.parseInt(parts[4]));
@@ -217,18 +218,25 @@ public class Account {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Reservation does not exist.");
         } // End if statement
 
-        // Load the actual Reservation object
-        Reservation reservation = Manager.loadReservationFromFile(this.accountNumber, reservationNumber);
+        try{
+            // Load the actual Reservation object
+            Reservation reservation = Manager.loadReservationFromFile(this.accountNumber, reservationNumber);
 
-        if (reservation.getStatus() == ReservationStatus.COMPLETED ||
-                reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(this.accountNumber, reservationNumber,
-                    "Cannot cancel a completed or already cancelled reservation.");
-        } // End if statement
+            if (reservation.getStatus() == ReservationStatus.COMPLETED ||
+                    reservation.getStatus() == ReservationStatus.CANCELLED) {
+                throw new IllegalState_Exception(this.accountNumber, reservationNumber,
+                        "Cannot cancel a completed or already cancelled reservation.");
+            } // End if statement
 
-        // Mark reservation as cancelled
-        reservation.cancelReservation();
-        Manager.saveReservationToFile(reservation); // Save the updated reservation
+            // Mark reservation as cancelled
+            reservation.cancelReservation();
+            Manager.saveReservationToFile(reservation); // Save the updated reservation
+
+        } catch (IllegalLoad_Exception e) {
+            System.out.println("Error loading reservation: " + e.getMessage());
+        } catch (IllegalSave_Exception e) {
+            System.out.println("Error saving reservation: " + e.getMessage());
+        } // End try-catch statements
 
     } // End cancelReservation method
 

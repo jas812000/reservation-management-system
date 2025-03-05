@@ -8,17 +8,15 @@ package com.swen_646_project_1.exceptions;
  * The generated exception message should indicate the account number and/or reservation number and why it failed.
  */
 public class DuplicateObject_Exception extends RuntimeException {
+
+    /**
+     * Constructor for DuplicateObject_Exception.
+     * @param accountNumber The account number associated with the duplicate object.
+     * @param reservationNumber The reservation number associated with the duplicate object.
+     */
     public DuplicateObject_Exception(String accountNumber, String reservationNumber) {
         super("Duplicate entry detected | Account: " + accountNumber + ", Reservation: " + reservationNumber);
     } // End DuplicateObject_Exception constructor
 
-    /**
-     * Returns a string representation of the exception.
-     * @return A formatted string containing the exception message.
-     */
-    @Override
-    public String toString() {
-        return getMessage();
-    } // End toString method
 } // End DuplicateObject_Exception class
 
