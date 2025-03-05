@@ -8,14 +8,17 @@ package com.swen_646_project_1;
  * - Java I/O classes for file operations such as saving and loading reservation data.
  * - Java utility classes for handling data structures and operations like lists, maps, etc.
  */
+import com.swen_646_project_1.reservation.CabinReservation;
+import com.swen_646_project_1.reservation.HotelReservation;
+import com.swen_646_project_1.reservation.HouseReservation;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.exceptions.DuplicateObject_Exception;
 import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
 import com.swen_646_project_1.exceptions.IllegalOperation_Exception;
 import com.swen_646_project_1.exceptions.IllegalSave_Exception;
 import com.swen_646_project_1.exceptions.IllegalState_Exception;
-import com.swen_646_project_1.exceptions.NullAccount_Exception;
-import com.swen_646_project_1.exceptions.NullReservation_Exception;
+//import com.swen_646_project_1.exceptions.NullAccount_Exception;
+//import com.swen_646_project_1.exceptions.NullReservation_Exception;
 import com.swen_646_project_1.enums.ReservationStatus;
 import java.io.*;
 import java.util.*;
@@ -30,10 +33,10 @@ public class Manager {
     // Encapsulated Attributes
     // Constant representing the directory path where account and reservation data is stored.
     // Internal use only (no setter method needed)
-    private static final String DATA_DIRECTORY = "/path/to/data";
+    private static final String DATA_DIRECTORY = "/Users/james_stevens/IdeaProjects/SWEN 646 Project 1/src/com/resources";
 
     // Initialize a map storing accounts, where the key is the account number and the value is the Account object.
-    private Map<String, Account> accounts;
+    private final Map<String, Account> accounts;
 
     /**
      * Constructor to initialize the Manager object.
@@ -98,18 +101,22 @@ public class Manager {
 
                         // Construct the corresponding account directory path
                         File accountDir = new File(DATA_DIRECTORY + "/" + account.getAccountNumber());
-                        try {
-                            // Load reservations for this account
-                            loadReservationsForAccount(account, accountDir);
 
-                        } catch (IllegalLoad_Exception e) {
-                            // Handle errors while loading reservations and print the error message
-                            System.out.println(e.getMessage());
-                        } // End try-catch statements
+
+                        if (!accountDir.exists()) {
+                            if (accountDir.mkdirs()) {
+                                System.out.println("Created missing account directory: " + accountDir.getAbsolutePath());
+                            } else {
+                                throw new IllegalLoad_Exception("Account Directory", accountDir.getAbsolutePath(), account.getAccountNumber());
+                            } // End if-else statements
+                        } // End if statement
+
+                        // Load reservations for this account
+                        loadReservationsForAccount(account, accountDir);
 
                     } catch (IllegalLoad_Exception e) {
                         // Handle errors while loading an account and print the error message
-                        System.out.println(e.getMessage());
+                        System.out.println("Error loading account: " + e.getMessage());
                     } // End try-catch statements
 
                 } // End for loop
@@ -118,7 +125,7 @@ public class Manager {
 
         } catch (IllegalLoad_Exception e) {
             // Handle errors occurring at the outer level and print the error message
-            System.out.println(e.getMessage());
+            System.out.println("Error in loading accounts and reservations: " + e.getMessage());
         } // End try-catch statements
     } // End loadAccountsAndReservations method
 
@@ -146,16 +153,19 @@ public class Manager {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String data = reader.readLine(); // Read account data from file
 
-            // Convert the stored data into an Account object
-            Account account = Account.fromString(data);
-
-            // Check if account is null before accessing its methods
-            if (account == null) {
-                // Throw a NullAccount_Exception when an account is expected but not found.
-                throw new NullAccount_Exception("N/A", "Account information is missing. " +
-                        "Unable to create the directory.");
-
+            // Ensure data is not null or empty
+            if (data == null || data.trim().isEmpty()) {
+                throw new IllegalLoad_Exception("Account File", file.getName(), "Empty account file.");
             } // End if statement
+
+            // Convert the stored data into an Account object
+            Account account;
+
+            try {
+                account = Account.fromString(data);
+            } catch (Exception e) {
+                throw new IllegalLoad_Exception("Account Data", file.getName(), "Failed to parse account data.");
+            } // End try-catch statements
 
             // Load reservations associated with this account
             File accountDir = new File(DATA_DIRECTORY + "/" + account.getAccountNumber());
@@ -185,7 +195,6 @@ public class Manager {
 
         // Ensure the account's directory exists and is a valid directory
         if (!accountDir.exists() || !accountDir.isDirectory()) {
-
             // Throw an IllegalLoad_Exception when the system fails to load an account's reservation directory.
             throw new IllegalLoad_Exception("Account Reservation Directory", accountDir.getAbsolutePath(),
                     account.getAccountNumber());
@@ -198,9 +207,9 @@ public class Manager {
 
         // Check if reservation files exist
         if (reservationFiles != null) {
+            List<Reservation> reservationList = new ArrayList<>();
             // Iterate through each reservation file
             for (File file : reservationFiles) {
-
                 // Open the specified file for reading using BufferedReader.
                 // BufferedReader reads the file efficiently, line by line, to optimize memory usage.
                 // FileReader is used to read character data from the file.
@@ -208,22 +217,33 @@ public class Manager {
                 try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                     // Read the first line of the file, which contains reservation data
                     String data = reader.readLine();
+                    String[] parts = data.split(",");
+                    String reservationType = parts[0];
 
-                    // Convert the stored data into a Reservation object
-                    Reservation reservation = Reservation.fromString(data);
+                    // End switch Statement
+                    Reservation reservation = switch (reservationType) {
+                        case "CabinReservation" -> CabinReservation.fromString(data);
+                        case "HotelReservation" -> HotelReservation.fromString(data);
+                        case "HouseReservation" -> HouseReservation.fromString(data);
+                        default ->
+                                throw new IllegalLoad_Exception("Unknown Reservation Type", file.getName(), account.getAccountNumber());
+                    };
 
-                    // Check if reservation is null before accessing its methods
-                    if (reservation == null) {
-                        // Throw a NullReservation_Exception when attempting to add a reservation that does not exist.
-                        throw new NullReservation_Exception(account.getAccountNumber(), "N/A",
-                                "No reservation found. " + "Unable to add it to account.");
-                    } // End if Statement
+                    // Identify the reservation type
 
-                    // Link the reservation to the account
-                    account.addReservation(reservation.getReservationNumber());
+                    reservationList.add(reservation);
+
                 } catch (IOException e) {
                     throw new IllegalLoad_Exception("Reservation File", file.getName(), account.getAccountNumber());
                 } // End try-catch statements
+            } // End for loop
+
+            // Sort reservations by reservation number
+            reservationList.sort(Comparator.comparing(Reservation::getReservationNumber));
+
+            // Link the sorted reservations to the account
+            for (Reservation res : reservationList) {
+                account.addReservation(res.getReservationNumber());
             } // End for loop
         } // End if statement
     } // End loadReservationsForAccount method
@@ -254,8 +274,15 @@ public class Manager {
         try (BufferedReader reader = new BufferedReader(new FileReader(reservationFile))) {
             String data = reader.readLine(); // Read reservation data from file
 
-            // Convert the stored data into a Reservation object
-            return Reservation.fromString(data);
+            if (data.startsWith("HotelReservation")) {
+                return HotelReservation.fromString(data);
+            } else if (data.startsWith("HouseReservation")) {
+                return HouseReservation.fromString(data);
+            } else if (data.startsWith("CabinReservation")) {
+                return CabinReservation.fromString(data);
+            } else {
+                throw new IllegalLoad_Exception("Reservation Type", "Unknown type in file: " + reservationFile.getName(), accountNumber);
+            } // End if-else statements
         } catch (IOException e) {
             // If an error occurs while reading the file, throw an IllegalLoad_Exception
             throw new IllegalLoad_Exception("Reservation File", reservationFile.getName(), accountNumber);
@@ -330,23 +357,15 @@ public class Manager {
          * 	    save account details to file
          * Handle exceptions related to duplicate accounts or saving errors.
          */
-        try {
-            // Check if the account already exists
-            if (accounts.containsKey(account.getAccountNumber())) {
-                throw new DuplicateObject_Exception(account.getAccountNumber(), "N/A");
-            } // End if statement
+        if (accounts.containsKey(account.getAccountNumber())) {
+            throw new DuplicateObject_Exception(account.getAccountNumber(), "N/A");
+        } // End if statement
 
-            // Add the account to the system
-            accounts.put(account.getAccountNumber(), account);
+        // Add the account to the system
+        accounts.put(account.getAccountNumber(), account);
 
-            // Save the account details to a file
-            saveAccountToFile(account);
-
-        } catch (DuplicateObject_Exception e) {
-            System.out.println(e.getMessage()); // Print error message if the account is duplicate
-        } catch (IllegalSave_Exception e) {
-            System.out.println(e.getMessage()); // Print error message if the account cannot be saved
-        } // End try-catch statements
+        // Save the account details to a file
+        saveAccountToFile(account);
 
     } // End addAccount method
 
@@ -393,22 +412,19 @@ public class Manager {
          * 	    throw IllegalState_Exception
          * Handle any errors that occur while saving the reservation.
          */
-        try {
-            // Retrieve the account object
-            Account account = accounts.get(accountNumber);
 
-            // If the account does not exist, throw an exception
-            if (account == null) {
-                throw new IllegalState_Exception(accountNumber, reservation.getReservationNumber(),
+        Account account = accounts.get(accountNumber);
+
+        // If the account does not exist, throw an exception
+        if (account == null) {
+            throw new IllegalState_Exception(accountNumber, reservation.getReservationNumber(),
                         "Account does not exist.");
-            } // End if statement
+        } // End if statement
 
-            // Save the reservation details to a file
-            saveReservationToFile(reservation);
+        account.addReservation(reservation.getReservationNumber());
+        // Save the reservation details to a file
+        saveReservationToFile(reservation);
 
-        } catch (IllegalSave_Exception e) {
-            System.out.println(e.getMessage()); // Print error message if reservation saving fails
-        } // End try-catch statements
     } // End addReservation method
 
     /**
@@ -441,35 +457,30 @@ public class Manager {
 
         // If the account does not exist, throw an exception
         if (account == null) {
-            throw new IllegalState_Exception(accountNumber, "N/A", "Account does not exist.");
+            throw new IllegalState_Exception(accountNumber, reservationNumber, "Account does not exist.");
         } // End if statement
 
-        try {
-            // Find the reservation associated with the account
-            Reservation reservation = findReservation(accountNumber, reservationNumber);
+        // Find the reservation associated with the account
+        Reservation reservation = findReservation(accountNumber, reservationNumber);
 
-            // If the reservation does not exist, throw an exception
-            if (reservation == null) {
-                throw new IllegalOperation_Exception("Complete Reservation", accountNumber, reservationNumber,
+        // If the reservation does not exist, throw an exception
+        if (reservation == null) {
+            throw new IllegalOperation_Exception("Complete Reservation", accountNumber, reservationNumber,
                         "Reservation does not exist.");
-            } // End if statement
+        } // End if statement
 
-            // If the reservation is already completed or cancelled, throw an exception
-            if (reservation.getStatus() == ReservationStatus.COMPLETED ||
+        // If the reservation is already completed or cancelled, throw an exception
+        if (reservation.getStatus() == ReservationStatus.COMPLETED ||
                     reservation.getStatus() == ReservationStatus.CANCELLED) {
-                throw new IllegalState_Exception(accountNumber, reservationNumber,
+            throw new IllegalState_Exception(accountNumber, reservationNumber,
                         "Cannot complete a cancelled or already completed reservation.");
-            } // End if statement
+        } // End if statement
 
-            // Mark the reservation as completed
-            reservation.completeReservation();
+        // Mark the reservation as completed
+        reservation.completeReservation();
 
-            // Save the updated reservation details to the file
-            saveReservationToFile(reservation);
-
-        } catch (IllegalState_Exception | IllegalOperation_Exception e) {
-            System.out.println("Error: " + e.getMessage());  // Print only the custom error message
-        } // End try-catch statements
+        // Save the updated reservation details to the file
+        saveReservationToFile(reservation);
 
     } // End completeReservation method
 
@@ -499,6 +510,25 @@ public class Manager {
 
         // Call the account's method to cancel the reservation
         account.cancelReservation(reservationNumber);
+
+        // Retrieve the updated reservation
+        Reservation reservation = findReservation(accountNumber, reservationNumber);
+
+        // Ensure reservation is valid and set the price to $0.00 if cancelled
+        if (reservation == null) {
+            throw new IllegalState_Exception(accountNumber, reservationNumber, "Failed to retrieve reservation after cancellation.");
+        } // End if statement
+
+        // Ensure reservation is valid and set the price to $0.00 if cancelled
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            reservation.setLodgingPrice(0.00);
+        } // End if statement
+
+        // Save the updated reservation to file
+        saveReservationToFile(reservation);
+
+        System.out.println("Reservation cancelled: " + reservationNumber);
+        System.out.println("After Cancellation - Price per night: $" + String.format("%.2f", reservation.calculatePricePerNight()));
 
     } // End cancelReservation method
 
@@ -566,7 +596,11 @@ public class Manager {
          * retrieve reservation using accountNumber and reservationNumber
          * return reservation's nightly price
          */
-        return 0.0d;
+        Reservation reservation = findReservation(accountNumber, reservationNumber);
+        if (reservation == null) {
+            return 0.0;
+        } // End if statement
+        return reservation.calculatePricePerNight();
 
     } // End calculatePricePerNight method
 
@@ -583,7 +617,11 @@ public class Manager {
          * calculate total cost: nightly price * number of nights
          * return total cost
          */
-        return 0.0d;
+        Reservation reservation = findReservation(accountNumber, reservationNumber);
+        if (reservation == null) {
+            return 0.0; // Handle missing reservation case
+        } // End if statement
+        return reservation.calculatePricePerNight() * reservation.getNumNights();
 
     } // End calculateTotalPrice method
 
@@ -599,8 +637,18 @@ public class Manager {
          *
          * The file name follows the convention: ACCOUNTNUMBER.txt
          */
+        // Ensure the account's directory exists
+        File accountDir = new File(DATA_DIRECTORY + "/" + account.getAccountNumber());
+        if (!accountDir.exists()) {
+            if (accountDir.mkdirs()) {
+                System.out.println("Created account directory: " + accountDir.getAbsolutePath());
+            } else {
+                throw new IllegalSave_Exception("Account Directory", accountDir.getAbsolutePath(), account.getAccountNumber());
+            } // End if-else statements
+        }  // End if statement
+
         // Create the file path for the account file
-        File file = new File(DATA_DIRECTORY + "/" + account.getAccountNumber() + ".txt");
+        File file = new File(DATA_DIRECTORY + "/acc-" + account.getAccountNumber() + ".txt");
 
         // Open the file for writing using BufferedWriter.
         // If the file exists, this will overwrite its contents.
@@ -609,7 +657,7 @@ public class Manager {
 
             // Convert Account to string and write to file
             writer.write(account.toString()); // Convert Account to string and write to file
-
+            System.out.println("Account saved: " + file.getAbsolutePath());
         } catch (IOException e) {
             // If an error occurs while writing, throw an IllegalSave_Exception with relevant details
             throw new IllegalSave_Exception("Account", file.getName(), account.getAccountNumber());
@@ -630,19 +678,28 @@ public class Manager {
          * Each reservation is stored on a new line within the file.
          */
         // Create the file path for the reservation file
+        // Ensure the account's directory exists
+        File accountDir = new File(DATA_DIRECTORY + "/" + reservation.getAccountNumber());
+        if (!accountDir.exists()) {
+            if (accountDir.mkdirs()) {
+                System.out.println("Created account directory: " + accountDir.getAbsolutePath());
+            } else {
+                throw new IllegalSave_Exception("Account Directory", accountDir.getAbsolutePath(), reservation.getAccountNumber());
+            } // End if-else statements
+        }  // End if statement
+
         File file = new File(DATA_DIRECTORY + "/" + reservation.getAccountNumber() +
-                "_reservations.txt");
+                "/res-" + reservation.getReservationNumber() + ".txt");
 
         // Open the file for writing using BufferedWriter in append mode.
         // If the file exists, new data will be appended instead of overwriting it.
         // If the file does not exist, it will be created automatically.
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
 
             // Convert Reservation to string and write to file
             writer.write(reservation.toString());
-
-            // Ensure each reservation is on a new line
             writer.newLine();
+            System.out.println("Reservation saved: " + file.getAbsolutePath());
 
         } catch (IOException e) {
             // If an error occurs while writing, throw an IllegalSave_Exception with relevant details

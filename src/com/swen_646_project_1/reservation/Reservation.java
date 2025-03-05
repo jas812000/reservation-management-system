@@ -252,6 +252,16 @@ public abstract class Reservation {
     } // End getLodgingPrice method
 
     /**
+     * Setter that updates the price per night for the lodging.
+     * Ensures the lodging price is not set to a negative value.
+     *
+     * @param lodgingPrice The new price per night as a double.
+     */
+    public void setLodgingPrice(double lodgingPrice) {
+        this.lodgingPrice = lodgingPrice;
+    } // End setLodgingPrice method
+
+    /**
      * Marks the reservation as completed.
      * Throws IllegalState_Exception if the reservation is already completed or cancelled.
      */

@@ -1,6 +1,8 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
 // Imports the custom exception class for handling invalid parameter inputs.
+import com.swen_646_project_1.enums.ReservationStatus;
+import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 // Import for handing reservation start dates
 import java.time.LocalDate;
@@ -89,7 +91,16 @@ public class HouseReservation extends Reservation {
          * return price per night for the house
          * may include additional cost based on the number of floors
          */
-        return 0.0d;
+        // If reservation is cancelled, price should be $0.00
+        if (this.status == ReservationStatus.CANCELLED) {
+            return 0.00;
+        } // End if statement
+        double basePrice = 120.0; // Base price
+
+        if (this.lodgingSizeSqFt > 900) {
+            basePrice += 15.0; // Additional fee for large lodging
+        } // End if statement
+        return basePrice;
 
     } // End calculatePricePerNight method
 
@@ -103,19 +114,16 @@ public class HouseReservation extends Reservation {
         /*
          * format and return house reservation details as a string
          */
-        return "ReservationNumber: " + this.reservationNumber +
-                ", AccountNumber: " + this.accountNumber +
-                ", LodgingPhysicalAddress: " + this.lodgingPhysicalAddress +
-                ", LodgingMailingAddress: " + (this.lodgingMailingAddress != null ? this.lodgingMailingAddress : "N/A") +
-                ", StartDate: " + this.startDate +
-                ", NumNights: " + this.numNights +
-                ", NumBeds: " + this.numBeds +
-                ", NumBedrooms: " + this.numBedrooms +
-                ", NumBathrooms: " + this.numBathrooms +
-                ", LodgingSizeSqFt: " + this.lodgingSizeSqFt +
-                ", LodgingPrice: " + this.lodgingPrice +
-                ", Status: " + this.status +
-                ", NumFloors: " + this.numFloors;
+        return String.format("HouseReservation,%s,%s,\"%s\"%s,%s,%d,%d,%d,%d,%d,%.2f,%s,%d",
+                reservationNumber, accountNumber,
+                String.join(";", lodgingPhysicalAddress.getStreet(), lodgingPhysicalAddress.getCity(),
+                        lodgingPhysicalAddress.getState(), String.valueOf(lodgingPhysicalAddress.getZipCode())),
+                (lodgingMailingAddress != null ?
+                        "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(), lodgingMailingAddress.getCity(),
+                                lodgingMailingAddress.getState(), String.valueOf(lodgingMailingAddress.getZipCode())) + "\""
+                        : ",N/A"),
+                startDate, numNights, numBeds, numBedrooms, numBathrooms,
+                lodgingSizeSqFt, lodgingPrice, status, numFloors);
     } // End toString method
 
     /**
@@ -123,26 +131,75 @@ public class HouseReservation extends Reservation {
      * @param data A string containing house reservation details in a predefined format
      * @return A HouseReservation object created from the provided data
      */
-    public static HouseReservation fromString(String data){
-
+    public static HouseReservation fromString(String data) {
         /*
-         * parse data string
-         * extract house reservation details
-         * return new HouseReservation object with extracted details
+         * Parse data string
+         * Extract house reservation details
+         * Return new HouseReservation object with extracted details
          */
-        String[] parts = data.split(",");
-        if (parts.length < 12) { // FIXED: Ensure enough parameters exist
-            throw new IllegalArgumentException("Invalid data format for HouseReservation.");
-        } // End If statement
 
-        Address lodgingPhysicalAddress = new Address(parts[2], parts[3], parts[4], Integer.parseInt(parts[5]));
-        Address lodgingMailingAddress = parts[6].equals("null") ? null :
-                new Address(parts[6], parts[7], parts[8], Integer.parseInt(parts[9]));
+        //System.out.println("Raw Data for Parsing: " + data); // Debugging output
 
-        return new HouseReservation(parts[0], parts[1], lodgingPhysicalAddress, lodgingMailingAddress,
-                LocalDate.parse(parts[10]), Integer.parseInt(parts[11]), Integer.parseInt(parts[12]),
-                Integer.parseInt(parts[13]), Integer.parseInt(parts[14]), Integer.parseInt(parts[15]),
-                Double.parseDouble(parts[16]), Integer.parseInt(parts[17]));
-    } // End fromString method
+        // Use regex to split while preserving quoted substrings
+        String[] parts = data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+        // Ensure correct number of fields
+        if (parts.length < 14) {
+            throw new IllegalLoad_Exception("HouseReservation Data", "N/A",
+                    "Invalid data format. Found: " + parts.length);
+        }
+
+        // Extract lodging physical address components
+        Address lodgingPhysicalAddress = getAddress(parts);
+
+        // Extract lodging mailing address components
+        Address lodgingMailingAddress = getLodgingMailingAddress(parts);
+
+        // Fix: Ensure numFloors is correctly parsed
+        return new HouseReservation(
+                parts[1], // reservationNumber
+                parts[2], // accountNumber
+                lodgingPhysicalAddress,
+                lodgingMailingAddress,
+                LocalDate.parse(parts[5]), // startDate
+                Integer.parseInt(parts[6]), // numNights
+                Integer.parseInt(parts[7]), // numBeds
+                Integer.parseInt(parts[8]), // numBedrooms
+                Integer.parseInt(parts[9]), // numBathrooms
+                Integer.parseInt(parts[10]), // lodgingSizeSqFt
+                Double.parseDouble(parts[11]), // lodgingPrice
+                Integer.parseInt(parts[13]) // Correctly parse numFloors from index 13, skipping the status
+        );
+    }
+    // End fromString method
+
+    private static Address getLodgingMailingAddress(String[] parts) {
+        Address lodgingMailingAddress = null;
+        if (!parts[4].equals("N/A")) {
+            String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
+            if (mailingAddressParts.length < 4) {
+                throw new IllegalLoad_Exception("HouseReservation Address", "N/A", "Invalid mailing address format.");
+            } // End if statement
+            return new Address(mailingAddressParts[0], mailingAddressParts[1],
+                    mailingAddressParts[2], Integer.parseInt(mailingAddressParts[3]));
+        } // End if statement
+        //return lodgingMailingAddress;
+        return null;
+    } // End getLodgingMailingAddress method
+
+    private static Address getAddress(String[] parts) {
+        //if (parts.length < 14) { // Ensure correct number of fields
+            //throw new IllegalLoad_Exception("HouseReservation Data", "N/A", "Invalid data format. Found: " + parts.length);
+        //} // End if statement
+
+        // Extract lodging physical address components
+        String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
+        if (physicalAddressParts.length < 4) {
+            throw new IllegalLoad_Exception("HouseReservation Address", "N/A", "Invalid physical address format.");
+        } // End if statement
+        return new Address(physicalAddressParts[0], physicalAddressParts[1],
+                physicalAddressParts[2], Integer.parseInt(physicalAddressParts[3]));
+
+    } // End getAddress method
 
 } // End class HouseReservation

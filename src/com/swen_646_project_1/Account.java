@@ -8,7 +8,7 @@ package com.swen_646_project_1;
  * - Java utility classes for handling data structures and operations like lists, maps, etc.
  */
 import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
-import com.swen_646_project_1.exceptions.IllegalSave_Exception;
+//import com.swen_646_project_1.exceptions.IllegalSave_Exception;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.exceptions.IllegalState_Exception;
@@ -26,7 +26,7 @@ public class Account {
     private Address address;                    // Stores the address object
     private String phoneNumber;                 // Stores the phone number
     private String email;                       // Stores the email address
-    private List<String> reservationNumbers;    // List of reservation numbers associated with this account
+    private final List<String> reservationNumbers;    // List of reservation numbers associated with this account
 
     /**
      * Constructor to initialize an Account object with required details.
@@ -113,70 +113,6 @@ public class Account {
     } // End getAccountNumber method
 
     /**
-     * Getter that retrieves the account's address
-     */
-    public Address getAddress() { return address; } // End getAddress method
-
-    /**
-     * Updates the address of the account holder.
-     * @param newAddress The new mailing address to be set.
-     */
-    public void setAddress(Address newAddress) {
-        /*
-         * if newAddress is not null or empty
-         *      throw IllegalParameter_Exception with a message indication the address cannot be empty.
-         * update mailingAddress attribute
-         */
-        if (newAddress == null) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Address cannot be empty.");
-        } // End if-else statements
-        this.address = newAddress;
-
-    } // End setAddressAddress method
-
-    /**
-     * Getter that retrieves the phone number.
-     */
-    public String getPhoneNumber() {return this.phoneNumber;} // End getPhoneNumber method
-
-    /**
-     * Updates the phone number associated with the account.
-     * @param newPhoneNumber The new phone number to be set
-     */
-    public void setPhoneNumber(String newPhoneNumber) {
-        /*
-         * if newPhoneNumber is not null or empty
-         *      throw IllegalParameter_Exception with a message indication the phone number cannot be empty.
-         * update phoneNumber attribute
-         */
-        if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
-            throw new IllegalArgumentException("Phone number cannot be empty.");
-        } // End if-else statements
-        this.phoneNumber = newPhoneNumber;
-    } // End setPhoneNumber method
-
-    /**
-     * Getter that retrieves the email address.
-     */
-    public String getEmail() {return this.email;} // End getEmail method
-
-    /**
-     * Updates the email address associated with the account.
-     * @param newEmail The new email address to be set
-     */
-    public void setEmail(String newEmail) {
-        /*
-         * if newEmail is not null or empty
-         *      throw IllegalParameter_Exception with a message indication the email cannot be empty.
-         * update email attribute
-         */
-        if (newEmail == null || !newEmail.contains("@")) {
-            throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email format.");
-        } // End if statements
-        this.email = newEmail;
-    } // End setEmail method
-
-    /**
      * Getter that retrieves the list of reservation numbers.
      */
     public List<String> getReservationNumbers() {
@@ -229,29 +165,120 @@ public class Account {
             } // End if statement
 
             // Mark reservation as cancelled
-            reservation.cancelReservation();
-            Manager.saveReservationToFile(reservation); // Save the updated reservation
+            reservation.setStatus(ReservationStatus.CANCELLED);
 
         } catch (IllegalLoad_Exception e) {
             System.out.println("Error loading reservation: " + e.getMessage());
-        } catch (IllegalSave_Exception e) {
-            System.out.println("Error saving reservation: " + e.getMessage());
         } // End try-catch statements
 
     } // End cancelReservation method
+
+
+
+
+
 
     /**
      * Returns a string representation of the account details.
      * @return A formatted string containing account details
      */
+    /**
     @Override
     public String toString() {
 
         /*
          * format and return a string containing account details
          */
-        return null;
+    /**
+        return String.format("%s,%s,%s,%s,%d,%s,%s",
+                accountNumber, address.getStreet(), address.getCity(), address.getState(), address.getZipCode(),
+                phoneNumber, email);
 
     } // End toString method
+    */
+
+    /**
+    /**
+     * Getter that retrieves the account's address
+     */
+    //public Address getAddress() { return address; } // End getAddress method
+
+    /**
+     * Updates the address of the account holder.
+     * @param newAddress The new mailing address to be set.
+     */
+
+
+    //public void setAddress(Address newAddress) {
+        /*
+         * if newAddress is not null or empty
+         *      throw IllegalParameter_Exception with a message indication the address cannot be empty.
+         * update mailingAddress attribute
+         */
+            /**
+        if (newAddress == null) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Address cannot be empty.");
+        } // End if-else statements
+        this.address = newAddress;
+
+    } // End setAddressAddress method
+           */
+
+    /**
+     * Getter that retrieves the phone number.
+     */
+    //public String getPhoneNumber() {return this.phoneNumber;} // End getPhoneNumber method
+
+    /**
+     * Updates the phone number associated with the account.
+     * @param newPhoneNumber The new phone number to be set
+     */
+    /**
+    public void setPhoneNumber(String newPhoneNumber) {
+        /*
+         * if newPhoneNumber is not null or empty
+         *      throw IllegalParameter_Exception with a message indication the phone number cannot be empty.
+         * update phoneNumber attribute
+         */
+    /**
+        if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
+            throw new IllegalArgumentException("Phone number cannot be empty.");
+        } // End if-else statements
+        this.phoneNumber = newPhoneNumber;
+    } // End setPhoneNumber method
+     */
+    /**
+     * Getter that retrieves the email address.
+     */
+    //public String getEmail() {return this.email;} // End getEmail method
+
+    /**
+     * Updates the email address associated with the account.
+     * @param newEmail The new email address to be set
+     */
+
+    /**
+    public void setEmail(String newEmail) {
+        /*
+         * if newEmail is not null or empty
+         *      throw IllegalParameter_Exception with a message indication the email cannot be empty.
+         * update email attribute
+         */
+    /**
+        if (newEmail == null || !newEmail.contains("@")) {
+            throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email format.");
+        } // End if statements
+        this.email = newEmail;
+    } // End setEmail method
+    */
+
+
+
+
+
+
+
+
+
 
 } // end class Account
