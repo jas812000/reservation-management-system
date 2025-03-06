@@ -14,12 +14,7 @@ import com.swen_646_project_1.reservation.HouseReservation;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.exceptions.DuplicateObject_Exception;
 import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
-import com.swen_646_project_1.exceptions.IllegalOperation_Exception;
 import com.swen_646_project_1.exceptions.IllegalSave_Exception;
-import com.swen_646_project_1.exceptions.IllegalState_Exception;
-//import com.swen_646_project_1.exceptions.NullAccount_Exception;
-//import com.swen_646_project_1.exceptions.NullReservation_Exception;
-import com.swen_646_project_1.enums.ReservationStatus;
 import java.io.*;
 import java.util.*;
 
@@ -29,10 +24,10 @@ import java.util.*;
  * Data persistence is handled through file storage.
  */
 public class Manager {
-
-    // Encapsulated Attributes
-    // Constant representing the directory path where account and reservation data is stored.
-    // Internal use only (no setter method needed)
+    /* Encapsulated Attribute
+     * Constant representing the directory path where account and reservation data is stored.
+     * Internal use only (no setter method needed)
+     */
     private static final String DATA_DIRECTORY = "/Users/james_stevens/IdeaProjects/SWEN 646 Project 1/src/com/resources";
 
     // Initialize a map storing accounts, where the key is the account number and the value is the Account object.
@@ -146,10 +141,11 @@ public class Manager {
          * 7. If an error occurs while reading the file, throw an IllegalLoad_Exception with file details.
          */
 
-        // Open the specified file for reading using BufferedReader.
-        // BufferedReader reads the file efficiently, line by line, to optimize memory usage.
-        // FileReader is used to read character data from the file.
-        // The try-with-resources statement ensures that the BufferedReader closes after use.
+        /* Open the specified file for reading using BufferedReader.
+         * BufferedReader reads the file efficiently, line by line, to optimize memory usage.
+         * FileReader is used to read character data from the file.
+         * The try-with-resources statement ensures that the BufferedReader closes after use.
+         */
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String data = reader.readLine(); // Read account data from file
 
@@ -217,6 +213,11 @@ public class Manager {
                 try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                     // Read the first line of the file, which contains reservation data
                     String data = reader.readLine();
+                    if (data == null || data.trim().isEmpty()) {
+                        System.out.println("Skipping empty reservation file: " + file.getName());
+                        continue; // Skip empty files
+                    } // End if statement
+
                     String[] parts = data.split(",");
                     String reservationType = parts[0];
 
@@ -226,16 +227,25 @@ public class Manager {
                         case "HotelReservation" -> HotelReservation.fromString(data);
                         case "HouseReservation" -> HouseReservation.fromString(data);
                         default ->
-                                throw new IllegalLoad_Exception("Unknown Reservation Type", file.getName(), account.getAccountNumber());
+                                throw new IllegalLoad_Exception("Unknown Reservation Type",
+                                        file.getName(), account.getAccountNumber());
                     };
 
-                    // Identify the reservation type
+                    // Check if the reservation already exists before adding
+                    if (account.getReservation(reservation.getReservationNumber()) == null) {
+                        reservationList.add(reservation);
+                    } else {
+                        System.out.println("Skipping duplicate reservation: " + reservation.getReservationNumber());
+                    } // End if-else statements
 
-                    reservationList.add(reservation);
+
 
                 } catch (IOException e) {
                     throw new IllegalLoad_Exception("Reservation File", file.getName(), account.getAccountNumber());
+                } catch (DuplicateObject_Exception e) {
+                        System.out.println("Duplicate reservation detected during loading: " + e.getMessage());
                 } // End try-catch statements
+
             } // End for loop
 
             // Sort reservations by reservation number
@@ -243,7 +253,9 @@ public class Manager {
 
             // Link the sorted reservations to the account
             for (Reservation res : reservationList) {
-                account.addReservation(res.getReservationNumber());
+
+                account.addReservation(res);
+
             } // End for loop
         } // End if statement
     } // End loadReservationsForAccount method
@@ -255,7 +267,7 @@ public class Manager {
      * @return The Reservation object created from the file data.
      * @throws IllegalLoad_Exception If the file cannot be read or is corrupted.
      */
-    protected static Reservation loadReservationFromFile(String accountNumber, String reservationNumber)
+    private Reservation loadReservationFromFile(String accountNumber, String reservationNumber)
             throws IllegalLoad_Exception {
 
         // New file path for the reservation file based on account and reservation numbers
@@ -397,235 +409,6 @@ public class Manager {
     } // End updateAccount method
 
     /**
-     * Adds a reservation to an existing account.
-     * Throws IllegalState_Exception if the account does not exist or the reservation is invalid.
-     * @param accountNumber The unique identifier of the account.
-     * @param reservation The Reservation object to be added.
-     */
-    public void addReservation(String accountNumber, Reservation reservation) throws IllegalState_Exception,
-            IllegalSave_Exception {
-        /*
-         * if account exists in accounts map
-         *      ensures reservation is valid
-         * 		save reservation to file
-         * else
-         * 	    throw IllegalState_Exception
-         * Handle any errors that occur while saving the reservation.
-         */
-
-        Account account = accounts.get(accountNumber);
-
-        // If the account does not exist, throw an exception
-        if (account == null) {
-            throw new IllegalState_Exception(accountNumber, reservation.getReservationNumber(),
-                        "Account does not exist.");
-        } // End if statement
-
-        account.addReservation(reservation.getReservationNumber());
-        // Save the reservation details to a file
-        saveReservationToFile(reservation);
-
-    } // End addReservation method
-
-    /**
-     * Marks a reservation as completed.
-     * Throws IllegalOperation_Exception if the reservation cannot be finalized.
-     * @param accountNumber The unique identifier of the account.
-     * @param reservationNumber The unique identifier of the reservation.
-     */
-    public void completeReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception,
-            IllegalOperation_Exception, IllegalSave_Exception {
-        /*
-         * Retrieve the account from the system.
-         * If the account does not exist, throw an IllegalState_Exception.
-         *
-         * Find the reservation within the account.
-         * If the reservation does not exist, throw an IllegalOperation_Exception.
-         *
-         * If the reservation is already completed or cancelled:
-         *      - Throw an IllegalState_Exception indicating it cannot be completed.
-         *
-         * Otherwise:
-         *      - Mark the reservation as completed.
-         *      - Save the updated reservation to file.
-         *
-         * Handle any errors that occur and print appropriate error messages.
-         */
-
-        // Retrieve the account associated with the reservation
-        Account account = accounts.get(accountNumber);
-
-        // If the account does not exist, throw an exception
-        if (account == null) {
-            throw new IllegalState_Exception(accountNumber, reservationNumber, "Account does not exist.");
-        } // End if statement
-
-        // Find the reservation associated with the account
-        Reservation reservation = findReservation(accountNumber, reservationNumber);
-
-        // If the reservation does not exist, throw an exception
-        if (reservation == null) {
-            throw new IllegalOperation_Exception("Complete Reservation", accountNumber, reservationNumber,
-                        "Reservation does not exist.");
-        } // End if statement
-
-        // If the reservation is already completed or cancelled, throw an exception
-        if (reservation.getStatus() == ReservationStatus.COMPLETED ||
-                    reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(accountNumber, reservationNumber,
-                        "Cannot complete a cancelled or already completed reservation.");
-        } // End if statement
-
-        // Mark the reservation as completed
-        reservation.completeReservation();
-
-        // Save the updated reservation details to the file
-        saveReservationToFile(reservation);
-
-    } // End completeReservation method
-
-    /**
-     * Cancels an existing reservation.
-     * Throws IllegalState_Exception if the reservation is already cancelled or completed.
-     * @param accountNumber The unique identifier of the account.
-     * @param reservationNumber The unique identifier of the reservation.
-     */
-    public void cancelReservation(String accountNumber, String reservationNumber) throws IllegalState_Exception,
-            IllegalSave_Exception {
-        /*
-         * Retrieve the account from the system.
-         * If the account does not exist, throw an IllegalState_Exception.
-         *
-         * Call the account's cancelReservation method to update the reservation status.
-         * If the reservation is already cancelled or completed, an IllegalState_Exception is thrown.
-         */
-        // Retrieve the account associated with the reservation
-        Account account = accounts.get(accountNumber);
-
-        // If the account does not exist, throw an exception
-        if (account == null) {
-            // Throw an IllegalState_Exception when an operation is attempted on an account that does not exist.
-            throw new IllegalState_Exception(accountNumber, reservationNumber, "Account does not exist.");
-        } // End if statement
-
-        // Call the account's method to cancel the reservation
-        account.cancelReservation(reservationNumber);
-
-        // Retrieve the updated reservation
-        Reservation reservation = findReservation(accountNumber, reservationNumber);
-
-        // Ensure reservation is valid and set the price to $0.00 if cancelled
-        if (reservation == null) {
-            throw new IllegalState_Exception(accountNumber, reservationNumber, "Failed to retrieve reservation after cancellation.");
-        } // End if statement
-
-        // Ensure reservation is valid and set the price to $0.00 if cancelled
-        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            reservation.setLodgingPrice(0.00);
-        } // End if statement
-
-        // Save the updated reservation to file
-        saveReservationToFile(reservation);
-
-        System.out.println("Reservation cancelled: " + reservationNumber);
-        System.out.println("After Cancellation - Price per night: $" + String.format("%.2f", reservation.calculatePricePerNight()));
-
-    } // End cancelReservation method
-
-    /**
-     * Updates an existing reservation with new data.
-     * Throws IllegalState_Exception if the reservation is completed or cancelled.
-     * @param accountNumber The unique identifier of the account.
-     * @param reservationNumber The unique identifier of the reservation to update.
-     * @param newReservationData The new Reservation object containing updated details.
-     */
-    public void updateReservation(String accountNumber, String reservationNumber, Reservation newReservationData)
-            throws IllegalState_Exception, IllegalOperation_Exception, IllegalSave_Exception {
-        /*
-         * Retrieve the reservation using accountNumber and reservationNumber.
-         * If the reservation does not exist, throw an IllegalOperation_Exception.
-         *
-         * If the reservation is already completed or cancelled:
-         *      - Throw an IllegalState_Exception indicating it cannot be updated.
-         *
-         * Otherwise:
-         *      - Update the reservation details with newReservationData.
-         *      - Save the updated reservation to file.
-         *
-         * Handle any errors that occur and print appropriate error messages.
-         */
-
-        try {
-            // Find the reservation associated with the account
-            Reservation reservation = findReservation(accountNumber, reservationNumber);
-
-            // If the reservation does not exist, throw an exception
-            if (reservation == null) {
-                throw new IllegalOperation_Exception("Update Reservation", accountNumber, reservationNumber,
-                        "Reservation does not exist.");
-            } // End if statement
-
-            // If the reservation is already completed or cancelled, throw an exception
-            if (reservation.getStatus() == ReservationStatus.COMPLETED ||
-                    reservation.getStatus() == ReservationStatus.CANCELLED) {
-                throw new IllegalState_Exception(accountNumber, reservationNumber,
-                        "Cannot update a completed or cancelled reservation.");
-            } // End if statement
-
-            // Update the reservation details with new reservation data
-            reservation.updateReservation(newReservationData);
-
-            // Save the updated reservation details to the file
-            saveReservationToFile(reservation);
-
-        } catch (IllegalState_Exception | IllegalOperation_Exception e) {
-            System.out.println("Error: " + e.getMessage());  // Print only the custom error message
-        } // End try-catch statements
-
-    } // End updateReservation method
-
-    /**
-     * Calculates the price per night for a given reservation.
-     * @param accountNumber The unique identifier of the account.
-     * @param reservationNumber The unique identifier of the reservation.
-     * @return The price per night as a double.
-     */
-    public double calculatePricePerNight(String accountNumber, String reservationNumber) {
-
-        /*
-         * retrieve reservation using accountNumber and reservationNumber
-         * return reservation's nightly price
-         */
-        Reservation reservation = findReservation(accountNumber, reservationNumber);
-        if (reservation == null) {
-            return 0.0;
-        } // End if statement
-        return reservation.calculatePricePerNight();
-
-    } // End calculatePricePerNight method
-
-    /**
-     * Calculates the total price of a given reservation.
-     * @param accountNumber The unique identifier of the account.
-     * @param reservationNumber The unique identifier of the reservation.
-     * @return The total price as a double.
-     */
-    public double calculateTotalPrice(String accountNumber, String reservationNumber){
-
-        /*
-         * retrieve reservation using accountNumber and reservationNumber
-         * calculate total cost: nightly price * number of nights
-         * return total cost
-         */
-        Reservation reservation = findReservation(accountNumber, reservationNumber);
-        if (reservation == null) {
-            return 0.0; // Handle missing reservation case
-        } // End if statement
-        return reservation.calculatePricePerNight() * reservation.getNumNights();
-
-    } // End calculateTotalPrice method
-
-    /**
      * Saves an account's details to a file for persistence.
      * @param account The Account object to be saved.
      * @throws IllegalSave_Exception If there is an issue writing the account to a file.
@@ -657,7 +440,9 @@ public class Manager {
 
             // Convert Account to string and write to file
             writer.write(account.toString()); // Convert Account to string and write to file
+            writer.newLine();
             System.out.println("Account saved: " + file.getAbsolutePath());
+
         } catch (IOException e) {
             // If an error occurs while writing, throw an IllegalSave_Exception with relevant details
             throw new IllegalSave_Exception("Account", file.getName(), account.getAccountNumber());
@@ -669,7 +454,7 @@ public class Manager {
      * @param reservation The Reservation object to be saved.
      * @throws IllegalSave_Exception If there is an issue writing the reservation to a file.
      */
-    protected static void saveReservationToFile(Reservation reservation) throws IllegalSave_Exception {
+    public static void saveReservationToFile(Reservation reservation) throws IllegalSave_Exception {
         /*
          * Convert the Reservation object into a formatted string for storage.
          * Write the formatted data to a file in the data directory.
@@ -699,7 +484,7 @@ public class Manager {
             // Convert Reservation to string and write to file
             writer.write(reservation.toString());
             writer.newLine();
-            System.out.println("Reservation saved: " + file.getAbsolutePath());
+            System.out.println("\tReservation saved: " + file.getAbsolutePath());
 
         } catch (IOException e) {
             // If an error occurs while writing, throw an IllegalSave_Exception with relevant details
