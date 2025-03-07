@@ -344,15 +344,11 @@ public class Manager {
             return null;
         } // End if statement
 
-        // Loop through reservations linked to the account
-        for (String resNum : account.getReservationNumbers()) {
-            // If a matching reservation number is found, load the reservation from the file
-            if (resNum.equals(reservationNumber)) {
-                return loadReservationFromFile(accountNumber, reservationNumber);
-            } // End if statement
-        } // End for loop
+        // Directly retrieve the reservation from the Account object
+        Reservation reservation = account.getReservation(reservationNumber);
 
-        return null; // Reservation not found
+        // If found in memory, return it; otherwise, try loading from the file
+        return (reservation != null) ? reservation : loadReservationFromFile(accountNumber, reservationNumber);
     } // End findReservation method
 
     /**

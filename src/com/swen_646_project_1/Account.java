@@ -20,9 +20,9 @@ public class Account {
 
     // Encapsulated Attributes
     private final String accountNumber;                     // Unique identifier for account that cannot be changed
-    private final Address address;                                // Stores the address object
-    private final String phoneNumber;                             // Stores the phone number
-    private final String email;                                   // Stores the email address
+    private Address address;                          // Stores the address object
+    private final String phoneNumber;                       // Stores the phone number
+    private final String email;                             // Stores the email address
     private final Map<String, Reservation> reservations;    // Map of reservation numbers to Reservation objects
 
     /**
@@ -131,6 +131,51 @@ public class Account {
     public Reservation getReservation(String reservationNumber) {
         return reservations.get(reservationNumber);
     } // End getReservation method
+
+
+
+    /**
+     * Update the address using an Address object.
+     * @param newAddress New Address object
+     */
+    public void updateAddress(Address newAddress) {
+        if (newAddress == null) {
+            throw new IllegalArgumentException("Address cannot be null.");
+        }
+        this.address = newAddress;
+    }
+
+    /**
+     * Update the address by setting new values directly.
+     * Uses the `setAddress()` method from the Address class.
+     * @param street New street name
+     * @param city New city
+     * @param state New state
+     * @param zipCode New zip code
+     */
+    public void updateAddress(String street, String city, String state, int zipCode) {
+        this.address.setAddress(street, city, state, zipCode);
+    }
+
+    /**
+     * Getter for Address.
+     * @return Address object
+     */
+    public Address getAddress() {
+        return this.address;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Adds a new reservation to the account.
@@ -249,6 +294,7 @@ public class Account {
 
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservation.setLodgingPrice(0.00); // Price should be zero after cancellation
+        System.out.println("Reservation " + reservationNumber + " has been cancelled.");
 
     } // End cancelReservation method
 
@@ -288,6 +334,7 @@ public class Account {
         } // End if statement
 
         reservation.setStatus(ReservationStatus.COMPLETED);
+        System.out.println("Reservation " + reservationNumber + " has been completed.");
     } // End completeReservation method
 
     /**

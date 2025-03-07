@@ -172,7 +172,11 @@ public abstract class Reservation {
      * Setter that updates the lodging physical address.
      */
     public void setLodgingPhysicalAddress(Address lodgingPhysicalAddress) {
-        this.lodgingPhysicalAddress = lodgingPhysicalAddress;
+        if (lodgingPhysicalAddress != null) {
+            this.lodgingPhysicalAddress = lodgingPhysicalAddress;
+        } else {
+            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "Invalid address.");
+        }
     } // End setLodgingPhysicalAddress method
 
     /**
@@ -200,7 +204,11 @@ public abstract class Reservation {
      * Setter that updates the start date.
      */
     public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
+        if (startDate != null) {
+            this.startDate = startDate;
+        } else {
+            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "Start date cannot be null.");
+        }
     } // End setStartDate method
 
     /**
@@ -258,7 +266,11 @@ public abstract class Reservation {
      * @param lodgingPrice The new price per night as a double.
      */
     public void setLodgingPrice(double lodgingPrice) {
-        this.lodgingPrice = lodgingPrice;
+        if (lodgingPrice >= 0) {
+            this.lodgingPrice = lodgingPrice;
+        } else {
+            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "Price cannot be negative.");
+        }
     } // End setLodgingPrice method
 
     /**
@@ -279,6 +291,7 @@ public abstract class Reservation {
         } // End if statement
 
         this.status = ReservationStatus.COMPLETED;
+        System.out.println("Reservation " + reservationNumber + " has been completed.");
 
     } // End completeReservation method
 
@@ -300,6 +313,9 @@ public abstract class Reservation {
         } // End if statement
 
         this.status = ReservationStatus.CANCELLED;
+        this.lodgingPrice = 0.00; // Set price to zero after cancellation
+
+        System.out.println("Reservation " + reservationNumber + " has been cancelled.");
 
     } // End cancelReservation method
 
@@ -308,6 +324,16 @@ public abstract class Reservation {
      * @param newReservationData The new Reservation object containing updated details.
      */
     public void updateReservation(Reservation newReservationData) {
+        if (newReservationData == null) {
+            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "New reservation data cannot be null.");
+        }
+
+        // Prevent updating completed or cancelled reservations
+        if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
+                    "Cannot update a completed or cancelled reservation.");
+        }
+
         this.lodgingPhysicalAddress = newReservationData.lodgingPhysicalAddress;
         this.lodgingMailingAddress = newReservationData.lodgingMailingAddress;
         this.startDate = newReservationData.startDate;
@@ -317,6 +343,8 @@ public abstract class Reservation {
         this.numBathrooms = newReservationData.numBathrooms;
         this.lodgingSizeSqFt = newReservationData.lodgingSizeSqFt;
         this.lodgingPrice = newReservationData.lodgingPrice;
+
+        System.out.println("Reservation " + reservationNumber + " updated successfully.");
     } // End updateReservation method
 
     /**
