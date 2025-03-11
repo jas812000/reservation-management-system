@@ -1,8 +1,13 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
-// Import for handing reservation start dates
+/*
+ * Imports the following:
+ * - Time utility for handling reservation start dates
+ * - Address class to handle lodging and mailing addresses in reservations
+ * - ReservationStatus enum to manage different states of reservations.
+ * - Custom exception class to handle various error scenarios related to reservations.
+ */
 import java.time.LocalDate;
-// Import Address class to handle lodging and mailing addresses in reservations
 import com.swen_646_project_1.Address;
 import com.swen_646_project_1.enums.ReservationStatus;
 import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
@@ -39,7 +44,6 @@ public class CabinReservation extends Reservation {
                             Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                             int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice,
                             boolean fullKitchenAvailable, boolean loftAvailable){
-
         // Calls the superclass (Reservation) constructor to initialize common reservation attributes.
         super(reservationNumber, accountNumber, lodgingPhysicalAddress, lodgingMailingAddress, startDate, numNights,
                 numBeds, numBedrooms, numBathrooms, lodgingSizeSqFt, lodgingPrice);
@@ -89,7 +93,6 @@ public class CabinReservation extends Reservation {
      */
     @Override
     public double calculatePricePerNight(){
-
         /*
          * return price per night for the cabin
          * may include additional cost if full kitchen or loft is available
@@ -109,7 +112,7 @@ public class CabinReservation extends Reservation {
         } // End if statement
         basePrice += (this.numBathrooms * 5); // Additional fee per bathroom
 
-        return basePrice;
+        return basePrice; // Updated price
 
     } // End calculatePricePerNight method
 
@@ -119,18 +122,19 @@ public class CabinReservation extends Reservation {
      */
     @Override
     public String toString(){
-
         /*
          * format and return cabin reservation details as a string
          */
         return String.format("CabinReservation,%s,%s,\"%s\"%s,%s,%d,%d,%d,%d,%d,%.2f,%s,%b,%b",
                 reservationNumber, accountNumber,
-                String.join(";", lodgingPhysicalAddress.getStreet(), lodgingPhysicalAddress.getCity(),
+                String.join(";",
+                        lodgingPhysicalAddress.getStreet(), lodgingPhysicalAddress.getCity(),
                         lodgingPhysicalAddress.getState(), String.valueOf(lodgingPhysicalAddress.getZipCode())),
                 (lodgingMailingAddress != null ?
-                        "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(), lodgingMailingAddress.getCity(),
-                                lodgingMailingAddress.getState(), String.valueOf(lodgingMailingAddress.getZipCode())) + "\""
-                        : ",N/A"),
+                        "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(),
+                                lodgingMailingAddress.getCity(),
+                                lodgingMailingAddress.getState(),
+                                String.valueOf(lodgingMailingAddress.getZipCode())) + "\"": ",N/A"),
                 startDate, numNights, numBeds, numBedrooms, numBathrooms,
                 lodgingSizeSqFt, lodgingPrice, status, fullKitchenAvailable, loftAvailable);
     } // End toString method
@@ -146,9 +150,6 @@ public class CabinReservation extends Reservation {
          * Extract cabin reservation details
          * Return new CabinReservation object with extracted details
          */
-
-        //System.out.println("Raw Data for Parsing: " + data); // Debugging output
-
         // Use regex to split while preserving quoted substrings
         String[] parts = data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
@@ -156,7 +157,7 @@ public class CabinReservation extends Reservation {
         if (parts.length < 14) {
             throw new IllegalLoad_Exception("CabinReservation Data", "N/A",
                     "Invalid data format. Found: " + parts.length);
-        }
+        } // End if statement
 
         // Extract lodging physical address components
         Address lodgingPhysicalAddress = getAddress(parts);
@@ -164,7 +165,7 @@ public class CabinReservation extends Reservation {
         // Extract lodging mailing address components
         Address lodgingMailingAddress = getLodgingMailingAddress(parts);
 
-        // Fix: Ensure indexes are correct
+        // Ensure indexes are correct
         return new CabinReservation(
                 parts[1], // reservationNumber
                 parts[2], // accountNumber
@@ -180,33 +181,57 @@ public class CabinReservation extends Reservation {
                 Boolean.parseBoolean(parts[13]), // fullKitchenAvailable
                 Boolean.parseBoolean(parts[14]) // loftAvailable
         );
-    }
-    // End fromString method
+    } // End fromString method
 
+    /**
+     * Parses and retrieves the lodging mailing address from the given data parts.
+     * If the mailing address is specified as "N/A", this method returns null.
+     *
+     * @param parts A string array containing reservation details, with the mailing address at index 4.
+     * @return An Address object representing the lodging mailing address, or null if not available.
+     * @throws IllegalLoad_Exception if the mailing address format is invalid.
+     */
     private static Address getLodgingMailingAddress(String[] parts) {
-        Address lodgingMailingAddress = null;
+        // Check if mailing address is provided
         if (!parts[4].equals("N/A")) {
             String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
+
+            // Validate the mailing address format (should contain at least 4 parts)
             if (mailingAddressParts.length < 4) {
                 throw new IllegalLoad_Exception("CabinReservation Address", "N/A", "Invalid mailing address format.");
             } // End if statement
+
+            // Return an Address object with extracted components
             return new Address(mailingAddressParts[0], mailingAddressParts[1],
                     mailingAddressParts[2], Integer.parseInt(mailingAddressParts[3]));
         } // End if statement
-        //return lodgingMailingAddress;
+
+        // Return null if mailing address is "N/A"
         return null;
     } // End getlodgingMailingAddress method
 
+    /**
+     * Parses and retrieves the lodging physical address from the given data parts.
+     *
+     * @param parts A string array containing reservation details, expected to have at least 14 elements.
+     * @return An Address object representing the lodging physical address.
+     * @throws IllegalLoad_Exception if the data format is invalid or if the physical address format is incorrect.
+     */
     private static Address getAddress(String[] parts) {
+        // Ensure correct number of fields
         if (parts.length < 14) {
             throw new IllegalLoad_Exception("CabinReservation Data", "N/A", "Invalid data format. Found: " + parts.length);
         } // End if statement
 
         // Extract lodging physical address components
         String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
+
+        // Validate the physical address format (should contain at least 4 parts)
         if (physicalAddressParts.length < 4) {
             throw new IllegalLoad_Exception("CabinReservation Address", "N/A", "Invalid physical address format.");
         } // End if statement
+
+        // Return an Address object with extracted components
         return new Address(physicalAddressParts[0], physicalAddressParts[1],
                 physicalAddressParts[2], Integer.parseInt(physicalAddressParts[3]));
     } // End getAddress method

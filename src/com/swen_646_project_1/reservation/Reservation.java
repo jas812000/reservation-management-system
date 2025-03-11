@@ -53,7 +53,6 @@ public abstract class Reservation {
     public Reservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
                        Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                        int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice) {
-
         /*
  		 * Validate input parameters to ensure they are not null, empty, or	invalid.
  		 *
@@ -133,7 +132,7 @@ public abstract class Reservation {
     } // End getAccountNumber method
 
     /**
-     * Setter that updates the account number.
+     * Setter that updates the account number if the provided value is not null or empty.
      */
     public void setAccountNumber(String accountNumber) {
         if (accountNumber != null && !accountNumber.isEmpty()) {
@@ -151,7 +150,7 @@ public abstract class Reservation {
     } // End getStatus method
 
     /**
-     * Setter that updates the reservation status.
+     * Setter that updates the reservation status if the provided value is not null or empty.
      */
     public void setStatus(ReservationStatus status) {
         if (status == null) {
@@ -169,7 +168,7 @@ public abstract class Reservation {
     } // End getLodgingPhysicalAddress method
 
     /**
-     * Setter that updates the lodging physical address.
+     * Setter that updates the lodging physical address if the provided value is not null or empty.
      */
     public void setLodgingPhysicalAddress(Address lodgingPhysicalAddress) {
         if (lodgingPhysicalAddress != null) {
@@ -201,13 +200,14 @@ public abstract class Reservation {
     public LocalDate getStartDate() {return this.startDate; } // End getStartDate method
 
     /**
-     * Setter that updates the start date.
+     * Setter that updates the start date if the provided value is not null or empty.
      */
     public void setStartDate(LocalDate startDate) {
         if (startDate != null) {
             this.startDate = startDate;
         } else {
-            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "Start date cannot be null.");
+            throw new IllegalParameter_Exception(this.accountNumber,
+                    this.reservationNumber, "Start date cannot be null.");
         }
     } // End setStartDate method
 
@@ -269,7 +269,8 @@ public abstract class Reservation {
         if (lodgingPrice >= 0) {
             this.lodgingPrice = lodgingPrice;
         } else {
-            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "Price cannot be negative.");
+            throw new IllegalParameter_Exception(this.accountNumber,
+                    this.reservationNumber, "Price cannot be negative.");
         }
     } // End setLodgingPrice method
 
@@ -278,7 +279,6 @@ public abstract class Reservation {
      * Throws IllegalState_Exception if the reservation is already completed or cancelled.
      */
     public void completeReservation() {
-
         /*
          * if reservation is already completed or cancelled
          * 	    throw IllegalState_Exception
@@ -300,7 +300,6 @@ public abstract class Reservation {
      * Throws IllegalState_Exception if the reservation is already completed or cancelled.
      */
     public void cancelReservation() {
-
         /*
          * if reservation is already completed or cancelled
          * 	    throw IllegalState_Exception
@@ -321,19 +320,21 @@ public abstract class Reservation {
 
     /**
      * Updates reservation details with new data.
+     * Ensures the new data is not null and does not allow updates to completed or cancelled reservations.
      * @param newReservationData The new Reservation object containing updated details.
      */
     public void updateReservation(Reservation newReservationData) {
         if (newReservationData == null) {
             throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "New reservation data cannot be null.");
-        }
+        } // End if statement
 
         // Prevent updating completed or cancelled reservations
         if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
             throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
                     "Cannot update a completed or cancelled reservation.");
-        }
+        } // End if statement
 
+        // Update reservation details
         this.lodgingPhysicalAddress = newReservationData.lodgingPhysicalAddress;
         this.lodgingMailingAddress = newReservationData.lodgingMailingAddress;
         this.startDate = newReservationData.startDate;
@@ -369,7 +370,6 @@ public abstract class Reservation {
      * Calling this method from the base class will result in an IllegalOperation_Exception.
      */
     public static Reservation fromString(String data) throws IllegalOperation_Exception {
-
         /*
          * throw IllegalOperation_Exception
          * fromString() must be implemented by subclasses.

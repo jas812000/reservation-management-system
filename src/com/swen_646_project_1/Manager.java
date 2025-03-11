@@ -140,7 +140,6 @@ public class Manager {
          * 6. Return the created Account object.
          * 7. If an error occurs while reading the file, throw an IllegalLoad_Exception with file details.
          */
-
         /* Open the specified file for reading using BufferedReader.
          * BufferedReader reads the file efficiently, line by line, to optimize memory usage.
          * FileReader is used to read character data from the file.
@@ -188,7 +187,6 @@ public class Manager {
          * 			iii) Link the reservation to the corresponding account.
          * 3. Handle potential errors while reading files.
          */
-
         // Ensure the account's directory exists and is a valid directory
         if (!accountDir.exists() || !accountDir.isDirectory()) {
             // Throw an IllegalLoad_Exception when the system fails to load an account's reservation directory.
@@ -238,8 +236,6 @@ public class Manager {
                         System.out.println("Skipping duplicate reservation: " + reservation.getReservationNumber());
                     } // End if-else statements
 
-
-
                 } catch (IOException e) {
                     throw new IllegalLoad_Exception("Reservation File", file.getName(), account.getAccountNumber());
                 } catch (DuplicateObject_Exception e) {
@@ -251,12 +247,11 @@ public class Manager {
             // Sort reservations by reservation number
             reservationList.sort(Comparator.comparing(Reservation::getReservationNumber));
 
-            // Link the sorted reservations to the account
+            // Add each sorted reservation to the account
             for (Reservation res : reservationList) {
-
                 account.addReservation(res);
-
             } // End for loop
+
         } // End if statement
     } // End loadReservationsForAccount method
 
@@ -286,6 +281,7 @@ public class Manager {
         try (BufferedReader reader = new BufferedReader(new FileReader(reservationFile))) {
             String data = reader.readLine(); // Read reservation data from file
 
+            // Determine the reservation type based on the data prefix and parse accordingly
             if (data.startsWith("HotelReservation")) {
                 return HotelReservation.fromString(data);
             } else if (data.startsWith("HouseReservation")) {
@@ -293,7 +289,9 @@ public class Manager {
             } else if (data.startsWith("CabinReservation")) {
                 return CabinReservation.fromString(data);
             } else {
-                throw new IllegalLoad_Exception("Reservation Type", "Unknown type in file: " + reservationFile.getName(), accountNumber);
+                // If the reservation type is unknown, throw an exception
+                throw new IllegalLoad_Exception("Reservation Type",
+                        "Unknown type in file: " + reservationFile.getName(), accountNumber);
             } // End if-else statements
         } catch (IOException e) {
             // If an error occurs while reading the file, throw an IllegalLoad_Exception

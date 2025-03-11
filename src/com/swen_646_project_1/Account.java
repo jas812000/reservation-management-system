@@ -20,7 +20,7 @@ public class Account {
 
     // Encapsulated Attributes
     private final String accountNumber;                     // Unique identifier for account that cannot be changed
-    private Address address;                          // Stores the address object
+    private Address address;                                // Stores the address object
     private final String phoneNumber;                       // Stores the phone number
     private final String email;                             // Stores the email address
     private final Map<String, Reservation> reservations;    // Map of reservation numbers to Reservation objects
@@ -55,7 +55,6 @@ public class Account {
  		 *      If true, throw an IllegalArgumentException with a message
  		 *          indicating the email cannot be empty.
  	     */
-
         // Validate input parameters to ensure they are not null or empty.
         if (accountNumber == null || accountNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
@@ -80,9 +79,13 @@ public class Account {
     } // End Account constructor
 
     /**
-     * Creates an Account object from a formatted string.
-     * @param data A string containing account details in a predefined format
-     * @return An Account object constructed from the provided data
+     * Creates an Account object from a comma-separated string.
+     * The data string should contain at least 7 elements:
+     * account ID, address (street, city, state, ZIP), email, and phone number.
+     *
+     * @param data A comma-separated string representing an account.
+     * @return A new Account object populated with parsed details.
+     * @throws IllegalLoad_Exception if the data format is invalid or incomplete.
      */
     public static Account fromString(String data) throws IllegalLoad_Exception {
         /*
@@ -90,11 +93,18 @@ public class Account {
          * extract account details
          * return new Account object with extracted details
          */
+        // Split the data string into parts based on commas
         String[] parts = data.split(",");
+
+        // Validate the expected number of parts
         if (parts.length < 7){
             throw new IllegalLoad_Exception("Account", "N/A", "Data corrupted");
-        }
+        } // End if statement
+
+        // Parse address information from the extracted parts
         Address address = new Address(parts[1], parts[2], parts[3], Integer.parseInt(parts[4]));
+
+        // Create and return a new Account object
         return new Account(parts[0], address, parts[5], parts[6]);
 
     } // End fromString method
@@ -132,8 +142,6 @@ public class Account {
         return reservations.get(reservationNumber);
     } // End getReservation method
 
-
-
     /**
      * Update the address using an Address object.
      * @param newAddress New Address object
@@ -143,7 +151,7 @@ public class Account {
             throw new IllegalArgumentException("Address cannot be null.");
         }
         this.address = newAddress;
-    }
+    } // End updateAddress method
 
     /**
      * Update the address by setting new values directly.
@@ -155,7 +163,7 @@ public class Account {
      */
     public void updateAddress(String street, String city, String state, int zipCode) {
         this.address.setAddress(street, city, state, zipCode);
-    }
+    } // End updateAddress method
 
     /**
      * Getter for Address.
@@ -163,24 +171,14 @@ public class Account {
      */
     public Address getAddress() {
         return this.address;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
+    } // End getAddress method
 
     /**
-     * Adds a new reservation to the account.
+     * Adds a new reservation to the account if it does not already exist.
+     *
      * @param reservation The Reservation object to be added.
      * @throws DuplicateObject_Exception If the reservation already exists.
+     * @throws IllegalParameter_Exception If the reservation object is null.
      */
     public void addReservation(Reservation reservation) throws DuplicateObject_Exception {
         /*
@@ -193,18 +191,14 @@ public class Account {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
         } // End if statement
 
-        boolean isNewReservation = !reservations.containsKey(reservation.getReservationNumber());
-
-        if (!isNewReservation) {
+        // Checks if the reservation already exists
+        if (reservations.containsKey(reservation.getReservationNumber())) {
             System.out.println("Skipping duplicate reservation: " + reservation.getReservationNumber());
             return; // Exits if the reservation already exists
         } // End if statement
 
         // Store the reservation in the account's map
         reservations.put(reservation.getReservationNumber(), reservation);
-
-        // Debugging: Print that reservation is stored
-        System.out.println("Reservation stored in account: " + reservation.getReservationNumber());
 
         // Save the reservation to a file only if it is new
         try {
@@ -218,6 +212,7 @@ public class Account {
 
     /**
      * Updates an existing reservation with new data.
+     *
      * @param reservationNumber The unique identifier of the reservation.
      * @param updatedReservation The new Reservation object containing updated details.
      * @throws IllegalState_Exception If the reservation is completed or cancelled.
@@ -243,6 +238,7 @@ public class Account {
                     "Reservation does not exist.");
         } // End if statement
 
+        // Retrieve the reservation
         Reservation currentReservation = reservations.get(reservationNumber);
 
         // Prevent updates to completed or cancelled reservations
@@ -250,7 +246,7 @@ public class Account {
                 currentReservation.getStatus() == ReservationStatus.CANCELLED) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber,
                     "Cannot update a completed or cancelled reservation.");
-        }
+        } // End if statement
 
         // Check if the new reservation is actually different before updating
         if (!currentReservation.equals(updatedReservation)) {
@@ -271,6 +267,7 @@ public class Account {
 
     /**
      * Cancels an existing reservation for this account.
+     *
      * @param reservationNumber The reservation number to be cancelled.
      * @throws IllegalState_Exception if the reservation does not exist or is already cancelled/completed.
      */
@@ -281,25 +278,32 @@ public class Account {
          * 3. If reservation is already cancelled or completed, throw IllegalState_Exception
          * 4. Otherwise, update status to CANCELLED and save it
          */
+
+        // Retrieve the reservation
         Reservation reservation = reservations.get(reservationNumber);
 
+        // Checks if the reservation exists
         if (reservation == null) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Reservation does not exist.");
         } // End if statement
+
+        // Ensure reservation is not already cancelled or completed
         if (reservation.getStatus() == ReservationStatus.CANCELLED ||
                 reservation.getStatus() == ReservationStatus.COMPLETED) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber,
                     "Cannot cancel a completed or already cancelled reservation.");
         } // End if statement
 
+        // Cancel the reservation and reset price
         reservation.setStatus(ReservationStatus.CANCELLED);
-        reservation.setLodgingPrice(0.00); // Price should be zero after cancellation
+        reservation.setLodgingPrice(0.00);
         System.out.println("Reservation " + reservationNumber + " has been cancelled.");
 
     } // End cancelReservation method
 
     /**
      * Completes an existing reservation.
+     *
      * @param reservationNumber The reservation number to be marked as completed.
      * @throws IllegalState_Exception If the reservation is already completed or cancelled.
      * @throws IllegalOperation_Exception If the reservation does not exist.
@@ -321,18 +325,22 @@ public class Account {
          *
          * Handle any errors that occur and print appropriate error messages.
          */
+        // Retrieve the reservation
         Reservation reservation = reservations.get(reservationNumber);
 
         if (reservation == null) {
             throw new IllegalOperation_Exception("Complete Reservation", this.accountNumber, reservationNumber,
                     "Reservation does not exist.");
         } // End if statement
+
+        // Ensure reservation is not already completed or cancelled
         if (reservation.getStatus() == ReservationStatus.COMPLETED ||
                 reservation.getStatus() == ReservationStatus.CANCELLED) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber,
                     "Cannot complete a cancelled or already completed reservation.");
         } // End if statement
 
+        // Mark reservation as completed
         reservation.setStatus(ReservationStatus.COMPLETED);
         System.out.println("Reservation " + reservationNumber + " has been completed.");
     } // End completeReservation method
@@ -341,7 +349,6 @@ public class Account {
      * Returns a string representation of the account details.
      * @return A formatted string containing account details
      */
-
     @Override
     public String toString() {
         /*

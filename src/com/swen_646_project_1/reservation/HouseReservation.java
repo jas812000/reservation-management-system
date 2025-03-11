@@ -1,13 +1,17 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
-// Imports the custom exception class for handling invalid parameter inputs.
+/*
+ * Imports the following:
+ * - Time utility for handling reservation start dates
+ * - Address class to handle lodging and mailing addresses in reservations
+ * - ReservationStatus enum to manage different states of reservations.
+ * - Custom exception class to handle various error scenarios related to reservations.
+ */
+import java.time.LocalDate;
+import com.swen_646_project_1.Address;
 import com.swen_646_project_1.enums.ReservationStatus;
 import com.swen_646_project_1.exceptions.IllegalLoad_Exception;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
-// Import for handing reservation start dates
-import java.time.LocalDate;
-// Import Address class to handle lodging and mailing addresses in reservations
-import com.swen_646_project_1.Address;
 
 /**
  * Represents a house reservation with multiple floors.
@@ -39,7 +43,6 @@ public class HouseReservation extends Reservation {
                             Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
                             int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice,
                             int numFloors){
-
         // Calls the superclass (Reservation) constructor to initialize common reservation attributes.
         super(reservationNumber, accountNumber, lodgingPhysicalAddress, lodgingMailingAddress, startDate, numNights,
                 numBeds, numBedrooms, numBathrooms, lodgingSizeSqFt, lodgingPrice);
@@ -75,7 +78,7 @@ public class HouseReservation extends Reservation {
         if (numFloors <= 0) {
             throw new IllegalParameter_Exception("N/A", "N/A",
                     "A house cannot have zero or negative floors. Please enter a valid number..");
-        }
+        } // End if statement
         this.numFloors = numFloors;
     } // End setNumFloors method
 
@@ -86,7 +89,6 @@ public class HouseReservation extends Reservation {
      */
     @Override
     public double calculatePricePerNight(){
-
         /*
          * return price per night for the house
          * may include additional cost based on the number of floors
@@ -110,7 +112,6 @@ public class HouseReservation extends Reservation {
      */
     @Override
     public String toString(){
-
         /*
          * format and return house reservation details as a string
          */
@@ -137,9 +138,6 @@ public class HouseReservation extends Reservation {
          * Extract house reservation details
          * Return new HouseReservation object with extracted details
          */
-
-        //System.out.println("Raw Data for Parsing: " + data); // Debugging output
-
         // Use regex to split while preserving quoted substrings
         String[] parts = data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
@@ -147,7 +145,7 @@ public class HouseReservation extends Reservation {
         if (parts.length < 14) {
             throw new IllegalLoad_Exception("HouseReservation Data", "N/A",
                     "Invalid data format. Found: " + parts.length);
-        }
+        } // End if statement
 
         // Extract lodging physical address components
         Address lodgingPhysicalAddress = getAddress(parts);
@@ -155,7 +153,7 @@ public class HouseReservation extends Reservation {
         // Extract lodging mailing address components
         Address lodgingMailingAddress = getLodgingMailingAddress(parts);
 
-        // Fix: Ensure numFloors is correctly parsed
+        // Ensure numFloors is correctly parsed
         return new HouseReservation(
                 parts[1], // reservationNumber
                 parts[2], // accountNumber
@@ -170,33 +168,58 @@ public class HouseReservation extends Reservation {
                 Double.parseDouble(parts[11]), // lodgingPrice
                 Integer.parseInt(parts[13]) // Correctly parse numFloors from index 13, skipping the status
         );
-    }
-    // End fromString method
+    } // End fromString method
 
+    /**
+     * Parses and retrieves the lodging mailing address from the given data parts.
+     * If the mailing address is specified as "N/A", this method returns null.
+     *
+     * @param parts A string array containing reservation details, with the mailing address at index 4.
+     * @return An Address object representing the lodging mailing address, or null if not available.
+     * @throws IllegalLoad_Exception if the mailing address format is invalid.
+     */
     private static Address getLodgingMailingAddress(String[] parts) {
-        Address lodgingMailingAddress = null;
+        // Check if a valid mailing address is provided
         if (!parts[4].equals("N/A")) {
             String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
+
+            // Validate the mailing address format (should contain at least 4 components)
             if (mailingAddressParts.length < 4) {
                 throw new IllegalLoad_Exception("HouseReservation Address", "N/A", "Invalid mailing address format.");
             } // End if statement
+
+            // Return an Address object with extracted components
             return new Address(mailingAddressParts[0], mailingAddressParts[1],
                     mailingAddressParts[2], Integer.parseInt(mailingAddressParts[3]));
         } // End if statement
-        //return lodgingMailingAddress;
+
+        // Return null if mailing address is "N/A"
         return null;
     } // End getLodgingMailingAddress method
 
+    /**
+     * Parses and retrieves the lodging physical address from the given data parts.
+     *
+     * @param parts A string array containing reservation details, expected to have at least 14 elements.
+     * @return An Address object representing the lodging physical address.
+     * @throws IllegalLoad_Exception if the data format is invalid or if the physical address format is incorrect.
+     */
     private static Address getAddress(String[] parts) {
-        //if (parts.length < 14) { // Ensure correct number of fields
-            //throw new IllegalLoad_Exception("HouseReservation Data", "N/A", "Invalid data format. Found: " + parts.length);
-        //} // End if statement
+        // Ensure correct number of fields
+        if (parts.length < 14) {
+            throw new IllegalLoad_Exception("HouseReservation Data", "N/A",
+                    "Invalid data format. Found: " + parts.length);
+        } // End if statement
 
         // Extract lodging physical address components
         String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
+
+        // Validate the physical address format (should contain at least 4 components)
         if (physicalAddressParts.length < 4) {
             throw new IllegalLoad_Exception("HouseReservation Address", "N/A", "Invalid physical address format.");
         } // End if statement
+
+        // Return an Address object with extracted components
         return new Address(physicalAddressParts[0], physicalAddressParts[1],
                 physicalAddressParts[2], Integer.parseInt(physicalAddressParts[3]));
 
