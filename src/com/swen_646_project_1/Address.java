@@ -62,7 +62,7 @@ public class Address {
         if (state == null || state.length() != 2) {
             throw new IllegalParameter_Exception("N/A", "N/A", "State must be a valid 2-letter abbreviation.");
         } // End if statement
-        if (zipCode < 10000 || zipCode > 99999) {
+        if (zipCode < Integer.parseInt("00500") || zipCode > Integer.parseInt("99999")) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Zip code must be a 5-digit number.");
         } // End if statement
     } // End validateAddress method

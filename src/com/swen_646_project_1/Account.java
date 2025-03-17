@@ -19,10 +19,10 @@ import java.util.*;
 public class Account {
 
     // Encapsulated Attributes
-    private final String accountNumber;                     // Unique identifier for account that cannot be changed
+    private String accountNumber;                           // Unique identifier for account that cannot be changed
     private Address address;                                // Stores the address object
-    private final String phoneNumber;                       // Stores the phone number
-    private final String email;                             // Stores the email address
+    private String phoneNumber;                             // Stores the phone number
+    private String email;                                   // Stores the email address
     private final Map<String, Reservation> reservations;    // Map of reservation numbers to Reservation objects
 
     /**
@@ -118,6 +118,19 @@ public class Account {
     } // End getAccountNumber method
 
     /**
+     * Sets the account number for this account.
+     * Only used when assigning a generated account number.
+     * @param accountNumber The new account number.
+     */
+    public void setAccountNumber(String accountNumber) {
+        if (this.accountNumber == null || this.accountNumber.isEmpty()) {
+            this.accountNumber = accountNumber;
+        } else {
+            throw new IllegalStateException("Account number cannot be changed once assigned.");
+        } // End if-else statements
+    } // End setAccountNumber method
+
+    /**
      * Getter that retrieves the list of reservation numbers.
      * @return List of reservation numbers associated with this account.
      */
@@ -143,19 +156,29 @@ public class Account {
     } // End getReservation method
 
     /**
-     * Update the address using an Address object.
-     * @param newAddress New Address object
+     * Getter for Address.
+     * @return Address object
+     */
+    public Address getAddress() {
+        return this.address;
+    } // End getAddress method
+
+    /**
+     * Updates the address using an Address object.
+     * Ensures the new address follows validation rules before applying.
+     * @param newAddress New Address object to replace the existing address.
+     * @throws IllegalParameter_Exception if the new address is null.
      */
     public void updateAddress(Address newAddress) {
         if (newAddress == null) {
-            throw new IllegalArgumentException("Address cannot be null.");
+            throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Address cannot be null.");
         }
-        this.address = newAddress;
+        this.address.setAddress(newAddress.getStreet(), newAddress.getCity(), newAddress.getState(), newAddress.getZipCode());
     } // End updateAddress method
 
     /**
-     * Update the address by setting new values directly.
-     * Uses the `setAddress()` method from the Address class.
+     * Updates the address by setting new values directly.
+     * Uses the `setAddress()` method from the Address class to ensure validation..
      * @param street New street name
      * @param city New city
      * @param state New state
@@ -166,12 +189,46 @@ public class Account {
     } // End updateAddress method
 
     /**
-     * Getter for Address.
-     * @return Address object
+     * Retrieves the phone number associated with the account.
+     * @return The phone number as a string.
      */
-    public Address getAddress() {
-        return this.address;
-    } // End getAddress method
+    public String getPhoneNumber() {
+        return this.phoneNumber;
+    } // End getPhoneNumber method
+
+    /**
+     * Updates the phone number for the account.
+     * Ensures the new phone number is not empty before applying.
+     * @param newPhoneNumber The new phone number.
+     * @throws IllegalParameter_Exception if the phone number is empty or null.
+     */
+    public void setPhoneNumber(String newPhoneNumber) {
+        if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
+            throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Phone number cannot be empty.");
+        }
+        this.phoneNumber = newPhoneNumber;
+    } // End setPhoneNumber method
+
+    /**
+     * Retrieves the email address associated with the account.
+     * @return The email address as a string.
+     */
+    public String getEmail() {
+        return this.email;
+    } // End getEmail method
+
+    /**
+     * Updates the email address for the account.
+     * Ensures the new email contains a valid "@" character before applying.
+     * @param newEmail The new email address.
+     * @throws IllegalParameter_Exception if the email is invalid.
+     */
+    public void setEmail(String newEmail) {
+        if (newEmail == null || !newEmail.contains("@")) {
+            throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email address.");
+        }
+        this.email = newEmail;
+    } // End setEmail method
 
     /**
      * Adds a new reservation to the account if it does not already exist.
