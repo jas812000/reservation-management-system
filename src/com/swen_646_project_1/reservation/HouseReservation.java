@@ -1,5 +1,6 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
+
 /*
  * Imports the following:
  * - Time utility for handling reservation start dates
@@ -153,8 +154,11 @@ public class HouseReservation extends Reservation {
         // Extract lodging mailing address components
         Address lodgingMailingAddress = getLodgingMailingAddress(parts);
 
-        // Ensure numFloors is correctly parsed
-        return new HouseReservation(
+        // Parse reservation status correctly
+        ReservationStatus status = ReservationStatus.valueOf(parts[12].trim());
+
+        // Create HouseReservation object
+        HouseReservation reservation = new HouseReservation(
                 parts[1], // reservationNumber
                 parts[2], // accountNumber
                 lodgingPhysicalAddress,
@@ -166,8 +170,12 @@ public class HouseReservation extends Reservation {
                 Integer.parseInt(parts[9]), // numBathrooms
                 Integer.parseInt(parts[10]), // lodgingSizeSqFt
                 Double.parseDouble(parts[11]), // lodgingPrice
-                Integer.parseInt(parts[13]) // Correctly parse numFloors from index 13, skipping the status
+                Integer.parseInt(parts[13]) // numFloors
         );
+        // ✅ Set the parsed status
+        reservation.setStatus(status);
+
+        return reservation;
     } // End fromString method
 
     /**

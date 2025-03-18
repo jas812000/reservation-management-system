@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.exceptions;
 
-/**
+/*
  * Throws NullReservation_Exception if a reservation is missing or not found.
  *      - User tries to access or modify a non-existent reservation. ("Reservation not found.")
  *      - User tries to add a reservation that is null. ("Cannot add a missing reservation.")

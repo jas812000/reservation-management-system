@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.exceptions;
 
-/**
+/*
  * Exception thrown when an illegal load operation is performed.
  * This could indicate that an attempt was made to load an invalid or
  * disallowed resource, object, or data into a system.

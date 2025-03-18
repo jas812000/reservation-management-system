@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.exceptions;
 
-/**
+/*
  * Throws NullAccount_Exception if an account is missing or not found.
  *    - User tries to perform an action on a non-existent account. ("Account not found.")
  *    - User tries to create a directory or save data for a missing account. ("Cannot proceed with a missing account.")

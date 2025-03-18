@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.exceptions;
 
-/**
+/*
  * Throws IllegalState_Exception if the reservation is already complete, cancelled or for a past date.
  *      - user tries to modify/change a completed reservation. ("Cannot modify a completed reservation.")
  *      - user tries to modify/change a cancelled reservation. ("Cannot modify a cancelled reservation.")

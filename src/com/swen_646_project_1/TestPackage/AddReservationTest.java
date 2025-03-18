@@ -33,10 +33,11 @@ public class AddReservationTest {
     public static void testAddReservation() {
         // Instantiate scanner and manager objects
         Scanner scanner = new Scanner(System.in);
-        Manager manager = new Manager();
+        Manager manager = TestManager.getManager(); // Ensure using shared instance
+
 
         System.out.print("\nEnter account number for reservation: ");
-        String accountNumber = scanner.nextLine().trim().toUpperCase();
+        String accountNumber = scanner.nextLine().trim();
 
         // Retrieve the account from the manager
         Account account = manager.getAccount(accountNumber);

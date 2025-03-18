@@ -1,5 +1,6 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
+
 /*
  * Imports the following:
  * - Address class to handle lodging and mailing addresses in reservations
@@ -8,11 +9,12 @@ package com.swen_646_project_1.reservation;
  * - Time utility for handling reservation start dates
  */
 import com.swen_646_project_1.Address;
+import com.swen_646_project_1.Manager;
 import com.swen_646_project_1.exceptions.IllegalOperation_Exception;
 import com.swen_646_project_1.exceptions.IllegalParameter_Exception;
 import com.swen_646_project_1.enums.ReservationStatus;
+import com.swen_646_project_1.exceptions.IllegalSave_Exception;
 import com.swen_646_project_1.exceptions.IllegalState_Exception;
-
 import java.time.LocalDate;
 
 /**
@@ -220,12 +222,36 @@ public abstract class Reservation {
     } // End getNumNights method
 
     /**
+     * Updates the number of nights for the reservation.
+     * Ensures the value is positive.
+     * @param numNights New number of nights.
+     */
+    public void setNumNights(int numNights) {
+        if (numNights <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of nights must be positive.");
+        } // End if statement
+        this.numNights = numNights;
+    } // End setNumNights method
+
+    /**
      * Getter that retrieves the number of beds available.
      * @return The number of beds as an integer.
      */
     public int getNumBeds() {
         return this.numBeds;
     } // End getNumBeds method
+
+    /**
+     * Updates the number of beds in the lodging.
+     * Ensures the value is positive.
+     * @param numBeds New number of beds.
+     */
+    public void setNumBeds(int numBeds) {
+        if (numBeds <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of beds must be positive.");
+        } // End if statement
+        this.numBeds = numBeds;
+    } // End setNumBeds method
 
     /**
      * Getter that retrieves the number of bedrooms in the lodging.
@@ -236,6 +262,18 @@ public abstract class Reservation {
     } // End getNumBedrooms method
 
     /**
+     * Updates the number of bedrooms in the lodging.
+     * Ensures the value is positive.
+     * @param numBedrooms New number of bedrooms.
+     */
+    public void setNumBedrooms(int numBedrooms) {
+        if (numBedrooms <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of bedrooms must be positive.");
+        } // End if statement
+        this.numBedrooms = numBedrooms;
+    } // End setNumBedrooms method
+
+    /**
      * Getter that retrieves the number of bathrooms in the lodging.
      * @return The number of bathrooms as an integer.
      */
@@ -244,12 +282,36 @@ public abstract class Reservation {
     } // End getNumBathrooms method
 
     /**
+     * Updates the number of bathrooms in the lodging.
+     * Ensures the value is positive.
+     * @param numBathrooms New number of bathrooms.
+     */
+    public void setNumBathrooms(int numBathrooms) {
+        if (numBathrooms <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of bathrooms must be positive.");
+        } // End if statement
+        this.numBathrooms = numBathrooms;
+    } // End setNumBathrooms method
+
+    /**
      * Getter that retrieves the size of the lodging in square feet.
      * @return The lodging size in square feet as an integer.
      */
     public int getLodgingSizeSqFt() {
         return this.lodgingSizeSqFt;
     } // End getLodgingSizeSqFt method
+
+    /**
+     * Updates the square footage of the lodging.
+     * Ensures the value is positive.
+     * @param sizeSqFt New size in square feet.
+     */
+    public void setLodgingSizeSqFt(int sizeSqFt) {
+        if (sizeSqFt <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging size must be positive.");
+        } // End if statement
+        this.lodgingSizeSqFt = sizeSqFt;
+    } // End setLodgingSizeSqFt method
 
     /**
      * Getter that retrieves the price per night.
@@ -271,7 +333,7 @@ public abstract class Reservation {
         } else {
             throw new IllegalParameter_Exception(this.accountNumber,
                     this.reservationNumber, "Price cannot be negative.");
-        }
+        }  // End if-else statements
     } // End setLodgingPrice method
 
     /**
@@ -292,6 +354,14 @@ public abstract class Reservation {
 
         this.status = ReservationStatus.COMPLETED;
         System.out.println("Reservation " + reservationNumber + " has been completed.");
+
+        // ✅ Ensure the updated status is saved
+        try {
+            Manager.saveReservationToFile(this);
+            System.out.println("🔍 Reservation status saved: COMPLETED");
+        } catch (IllegalSave_Exception e) {
+            System.out.println("Error saving updated reservation: " + e.getMessage());
+        } // End try-catch statements
 
     } // End completeReservation method
 
@@ -315,6 +385,14 @@ public abstract class Reservation {
         this.lodgingPrice = 0.00; // Set price to zero after cancellation
 
         System.out.println("Reservation " + reservationNumber + " has been cancelled.");
+
+        // ✅ Ensure the updated status is saved
+        try {
+            Manager.saveReservationToFile(this);
+            System.out.println("🔍 Reservation status saved: CANCELLED");
+        } catch (IllegalSave_Exception e) {
+            System.out.println("Error saving updated reservation: " + e.getMessage());
+        } // End try-catch statements
 
     } // End cancelReservation method
 
@@ -346,6 +424,16 @@ public abstract class Reservation {
         this.lodgingPrice = newReservationData.lodgingPrice;
 
         System.out.println("Reservation " + reservationNumber + " updated successfully.");
+
+
+        // ✅ Save the updated reservation
+        try {
+            Manager.saveReservationToFile(this);
+            System.out.println("🔍 Reservation details saved.");
+        } catch (IllegalSave_Exception e) {
+            System.out.println("Error saving updated reservation: " + e.getMessage());
+        } // End try-catch statements
+
     } // End updateReservation method
 
     /**

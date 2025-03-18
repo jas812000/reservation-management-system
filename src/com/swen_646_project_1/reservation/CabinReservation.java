@@ -1,5 +1,6 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.reservation;
+
 /*
  * Imports the following:
  * - Time utility for handling reservation start dates
@@ -154,7 +155,7 @@ public class CabinReservation extends Reservation {
         String[] parts = data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
         // Ensure correct number of fields
-        if (parts.length < 14) {
+        if (parts.length < 15) {
             throw new IllegalLoad_Exception("CabinReservation Data", "N/A",
                     "Invalid data format. Found: " + parts.length);
         } // End if statement
@@ -165,8 +166,11 @@ public class CabinReservation extends Reservation {
         // Extract lodging mailing address components
         Address lodgingMailingAddress = getLodgingMailingAddress(parts);
 
-        // Ensure indexes are correct
-        return new CabinReservation(
+        // Parse reservation status correctly
+        ReservationStatus status = ReservationStatus.valueOf(parts[12].trim());
+
+        // Create CabinReservation object
+        CabinReservation reservation = new CabinReservation(
                 parts[1], // reservationNumber
                 parts[2], // accountNumber
                 lodgingPhysicalAddress,
@@ -181,6 +185,10 @@ public class CabinReservation extends Reservation {
                 Boolean.parseBoolean(parts[13]), // fullKitchenAvailable
                 Boolean.parseBoolean(parts[14]) // loftAvailable
         );
+        // ✅ Set the parsed status
+        reservation.setStatus(status);
+
+        return reservation;
     } // End fromString method
 
     /**

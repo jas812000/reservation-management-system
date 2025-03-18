@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.exceptions;
 
-/**
+/*
  * Exception thrown when an error occurs while saving data to a file.
  * - Occurs when account or reservation data cannot be written to a file.
  * - The generated exception message should indicate what failed (account file vs reservation file)

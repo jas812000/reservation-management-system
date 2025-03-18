@@ -87,7 +87,10 @@ public class TestHelper {
         } // End for loop
 
         System.out.print("\nEnter reservation number: ");
-        return scanner.nextLine().trim().toUpperCase();
+        String userInput = scanner.nextLine().trim();
+
+        // Normalize the reservation number
+        return normalizeReservationNumber(userInput);
     }  // End selectReservation method
 
     /**
@@ -99,31 +102,6 @@ public class TestHelper {
     public static void handleException(Exception e, String action) {
         System.out.println("Error during " + action + ": " + e.getMessage());
     } // End handleException method
-
-
-
-
-
-
-
-
-    /**
-     * Provides a shared instance of the `Manager` class.
-     * @return The shared `Manager` instance.
-     */
-   public static Manager getManager() {
-        return manager;
-    } // End getManager method
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Prompts the user to enter an address and returns an Address object.
@@ -167,14 +145,25 @@ public class TestHelper {
      * @return The associated Account object, or null if not found.
      */
     public static Account getAccountFromReservation(String reservationNumber) {
+
+
+        System.out.println("📋 All accounts in memory before searching for reservation: " + manager.getAccounts());
+
+
+
+        if (reservationNumber == null) return null;
+
+        String formattedReservationNumber = normalizeReservationNumber(reservationNumber); // Normalize user input
+
+
         for (Account acc : manager.getAccounts()) {  // Loop through all accounts
             for (Reservation res : acc.getAllReservations()) {
-                if (res.getReservationNumber().equals(reservationNumber)) {
+                if (res.getReservationNumber().equals(formattedReservationNumber)) {
                     return acc; // Return the matched account
                 } // End if statement
             }  // End for loop
         }  // End for loop
-        System.out.println("No account found for reservation: " + reservationNumber);
+        System.out.println("No account found for reservation: " + formattedReservationNumber);
         return null; // Return null if no matching account is found
     } // End getAccountFromReservation method
 
@@ -198,6 +187,17 @@ public class TestHelper {
      * @return A valid reservation number, or `null` if no valid selection is made.
      */
     public static String getValidatedReservation() {
+
+
+
+
+        System.out.println("📋 All accounts in memory before selection: " + manager.getAccounts());
+
+
+
+
+
+
         // Get a valid account number first or Exit if no valid account is selected
         String accountNumber = getValidatedAccount();
         if (accountNumber == null) return null;
@@ -209,8 +209,9 @@ public class TestHelper {
             return null;
         } // End if statement
 
-        // Get a valid reservation number from the selected account or `null`
-        return selectReservation(account);
+        // Get a reservation number, normalize it before returning
+        String reservationNumber = selectReservation(account);
+        return reservationNumber == null ? null : normalizeReservationNumber(reservationNumber);
     } // End getValidatedReservation method
 
     /**
@@ -220,5 +221,21 @@ public class TestHelper {
     public static Scanner getScanner() {
         return scanner;
     } // End getScanner method
+
+    /**
+     * Ensures the reservation number follows the correct format:
+     * - The "res-" prefix is always lowercase.
+     * - The reservation type prefix (CAB, HOT, HOU) remains uppercase.
+     * - The numerical part remains unchanged.
+     *
+     * @param reservationNumber The original user input reservation number.
+     * @return Formatted reservation number in the correct format.
+     */
+    public static String normalizeReservationNumber(String reservationNumber) {
+        if (reservationNumber == null || reservationNumber.isEmpty()) return reservationNumber;
+
+        // Ensure "res-" is lowercase and the reservation type is uppercase
+        return "res-" + reservationNumber.substring(4, 7).toUpperCase() + reservationNumber.substring(7);
+    } // End normalizeReservationNumber methog
 
 } // End TestHelper class

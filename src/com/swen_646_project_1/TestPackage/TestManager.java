@@ -2,8 +2,8 @@
 package com.swen_646_project_1.TestPackage;
 
 /*
-  Imports the `Manager` class for managing accounts and reservations.
-  - `Manager`: Provides system-wide management of accounts and reservations.
+ * Imports the `Manager` class for managing accounts and reservations.
+ * - `Manager`: Provides system-wide management of accounts and reservations.
  */
 import com.swen_646_project_1.Manager;
 

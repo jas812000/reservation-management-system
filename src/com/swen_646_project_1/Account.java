@@ -1,5 +1,6 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1;
+
 /*
  * Imports the following:
  * - Reservation class to allow the Manager class to work with different types of reservations.
@@ -11,6 +12,8 @@ import com.swen_646_project_1.exceptions.*;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.enums.ReservationStatus;
 import java.util.*;
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 /**
  * Represents a user account in the system.
@@ -117,18 +120,61 @@ public class Account {
         return this.accountNumber;
     } // End getAccountNumber method
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Sets the account number for this account.
      * Only used when assigning a generated account number.
      * @param accountNumber The new account number.
      */
     public void setAccountNumber(String accountNumber) {
-        if (this.accountNumber == null || this.accountNumber.isEmpty()) {
-            this.accountNumber = accountNumber;
-        } else {
+        //if (this.accountNumber == null || this.accountNumber.isEmpty()) {
+            //this.accountNumber = accountNumber;
+        //} else {
+            //throw new IllegalStateException("Account number cannot be changed once assigned.");
+        //} // End if-else statements
+
+
+
+        if (this.accountNumber != null) {
             throw new IllegalStateException("Account number cannot be changed once assigned.");
-        } // End if-else statements
+        }// End if statement
+        this.accountNumber = accountNumber;
     } // End setAccountNumber method
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Getter that retrieves the list of reservation numbers.
@@ -152,6 +198,7 @@ public class Account {
      * @return The Reservation object if found, otherwise null.
      */
     public Reservation getReservation(String reservationNumber) {
+        if (reservationNumber == null) return null;
         return reservations.get(reservationNumber);
     } // End getReservation method
 
@@ -250,7 +297,7 @@ public class Account {
 
         // Checks if the reservation already exists
         if (reservations.containsKey(reservation.getReservationNumber())) {
-            System.out.println("Skipping duplicate reservation: " + reservation.getReservationNumber());
+            System.out.println("\n\t\tSkipping duplicate reservation: " + reservation.getReservationNumber());
             return; // Exits if the reservation already exists
         } // End if statement
 
@@ -260,7 +307,7 @@ public class Account {
         // Save the reservation to a file only if it is new
         try {
             Manager.saveReservationToFile(reservation);
-            System.out.println("Reservation " + reservation.getReservationNumber() + " successfully saved to file. \n");
+            System.out.println("Reservation " + reservation.getReservationNumber() + " successfully saved to file.");
         } catch (IllegalSave_Exception e) {
             System.out.println("Error saving reservation: " + e.getMessage());
         } // End try-catch statements
@@ -305,22 +352,75 @@ public class Account {
                     "Cannot update a completed or cancelled reservation.");
         } // End if statement
 
-        // Check if the new reservation is actually different before updating
-        if (!currentReservation.equals(updatedReservation)) {
-            reservations.put(reservationNumber, updatedReservation);
-            System.out.println("Updated reservation: " + reservationNumber);
 
-            // Save only if changes were made
-            try {
-                Manager.saveReservationToFile(updatedReservation);
-                System.out.println("Updated reservation saved to file: " + reservationNumber);
-            } catch (IllegalSave_Exception e) {
-                System.out.println("Error saving updated reservation: " + e.getMessage());
-            }
-        } else {
+
+
+        // Check if the new reservation is actually different before updating
+        if (!areReservationsDifferent(currentReservation, updatedReservation)) {
             System.out.println("No changes detected for reservation: " + reservationNumber);
-        }
+            return;
+        } // End if statement
+
+        // Apply the updates
+        reservations.put(reservationNumber, updatedReservation);
+        System.out.println("Updated reservation: " + reservationNumber);
+
+        // Save only if changes were made
+        try {
+            Manager.saveReservationToFile(updatedReservation);
+            System.out.println("Updated reservation saved to file: " + reservationNumber);
+        } catch (IllegalSave_Exception e) {
+            System.out.println("Error saving updated reservation: " + e.getMessage());
+        } // End try-catch statements
+
     } // End updateReservation method
+
+
+
+
+
+
+
+
+    /**
+     * Compares two reservations field by field using reflection.
+     * Ensures that updates are performed only if there are actual changes.
+     * @param res1 The first reservation object (current).
+     * @param res2 The second reservation object (updated).
+     * @return True if there are differences, false otherwise.
+     */
+    private boolean areReservationsDifferent(Reservation res1, Reservation res2) {
+        if (res1 == null || res2 == null) return true; // Handle null cases
+
+        try {
+            Class<?> clazz = res1.getClass(); // Get runtime class (CabinReservation, HotelReservation, etc.)
+            while (clazz != null) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    field.setAccessible(true);
+                    Object value1 = field.get(res1);
+                    Object value2 = field.get(res2);
+                    if (!Objects.equals(value1, value2)) {
+                        System.out.println("🔄 Change detected in field: " + field.getName() +
+                                " | Old: " + value1 + " | New: " + value2);
+                        return true;
+                    } // End if statement
+                } // End for loop
+                clazz = clazz.getSuperclass(); // Move up the inheritance chain
+            } // End while loop
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Error comparing reservations: " + e.getMessage());
+        } // End try-catch statements
+
+        return false; // No differences found
+    } // End areReservationsDifferent method
+
+
+
+
+
+
+
+
 
     /**
      * Cancels an existing reservation for this account.
@@ -339,6 +439,8 @@ public class Account {
         // Retrieve the reservation
         Reservation reservation = reservations.get(reservationNumber);
 
+
+
         // Checks if the reservation exists
         if (reservation == null) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Reservation does not exist.");
@@ -347,7 +449,7 @@ public class Account {
         // Ensure reservation is not already cancelled or completed
         if (reservation.getStatus() == ReservationStatus.CANCELLED ||
                 reservation.getStatus() == ReservationStatus.COMPLETED) {
-            throw new IllegalState_Exception(this.accountNumber, reservationNumber,
+            throw new IllegalState_Exception(accountNumber, reservationNumber,
                     "Cannot cancel a completed or already cancelled reservation.");
         } // End if statement
 
@@ -355,6 +457,14 @@ public class Account {
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservation.setLodgingPrice(0.00);
         System.out.println("Reservation " + reservationNumber + " has been cancelled.");
+
+        // Replace the updated reservation in the account's reservation map
+        reservations.put(reservationNumber, reservation);
+
+        // Save updated reservation to file
+        Manager.saveReservationToFile(reservation);
+
+        System.out.println("✅ Reservation status updated: " + reservation.getStatus());
 
     } // End cancelReservation method
 

@@ -1,7 +1,7 @@
 // Declares the package name for the project, grouping related classes together.
 package com.swen_646_project_1.exceptions;
 
-/**
+/*
  * Throws IllegalParameter_Exception if there are invalid parameters:
  *      - null values when a parameter is required
  *      - newEmail is null or does not contain '@'.

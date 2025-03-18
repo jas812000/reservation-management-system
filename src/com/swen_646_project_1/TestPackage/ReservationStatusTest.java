@@ -6,6 +6,8 @@ package com.swen_646_project_1.TestPackage;
  * - `Account`: Required to retrieve and manage reservations associated with an account.
  */
 import com.swen_646_project_1.Account;
+import com.swen_646_project_1.Manager;
+import com.swen_646_project_1.reservation.Reservation;
 
 /**
  * Handles cancellation and completion of reservations in a single class.
@@ -17,6 +19,8 @@ import com.swen_646_project_1.Account;
 public class ReservationStatusTest {
     /**
      * Tests modifying a reservation's status (Cancel or Complete).
+     * - Cancels a reservation if it's in the future.
+     * - Completes a reservation if it meets the conditions.
      * - Prompts the user to select an account and a reservation.
      * - Based on the provided operation, attempts to cancel or complete the reservation.
      * - Handles any exceptions if the modification is invalid.
@@ -31,14 +35,27 @@ public class ReservationStatusTest {
         Account account = TestHelper.getAccountFromReservation(reservationNumber);
         if (account == null) return; // Exit if account is not found
 
+        // Retrieve the actual reservation
+        Reservation reservation = account.getReservation(reservationNumber);
+        if (reservation == null) {
+            System.out.println("Error: Reservation not found.");
+            return;
+        } // End if statement
+
+
         try {
             if (operation.equalsIgnoreCase("cancel")) {
-                account.cancelReservation(reservationNumber);
-                System.out.println("Reservation cancelled successfully.");
+                reservation.cancelReservation();
+                System.out.println("     ***** Reservation cancelled successfully. *****     ");
             } else if (operation.equalsIgnoreCase("complete")) {
-                account.completeReservation(reservationNumber);
-                System.out.println("Reservation completed successfully.");
+                reservation.completeReservation();
+                System.out.println("     ***** Reservation completed successfully. *****     ");
             } // End if-else statements
+
+            // ✅ Save the updated reservation status
+            Manager.saveReservationToFile(reservation);
+            System.out.println("✅ Reservation status updated: " + reservation.getStatus());
+
         } catch (Exception e) {
             TestHelper.handleException(e, operation + " reservation");
         } // End try-catch statements

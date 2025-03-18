@@ -46,8 +46,8 @@ public class ReservationTest {
 
         // Cabin Reservation
         cabinReservation = new CabinReservation(
-                "res-CAB10000000",
-                "A100000000",
+                "res-CAB90000000",
+                "A900000000",
                 physicalAddress,
                 mailingAddress,
                 LocalDate.of(2025, 7, 10),
@@ -63,8 +63,8 @@ public class ReservationTest {
 
         // Hotel Reservation
         hotelReservation = new HotelReservation(
-                "res-HOT10000000",
-                "A100000001",
+                "res-HOT90000000",
+                "A900000001",
                 physicalAddress,
                 physicalAddress,
                 LocalDate.of(2025, 6, 15),
@@ -79,8 +79,8 @@ public class ReservationTest {
 
         // House Reservation
         houseReservation = new HouseReservation(
-                "res-HOU10000000",
-                "A100000002",
+                "res-HOU90000000",
+                "A900000002",
                 physicalAddress,
                 physicalAddress,
                 LocalDate.of(2025, 8, 1),
@@ -101,9 +101,9 @@ public class ReservationTest {
      */
     @Test
     public void testCabinGetReservationNumber() {
-        System.out.println("Cabin Reservation Number Entered: res-CAB10000000");
+        System.out.println("Cabin Reservation Number Entered: res-CAB90000000");
         System.out.println("Cabin Reservation Number Retrieved: " + cabinReservation.getReservationNumber());
-        assertEquals("res-CAB10000000", cabinReservation.getReservationNumber());
+        assertEquals("res-CAB90000000", cabinReservation.getReservationNumber());
     } // End testCabinGetReservationNumber method
 
     /**
@@ -111,9 +111,9 @@ public class ReservationTest {
      */
     @Test
     public void testCabinGetAccountNumber() {
-        System.out.println("Cabin Account Number Entered: A100000000");
+        System.out.println("Cabin Account Number Entered: A900000000");
         System.out.println("Cabin Account Number Retrieved: " + cabinReservation.getAccountNumber());
-        assertEquals("A100000000", cabinReservation.getAccountNumber());
+        assertEquals("A900000000", cabinReservation.getAccountNumber());
     } // End testCabinGetAccountNumber method
 
     /**
@@ -266,9 +266,9 @@ public class ReservationTest {
      */
     @Test
     public void testHotelGetReservationNumber() {
-        System.out.println("Hotel Reservation Number Entered: res-HOT10000000");
+        System.out.println("Hotel Reservation Number Entered: res-HOT90000000");
         System.out.println("Hotel Reservation Number Retrieved: " + hotelReservation.getReservationNumber());
-        assertEquals("res-HOT10000000", hotelReservation.getReservationNumber());
+        assertEquals("res-HOT90000000", hotelReservation.getReservationNumber());
     } // End testHotelGetReservationNumber method
 
     /**
@@ -276,9 +276,9 @@ public class ReservationTest {
      */
     @Test
     public void testHotelGetAccountNumber() {
-        System.out.println("Hotel Account Number Entered: A100000001");
+        System.out.println("Hotel Account Number Entered: A900000001");
         System.out.println("Hotel Account Number Retrieved: " + hotelReservation.getAccountNumber());
-        assertEquals("A100000001", hotelReservation.getAccountNumber());
+        assertEquals("A900000001", hotelReservation.getAccountNumber());
     } // End testHotelGetAccountNumber method
 
     /**
@@ -382,9 +382,9 @@ public class ReservationTest {
      */
     @Test
     public void testHouseGetReservationNumber() {
-        System.out.println("House Reservation Number Entered: res-HOU10000000");
+        System.out.println("House Reservation Number Entered: res-HOU90000000");
         System.out.println("House Reservation Number Retrieved: " + houseReservation.getReservationNumber());
-        assertEquals("res-HOU10000000", houseReservation.getReservationNumber());
+        assertEquals("res-HOU90000000", houseReservation.getReservationNumber());
     } // End testHouseGetReservationNumber method
 
     /**
@@ -392,9 +392,9 @@ public class ReservationTest {
      */
     @Test
     public void testHouseGetAccountNumber() {
-        System.out.println("House Account Number Entered: A100000002");
+        System.out.println("House Account Number Entered: A900000002");
         System.out.println("House Account Number Retrieved: " + houseReservation.getAccountNumber());
-        assertEquals("A100000002", houseReservation.getAccountNumber());
+        assertEquals("A900000002", houseReservation.getAccountNumber());
     } // End testHouseGetAccountNumber method
 
     /**
