@@ -55,6 +55,7 @@ public class CabinReservation extends Reservation {
 
     } // End CabinReservation constructor
 
+
     /**
      * Retrieves whether a full kitchen is available in the cabin.
      * @return True if the cabin has a full kitchen, otherwise false.
@@ -62,6 +63,7 @@ public class CabinReservation extends Reservation {
     public boolean isFullKitchenAvailable() {
         return fullKitchenAvailable;
     } // End isFullKitchenAvailable method
+
 
     /**
      * Retrieves whether a loft is available in the cabin.
@@ -71,6 +73,7 @@ public class CabinReservation extends Reservation {
         return loftAvailable;
     } // End isLoftAvailable method
 
+
     /**
      * Updates the availability of a full kitchen in the cabin.
      * @param fullKitchenAvailable True if the cabin has a full kitchen, false otherwise.
@@ -79,6 +82,7 @@ public class CabinReservation extends Reservation {
         this.fullKitchenAvailable = fullKitchenAvailable;
     } // End setFullKitchenAvailable method
 
+
     /**
      * Updates the availability of a loft in the cabin.
      * @param loftAvailable True if the cabin has a loft, false otherwise.
@@ -86,6 +90,7 @@ public class CabinReservation extends Reservation {
     public void setLoftAvailable(boolean loftAvailable) {
         this.loftAvailable = loftAvailable;
     } // End setLoftAvailable method
+
 
     /**
      * Calculates the price per night for the cabin.
@@ -117,6 +122,7 @@ public class CabinReservation extends Reservation {
 
     } // End calculatePricePerNight method
 
+
     /**
      * Returns a string representation of the cabin reservation details.
      * @return A formatted string containing reservation details
@@ -139,6 +145,7 @@ public class CabinReservation extends Reservation {
                 startDate, numNights, numBeds, numBedrooms, numBathrooms,
                 lodgingSizeSqFt, lodgingPrice, status, fullKitchenAvailable, loftAvailable);
     } // End toString method
+
 
     /**
      * Creates a CabinReservation object from a formatted string.
@@ -185,11 +192,12 @@ public class CabinReservation extends Reservation {
                 Boolean.parseBoolean(parts[13]), // fullKitchenAvailable
                 Boolean.parseBoolean(parts[14]) // loftAvailable
         );
-        // ✅ Set the parsed status
+        // Set the parsed status
         reservation.setStatus(status);
 
         return reservation;
     } // End fromString method
+
 
     /**
      * Parses and retrieves the lodging mailing address from the given data parts.
@@ -217,6 +225,7 @@ public class CabinReservation extends Reservation {
         // Return null if mailing address is "N/A"
         return null;
     } // End getlodgingMailingAddress method
+
 
     /**
      * Parses and retrieves the lodging physical address from the given data parts.

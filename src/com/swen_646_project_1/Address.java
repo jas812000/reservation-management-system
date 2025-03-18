@@ -14,6 +14,7 @@ public class Address {
     private String state;
     private int zipCode;
 
+
     /**
      * Constructor to initialize an Address object.
      * @param street The street name and number.
@@ -28,6 +29,7 @@ public class Address {
         this.zipCode = zipCode;
     } // End Constructor
 
+
     /**
      * Getters that retrieve the street, city, state and zip code.
      */
@@ -35,6 +37,7 @@ public class Address {
     public String getCity() { return city; } // End getCity method
     public String getState() { return state; } // End getState method
     public int getZipCode() { return zipCode; } // End getZipCode method
+
 
     /**
      * Setters that update the street, city, state, and zip code.
@@ -47,6 +50,7 @@ public class Address {
         this.state = state;
         this.zipCode = zipCode;
     } // End setAddress method
+
 
     /**
      * Validates address parameters to ensure they are properly formatted.
@@ -66,6 +70,7 @@ public class Address {
             throw new IllegalParameter_Exception("N/A", "N/A", "Zip code must be a 5-digit number.");
         } // End if statement
     } // End validateAddress method
+
 
     /**
      * Returns a string representation of the address.

@@ -118,6 +118,7 @@ public abstract class Reservation {
 
     } // End Reservation constructor
 
+
     /**
      * Getter that retrieves the unique reservation number.
      * @return The reservation number as a String.
@@ -126,12 +127,14 @@ public abstract class Reservation {
         return this.reservationNumber;
     } // End getReservationNumber method
 
+
     /**
      * Getter that retrieves the account number associated with this reservation.
      */
     public String getAccountNumber() {
         return this.accountNumber;
     } // End getAccountNumber method
+
 
     /**
      * Setter that updates the account number if the provided value is not null or empty.
@@ -143,6 +146,7 @@ public abstract class Reservation {
 
     } // End setAccountNumber method
 
+
     /**
      * Getter that retrieves the reservation status.
      * @return The current status of the reservation.
@@ -150,6 +154,7 @@ public abstract class Reservation {
     public ReservationStatus getStatus() {
         return this.status;
     } // End getStatus method
+
 
     /**
      * Setter that updates the reservation status if the provided value is not null or empty.
@@ -161,6 +166,7 @@ public abstract class Reservation {
         this.status = status;
     } // End setStatus method
 
+
     /**
      * Getter that retrieves the lodging physical address.
      * @return The lodging physical address as a String.
@@ -168,6 +174,7 @@ public abstract class Reservation {
     public Address getLodgingPhysicalAddress() {
         return this.lodgingPhysicalAddress;
     } // End getLodgingPhysicalAddress method
+
 
     /**
      * Setter that updates the lodging physical address if the provided value is not null or empty.
@@ -180,6 +187,7 @@ public abstract class Reservation {
         }
     } // End setLodgingPhysicalAddress method
 
+
     /**
      * Getter that retrieves the lodging mailing address.
      * @return The lodging mailing address as a String.
@@ -188,6 +196,7 @@ public abstract class Reservation {
         return this.lodgingMailingAddress;
     } // End getLodgingMailingAddress method
 
+
     /**
      * Setter that updates the lodging mailing address.
      */
@@ -195,11 +204,13 @@ public abstract class Reservation {
         this.lodgingMailingAddress = lodgingMailingAddress;
     } // End setLodgingMailingAddress method
 
+
     /**
      * Getter that retrieves the start date of the reservation.
      * @return The start date as a LocalDate.
      */
     public LocalDate getStartDate() {return this.startDate; } // End getStartDate method
+
 
     /**
      * Setter that updates the start date if the provided value is not null or empty.
@@ -213,6 +224,7 @@ public abstract class Reservation {
         }
     } // End setStartDate method
 
+
     /**
      * Getter that retrieves the number of nights for the stay.
      * @return The number of nights as an integer.
@@ -220,6 +232,7 @@ public abstract class Reservation {
     public int getNumNights() {
         return this.numNights;
     } // End getNumNights method
+
 
     /**
      * Updates the number of nights for the reservation.
@@ -233,6 +246,7 @@ public abstract class Reservation {
         this.numNights = numNights;
     } // End setNumNights method
 
+
     /**
      * Getter that retrieves the number of beds available.
      * @return The number of beds as an integer.
@@ -240,6 +254,7 @@ public abstract class Reservation {
     public int getNumBeds() {
         return this.numBeds;
     } // End getNumBeds method
+
 
     /**
      * Updates the number of beds in the lodging.
@@ -253,6 +268,7 @@ public abstract class Reservation {
         this.numBeds = numBeds;
     } // End setNumBeds method
 
+
     /**
      * Getter that retrieves the number of bedrooms in the lodging.
      * @return The number of bedrooms as an integer.
@@ -260,6 +276,7 @@ public abstract class Reservation {
     public int getNumBedrooms() {
         return this.numBedrooms;
     } // End getNumBedrooms method
+
 
     /**
      * Updates the number of bedrooms in the lodging.
@@ -273,6 +290,7 @@ public abstract class Reservation {
         this.numBedrooms = numBedrooms;
     } // End setNumBedrooms method
 
+
     /**
      * Getter that retrieves the number of bathrooms in the lodging.
      * @return The number of bathrooms as an integer.
@@ -280,6 +298,7 @@ public abstract class Reservation {
     public int getNumBathrooms() {
         return this.numBathrooms;
     } // End getNumBathrooms method
+
 
     /**
      * Updates the number of bathrooms in the lodging.
@@ -293,6 +312,7 @@ public abstract class Reservation {
         this.numBathrooms = numBathrooms;
     } // End setNumBathrooms method
 
+
     /**
      * Getter that retrieves the size of the lodging in square feet.
      * @return The lodging size in square feet as an integer.
@@ -300,6 +320,7 @@ public abstract class Reservation {
     public int getLodgingSizeSqFt() {
         return this.lodgingSizeSqFt;
     } // End getLodgingSizeSqFt method
+
 
     /**
      * Updates the square footage of the lodging.
@@ -313,6 +334,7 @@ public abstract class Reservation {
         this.lodgingSizeSqFt = sizeSqFt;
     } // End setLodgingSizeSqFt method
 
+
     /**
      * Getter that retrieves the price per night.
      * @return The price per night as a double.
@@ -320,6 +342,7 @@ public abstract class Reservation {
     public double getLodgingPrice() {
         return this.lodgingPrice;
     } // End getLodgingPrice method
+
 
     /**
      * Setter that updates the price per night for the lodging.
@@ -335,6 +358,7 @@ public abstract class Reservation {
                     this.reservationNumber, "Price cannot be negative.");
         }  // End if-else statements
     } // End setLodgingPrice method
+
 
     /**
      * Marks the reservation as completed.
@@ -355,7 +379,7 @@ public abstract class Reservation {
         this.status = ReservationStatus.COMPLETED;
         System.out.println("Reservation " + reservationNumber + " has been completed.");
 
-        // ✅ Ensure the updated status is saved
+        // Ensure the updated status is saved
         try {
             Manager.saveReservationToFile(this);
             System.out.println("🔍 Reservation status saved: COMPLETED");
@@ -364,6 +388,7 @@ public abstract class Reservation {
         } // End try-catch statements
 
     } // End completeReservation method
+
 
     /**
      * Cancels the reservation.
@@ -383,18 +408,16 @@ public abstract class Reservation {
 
         this.status = ReservationStatus.CANCELLED;
         this.lodgingPrice = 0.00; // Set price to zero after cancellation
-
         System.out.println("Reservation " + reservationNumber + " has been cancelled.");
-
-        // ✅ Ensure the updated status is saved
+        // Ensure the updated status is saved
         try {
             Manager.saveReservationToFile(this);
-            System.out.println("🔍 Reservation status saved: CANCELLED");
         } catch (IllegalSave_Exception e) {
             System.out.println("Error saving updated reservation: " + e.getMessage());
         } // End try-catch statements
 
     } // End cancelReservation method
+
 
     /**
      * Updates reservation details with new data.
@@ -425,16 +448,15 @@ public abstract class Reservation {
 
         System.out.println("Reservation " + reservationNumber + " updated successfully.");
 
-
-        // ✅ Save the updated reservation
+        // Save the updated reservation
         try {
             Manager.saveReservationToFile(this);
-            System.out.println("🔍 Reservation details saved.");
         } catch (IllegalSave_Exception e) {
             System.out.println("Error saving updated reservation: " + e.getMessage());
         } // End try-catch statements
 
     } // End updateReservation method
+
 
     /**
      * Abstract method to calculate the price per night for the reservation.
@@ -443,6 +465,7 @@ public abstract class Reservation {
      */
     public abstract double calculatePricePerNight();
 
+
     /**
      * Abstract method that creates a string representation of the reservation details.
      * Must be implemented by subclasses.
@@ -450,6 +473,7 @@ public abstract class Reservation {
      */
     @Override
     public abstract String toString();
+
 
     /**
      * Method for creating a Reservation object from a string.
@@ -463,7 +487,5 @@ public abstract class Reservation {
          * fromString() must be implemented by subclasses.
          */
         throw new IllegalOperation_Exception("fromString", "N/A", "N/A", "Must be implemented by subclasses.");
-
     } // End fromString method
-
 } // end abstract class Reservation

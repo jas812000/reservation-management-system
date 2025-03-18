@@ -81,6 +81,7 @@ public class Account {
 
     } // End Account constructor
 
+
     /**
      * Creates an Account object from a comma-separated string.
      * The data string should contain at least 7 elements:
@@ -98,7 +99,6 @@ public class Account {
          */
         // Split the data string into parts based on commas
         String[] parts = data.split(",");
-
         // Validate the expected number of parts
         if (parts.length < 7){
             throw new IllegalLoad_Exception("Account", "N/A", "Data corrupted");
@@ -106,11 +106,10 @@ public class Account {
 
         // Parse address information from the extracted parts
         Address address = new Address(parts[1], parts[2], parts[3], Integer.parseInt(parts[4]));
-
         // Create and return a new Account object
         return new Account(parts[0], address, parts[5], parts[6]);
-
     } // End fromString method
+
 
     /**
      * Getter that retrieves the unique account number.
@@ -121,59 +120,17 @@ public class Account {
     } // End getAccountNumber method
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Sets the account number for this account.
      * Only used when assigning a generated account number.
      * @param accountNumber The new account number.
      */
     public void setAccountNumber(String accountNumber) {
-        //if (this.accountNumber == null || this.accountNumber.isEmpty()) {
-            //this.accountNumber = accountNumber;
-        //} else {
-            //throw new IllegalStateException("Account number cannot be changed once assigned.");
-        //} // End if-else statements
-
-
-
         if (this.accountNumber != null) {
             throw new IllegalStateException("Account number cannot be changed once assigned.");
         }// End if statement
         this.accountNumber = accountNumber;
     } // End setAccountNumber method
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -184,6 +141,7 @@ public class Account {
         return new ArrayList<>(this.reservations.keySet());
     } // End getReservationNumbers method
 
+
     /**
      * Retrieves a list of all reservations associated with this account.
      * @return A list of Reservation objects.
@@ -191,6 +149,7 @@ public class Account {
     public List<Reservation> getAllReservations() {
         return new ArrayList<>(this.reservations.values());
     } // End getAllReservations method
+
 
     /**
      * Retrieves a reservation based on its reservation number.
@@ -202,6 +161,7 @@ public class Account {
         return reservations.get(reservationNumber);
     } // End getReservation method
 
+
     /**
      * Getter for Address.
      * @return Address object
@@ -209,6 +169,7 @@ public class Account {
     public Address getAddress() {
         return this.address;
     } // End getAddress method
+
 
     /**
      * Updates the address using an Address object.
@@ -219,9 +180,10 @@ public class Account {
     public void updateAddress(Address newAddress) {
         if (newAddress == null) {
             throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Address cannot be null.");
-        }
+        } // End if statement
         this.address.setAddress(newAddress.getStreet(), newAddress.getCity(), newAddress.getState(), newAddress.getZipCode());
     } // End updateAddress method
+
 
     /**
      * Updates the address by setting new values directly.
@@ -235,6 +197,7 @@ public class Account {
         this.address.setAddress(street, city, state, zipCode);
     } // End updateAddress method
 
+
     /**
      * Retrieves the phone number associated with the account.
      * @return The phone number as a string.
@@ -242,6 +205,7 @@ public class Account {
     public String getPhoneNumber() {
         return this.phoneNumber;
     } // End getPhoneNumber method
+
 
     /**
      * Updates the phone number for the account.
@@ -252,9 +216,10 @@ public class Account {
     public void setPhoneNumber(String newPhoneNumber) {
         if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
             throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Phone number cannot be empty.");
-        }
+        } // End if statement
         this.phoneNumber = newPhoneNumber;
     } // End setPhoneNumber method
+
 
     /**
      * Retrieves the email address associated with the account.
@@ -263,6 +228,7 @@ public class Account {
     public String getEmail() {
         return this.email;
     } // End getEmail method
+
 
     /**
      * Updates the email address for the account.
@@ -273,9 +239,10 @@ public class Account {
     public void setEmail(String newEmail) {
         if (newEmail == null || !newEmail.contains("@")) {
             throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Invalid email address.");
-        }
+        }  // End if statement
         this.email = newEmail;
     } // End setEmail method
+
 
     /**
      * Adds a new reservation to the account if it does not already exist.
@@ -291,6 +258,7 @@ public class Account {
          * Store the reservation in the map.
          * Conditionally save to file only if required.
          */
+        // Checks if the reservation is not null
         if (reservation == null) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
         } // End if statement
@@ -313,6 +281,7 @@ public class Account {
         } // End try-catch statements
 
     } // End addReservation method
+
 
     /**
      * Updates an existing reservation with new data.
@@ -337,6 +306,7 @@ public class Account {
          *
          * Handle any errors that occur and print appropriate error messages.
          */
+        // Checks if the reservation exists
         if (!reservations.containsKey(reservationNumber)) {
             throw new IllegalOperation_Exception("Update Reservation", this.accountNumber, reservationNumber,
                     "Reservation does not exist.");
@@ -352,19 +322,13 @@ public class Account {
                     "Cannot update a completed or cancelled reservation.");
         } // End if statement
 
-
-
-
         // Check if the new reservation is actually different before updating
         if (!areReservationsDifferent(currentReservation, updatedReservation)) {
-            System.out.println("No changes detected for reservation: " + reservationNumber);
             return;
         } // End if statement
 
         // Apply the updates
         reservations.put(reservationNumber, updatedReservation);
-        System.out.println("Updated reservation: " + reservationNumber);
-
         // Save only if changes were made
         try {
             Manager.saveReservationToFile(updatedReservation);
@@ -376,12 +340,6 @@ public class Account {
     } // End updateReservation method
 
 
-
-
-
-
-
-
     /**
      * Compares two reservations field by field using reflection.
      * Ensures that updates are performed only if there are actual changes.
@@ -390,22 +348,30 @@ public class Account {
      * @return True if there are differences, false otherwise.
      */
     private boolean areReservationsDifferent(Reservation res1, Reservation res2) {
-        if (res1 == null || res2 == null) return true; // Handle null cases
+        // Handle null cases to avoid NullPointerException
+        if (res1 == null || res2 == null) return true;
 
         try {
-            Class<?> clazz = res1.getClass(); // Get runtime class (CabinReservation, HotelReservation, etc.)
+            // Get the runtime class of the first reservation, allowing comparison of
+            // specific subclass fields (CabinReservation, HotelReservation, HouseReservation)
+            Class<?> clazz = res1.getClass();
+            // Traverse the class hierarchy to check fields of the base class as well
             while (clazz != null) {
+                // Iterate through each declared field in the class
                 for (Field field : clazz.getDeclaredFields()) {
-                    field.setAccessible(true);
+                    field.setAccessible(true);  // Allow access to private fields
+
+                    // Retrieve values of the field from both reservation objects
                     Object value1 = field.get(res1);
                     Object value2 = field.get(res2);
+
+                    // Check if the field values are different
                     if (!Objects.equals(value1, value2)) {
-                        System.out.println("🔄 Change detected in field: " + field.getName() +
-                                " | Old: " + value1 + " | New: " + value2);
                         return true;
                     } // End if statement
                 } // End for loop
-                clazz = clazz.getSuperclass(); // Move up the inheritance chain
+                // Move to the superclass to check inherited fields
+                clazz = clazz.getSuperclass();
             } // End while loop
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Error comparing reservations: " + e.getMessage());
@@ -413,13 +379,6 @@ public class Account {
 
         return false; // No differences found
     } // End areReservationsDifferent method
-
-
-
-
-
-
-
 
 
     /**
@@ -438,8 +397,6 @@ public class Account {
 
         // Retrieve the reservation
         Reservation reservation = reservations.get(reservationNumber);
-
-
 
         // Checks if the reservation exists
         if (reservation == null) {
@@ -464,9 +421,8 @@ public class Account {
         // Save updated reservation to file
         Manager.saveReservationToFile(reservation);
 
-        System.out.println("✅ Reservation status updated: " + reservation.getStatus());
-
     } // End cancelReservation method
+
 
     /**
      * Completes an existing reservation.
@@ -511,6 +467,7 @@ public class Account {
         reservation.setStatus(ReservationStatus.COMPLETED);
         System.out.println("Reservation " + reservationNumber + " has been completed.");
     } // End completeReservation method
+
 
     /**
      * Returns a string representation of the account details.

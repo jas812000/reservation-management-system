@@ -63,6 +63,7 @@ public class HouseReservation extends Reservation {
 
     } // End HouseReservation constructor
 
+
     /**
      * Retrieves the number of floors in the reserved house.
      * @return The number of floors.
@@ -70,6 +71,7 @@ public class HouseReservation extends Reservation {
     public int getNumFloors() {
         return numFloors;
     } // End getNumFloors method
+
 
     /**
      * Updates the number of floors in the reserved house.
@@ -82,6 +84,7 @@ public class HouseReservation extends Reservation {
         } // End if statement
         this.numFloors = numFloors;
     } // End setNumFloors method
+
 
     /**
      * Calculates the price per night for the house reservation.
@@ -107,6 +110,7 @@ public class HouseReservation extends Reservation {
 
     } // End calculatePricePerNight method
 
+
     /**
      * Returns a string representation of the house reservation details.
      * @return A formatted string containing reservation details
@@ -127,6 +131,7 @@ public class HouseReservation extends Reservation {
                 startDate, numNights, numBeds, numBedrooms, numBathrooms,
                 lodgingSizeSqFt, lodgingPrice, status, numFloors);
     } // End toString method
+
 
     /**
      * Creates a HouseReservation object from a formatted string.
@@ -172,11 +177,12 @@ public class HouseReservation extends Reservation {
                 Double.parseDouble(parts[11]), // lodgingPrice
                 Integer.parseInt(parts[13]) // numFloors
         );
-        // ✅ Set the parsed status
+        // Set the parsed status
         reservation.setStatus(status);
 
         return reservation;
     } // End fromString method
+
 
     /**
      * Parses and retrieves the lodging mailing address from the given data parts.
@@ -204,6 +210,7 @@ public class HouseReservation extends Reservation {
         // Return null if mailing address is "N/A"
         return null;
     } // End getLodgingMailingAddress method
+
 
     /**
      * Parses and retrieves the lodging physical address from the given data parts.

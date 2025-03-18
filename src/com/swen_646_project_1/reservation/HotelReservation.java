@@ -52,6 +52,7 @@ public class HotelReservation extends Reservation {
 
     } // End HotelReservation constructor
 
+
     /**
      * Retrieves whether the hotel room has a kitchenette.
      * @return True if the hotel room has a kitchenette, otherwise false.
@@ -60,6 +61,7 @@ public class HotelReservation extends Reservation {
         return kitchenetteAvailable;
     } // end hasKitchenette method
 
+
     /**
      * Updates the kitchenette availability in the hotel room.
      * @param kitchenetteAvailable True if the room has a kitchenette, false otherwise.
@@ -67,6 +69,7 @@ public class HotelReservation extends Reservation {
     public void setKitchenetteAvailable(boolean kitchenetteAvailable) {
         this.kitchenetteAvailable = kitchenetteAvailable;
     } // End setKitchenetteAvailable method
+
 
     /**
      * Calculates the price per night for the hotel reservation.
@@ -97,6 +100,7 @@ public class HotelReservation extends Reservation {
 
     } // End calculatePricePerNight method
 
+
     /**
      * Returns a string representation of the hotel reservation details.
      * @return A formatted string containing reservation details
@@ -119,6 +123,7 @@ public class HotelReservation extends Reservation {
                 startDate, numNights, numBeds, numBedrooms, numBathrooms,
                 lodgingSizeSqFt, lodgingPrice, status, kitchenetteAvailable);
     } // End toString method
+
 
     /**
      * Creates a HotelReservation object from a formatted string.
@@ -165,11 +170,12 @@ public class HotelReservation extends Reservation {
                 Boolean.parseBoolean(parts[13]) // kitchenetteAvailable
         );
 
-        // ✅ Set the parsed status
+        // Set the parsed status
         reservation.setStatus(status);
 
         return reservation;
     } // End fromString method
+
 
     /**
      * Parses and retrieves the lodging mailing address from the given data parts.
@@ -197,6 +203,7 @@ public class HotelReservation extends Reservation {
         // Return null if mailing address is "N/A"
         return null;
     } // End getlodgingMailingAddress method
+
 
     /**
      * Parses and retrieves the lodging physical address from the given data parts.
