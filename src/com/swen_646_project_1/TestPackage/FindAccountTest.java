@@ -47,37 +47,16 @@ public class FindAccountTest {
 
         // Attempt to add the test account to the Manager
         try {
-
-
-            System.out.println("🔍 Checking if test account already exists: " + testAccount.getAccountNumber());
-
-
-
-
-
-
             // Check if the account already exists before adding
             if (manager.getAccount(testAccount.getAccountNumber()) == null) {
-
-
-                System.out.println("📌 Adding test account: " + testAccount.getAccountNumber());
-
-
                 manager.addAccount(testAccount);
-
-                System.out.println("✅ Test account added: " + testAccount.getAccountNumber());
-
-
-                System.out.println("Test account added: " + testAccount.getAccountNumber());
+                manager.reloadAccounts();
             } else {
-
-
-                System.out.println("⚠️ Test account already exists, skipping creation.");
-
-
+                System.out.println("Test account already exists, skipping creation.");
+                manager.reloadAccounts();
             } // End if-else statement
         } catch (Exception e) {
-            System.out.println("❌ Error adding account: " + e.getMessage());
+            System.out.println("Error adding account: " + e.getMessage());
             fail("Setup failed due to exception: " + e.getMessage());
         } // End try-catch statements
     } // End setUp method
@@ -93,16 +72,19 @@ public class FindAccountTest {
 
         assertNotNull(testAccount, "Test account should not be null");  // Ensures setup is working
         try {
-            // Call `findAccount` method to search for the test account
-            manager.findAccount(testAccount.getAccountNumber());
 
-            // Retrieve reservations
-            List<String> reservations = testAccount.getReservationNumbers();
+            manager.reloadAccounts();
 
-            // Validate that the correct account number was found
-            assertEquals("A900000000", testAccount.getAccountNumber());
-            // Ensure that the account does not contain any reservations yet
-            assertTrue(reservations.isEmpty()); // No reservations yet
+            Account foundAccount = manager.getAccount(testAccount.getAccountNumber());
+
+            assertNotNull(foundAccount, "Failed to find test account in system.");
+            assertEquals("A900000000", foundAccount.getAccountNumber());
+
+            // Retrieve reservations and verify they are empty
+            List<String> reservations = foundAccount.getReservationNumbers();
+            //assertFalse(reservations.isEmpty(), "Test account should have no reservations initially.");
+            assertTrue(reservations.isEmpty(), "Test account should have no reservations initially.");
+
         } catch (NullAccount_Exception e) {
             fail("Account not found: " + e.getMessage());  // Fail test if account is not found
         } // End try-catch statements

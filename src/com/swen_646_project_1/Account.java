@@ -158,7 +158,12 @@ public class Account {
      */
     public Reservation getReservation(String reservationNumber) {
         if (reservationNumber == null) return null;
-        return reservations.get(reservationNumber);
+
+
+        String lookupKey = reservationNumber.trim().toUpperCase();
+        System.out.println("🔎 Looking up reservation with key: [" + lookupKey + "]");
+
+        return reservations.get(lookupKey);
     } // End getReservation method
 
 
@@ -263,14 +268,17 @@ public class Account {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
         } // End if statement
 
+        String normalizedKey = reservation.getReservationNumber().trim().toUpperCase();
+
         // Checks if the reservation already exists
-        if (reservations.containsKey(reservation.getReservationNumber())) {
+        if (reservations.containsKey(normalizedKey)) {
             System.out.println("\n\t\tSkipping duplicate reservation: " + reservation.getReservationNumber());
             return; // Exits if the reservation already exists
         } // End if statement
 
         // Store the reservation in the account's map
-        reservations.put(reservation.getReservationNumber(), reservation);
+        System.out.println("📝 Storing reservation with key: [" + normalizedKey + "]");
+        reservations.put(normalizedKey, reservation);
 
         // Save the reservation to a file only if it is new
         try {
@@ -306,29 +314,29 @@ public class Account {
          *
          * Handle any errors that occur and print appropriate error messages.
          */
-        // Checks if the reservation exists
-        if (!reservations.containsKey(reservationNumber)) {
-            throw new IllegalOperation_Exception("Update Reservation", this.accountNumber, reservationNumber,
-                    "Reservation does not exist.");
-        } // End if statement
 
         // Retrieve the reservation
         Reservation currentReservation = reservations.get(reservationNumber);
 
-        // Prevent updates to completed or cancelled reservations
-        if (currentReservation.getStatus() == ReservationStatus.COMPLETED ||
-                currentReservation.getStatus() == ReservationStatus.CANCELLED) {
+        // Ensure the reservation exists
+        if (currentReservation == null) {
+            throw new IllegalOperation_Exception("Update Reservation", this.accountNumber, reservationNumber,
+                    "Reservation does not exist.");
+        } // End if statement
+
+        // Validate if the reservation can be updated (Delegated to Reservation class)
+        if (!currentReservation.canBeUpdated()) {
             throw new IllegalState_Exception(this.accountNumber, reservationNumber,
                     "Cannot update a completed or cancelled reservation.");
         } // End if statement
 
-        // Check if the new reservation is actually different before updating
-        if (!areReservationsDifferent(currentReservation, updatedReservation)) {
-            return;
+        // Update the reservation details (Ensures only actual changes are applied)
+        boolean hasChanged = currentReservation.updateDetailsFrom(updatedReservation);
+
+        if (!hasChanged) {
+            return; // Exit early if no updates were made
         } // End if statement
 
-        // Apply the updates
-        reservations.put(reservationNumber, updatedReservation);
         // Save only if changes were made
         try {
             Manager.saveReservationToFile(updatedReservation);
@@ -379,94 +387,6 @@ public class Account {
 
         return false; // No differences found
     } // End areReservationsDifferent method
-
-
-    /**
-     * Cancels an existing reservation for this account.
-     *
-     * @param reservationNumber The reservation number to be cancelled.
-     * @throws IllegalState_Exception if the reservation does not exist or is already cancelled/completed.
-     */
-    public void cancelReservation(String reservationNumber) {
-        /*
-         * 1. Check if reservation exists in the account's reservation list
-         * 2. Load the Reservation object from storage
-         * 3. If reservation is already cancelled or completed, throw IllegalState_Exception
-         * 4. Otherwise, update status to CANCELLED and save it
-         */
-
-        // Retrieve the reservation
-        Reservation reservation = reservations.get(reservationNumber);
-
-        // Checks if the reservation exists
-        if (reservation == null) {
-            throw new IllegalState_Exception(this.accountNumber, reservationNumber, "Reservation does not exist.");
-        } // End if statement
-
-        // Ensure reservation is not already cancelled or completed
-        if (reservation.getStatus() == ReservationStatus.CANCELLED ||
-                reservation.getStatus() == ReservationStatus.COMPLETED) {
-            throw new IllegalState_Exception(accountNumber, reservationNumber,
-                    "Cannot cancel a completed or already cancelled reservation.");
-        } // End if statement
-
-        // Cancel the reservation and reset price
-        reservation.setStatus(ReservationStatus.CANCELLED);
-        reservation.setLodgingPrice(0.00);
-        System.out.println("Reservation " + reservationNumber + " has been cancelled.");
-
-        // Replace the updated reservation in the account's reservation map
-        reservations.put(reservationNumber, reservation);
-
-        // Save updated reservation to file
-        Manager.saveReservationToFile(reservation);
-
-    } // End cancelReservation method
-
-
-    /**
-     * Completes an existing reservation.
-     *
-     * @param reservationNumber The reservation number to be marked as completed.
-     * @throws IllegalState_Exception If the reservation is already completed or cancelled.
-     * @throws IllegalOperation_Exception If the reservation does not exist.
-     */
-    public void completeReservation(String reservationNumber) throws IllegalState_Exception, IllegalOperation_Exception {
-        /*
-         * Retrieve the account from the system.
-         * If the account does not exist, throw an IllegalState_Exception.
-         *
-         * Find the reservation within the account.
-         * If the reservation does not exist, throw an IllegalOperation_Exception.
-         *
-         * If the reservation is already completed or cancelled:
-         *      - Throw an IllegalState_Exception indicating it cannot be completed.
-         *
-         * Otherwise:
-         *      - Mark the reservation as completed.
-         *      - Save the updated reservation to file.
-         *
-         * Handle any errors that occur and print appropriate error messages.
-         */
-        // Retrieve the reservation
-        Reservation reservation = reservations.get(reservationNumber);
-
-        if (reservation == null) {
-            throw new IllegalOperation_Exception("Complete Reservation", this.accountNumber, reservationNumber,
-                    "Reservation does not exist.");
-        } // End if statement
-
-        // Ensure reservation is not already completed or cancelled
-        if (reservation.getStatus() == ReservationStatus.COMPLETED ||
-                reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(this.accountNumber, reservationNumber,
-                    "Cannot complete a cancelled or already completed reservation.");
-        } // End if statement
-
-        // Mark reservation as completed
-        reservation.setStatus(ReservationStatus.COMPLETED);
-        System.out.println("Reservation " + reservationNumber + " has been completed.");
-    } // End completeReservation method
 
 
     /**

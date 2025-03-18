@@ -16,6 +16,8 @@ import com.swen_646_project_1.enums.ReservationStatus;
 import com.swen_646_project_1.exceptions.IllegalSave_Exception;
 import com.swen_646_project_1.exceptions.IllegalState_Exception;
 import java.time.LocalDate;
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 /**
  * Abstract base class representing a reservation.
@@ -420,42 +422,60 @@ public abstract class Reservation {
 
 
     /**
-     * Updates reservation details with new data.
-     * Ensures the new data is not null and does not allow updates to completed or cancelled reservations.
-     * @param newReservationData The new Reservation object containing updated details.
+     * Updates the current reservation details based on another reservation object.
+     * Ensures that changes are only applied if they differ from the existing values.
+     *
+     * @param updatedReservation The reservation object containing updated details.
+     * @return true if changes were made, false otherwise.
      */
-    public void updateReservation(Reservation newReservationData) {
-        if (newReservationData == null) {
-            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "New reservation data cannot be null.");
-        } // End if statement
+    public boolean updateDetailsFrom(Reservation updatedReservation) {
+        // Checks if the provided reservation is valid.
+        if (updatedReservation == null) return false;
 
-        // Prevent updating completed or cancelled reservations
-        if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
-                    "Cannot update a completed or cancelled reservation.");
-        } // End if statement
+        // Flag to track if any updates were made
+        boolean changed = false;
 
-        // Update reservation details
-        this.lodgingPhysicalAddress = newReservationData.lodgingPhysicalAddress;
-        this.lodgingMailingAddress = newReservationData.lodgingMailingAddress;
-        this.startDate = newReservationData.startDate;
-        this.numNights = newReservationData.numNights;
-        this.numBeds = newReservationData.numBeds;
-        this.numBedrooms = newReservationData.numBedrooms;
-        this.numBathrooms = newReservationData.numBathrooms;
-        this.lodgingSizeSqFt = newReservationData.lodgingSizeSqFt;
-        this.lodgingPrice = newReservationData.lodgingPrice;
-
-        System.out.println("Reservation " + reservationNumber + " updated successfully.");
-
-        // Save the updated reservation
         try {
-            Manager.saveReservationToFile(this);
-        } catch (IllegalSave_Exception e) {
-            System.out.println("Error saving updated reservation: " + e.getMessage());
+            // Get the runtime class of the current reservation instance.
+            Class<?> clazz = this.getClass();
+            // Traverse the class hierarchy to check all fields including inherited ones
+            while (clazz != null) {
+                // Iterate through each declared field in the class
+                for (Field field : clazz.getDeclaredFields()) {
+                    field.setAccessible(true);      // Allow access to private fields
+
+                    // Retrieve the old and new values for the field
+                    Object oldValue = field.get(this);
+                    Object newValue = field.get(updatedReservation);
+
+                    // If the values are different, update the field
+                    if (!Objects.equals(oldValue, newValue)) {
+                        field.set(this, newValue);
+                        changed = true;     // Mark that at least one field was updated
+                    } // End if statement
+                } // End for loop
+
+                // Move to the superclass to check inherited fields
+                clazz = clazz.getSuperclass();
+            } // End while loop
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Error updating reservation: " + e.getMessage());
         } // End try-catch statements
 
-    } // End updateReservation method
+        return changed; // Return whether changes were applied
+    } // End updateDetailsFrom method
+
+
+    /**
+     * Determines whether the reservation can be updated.
+     * A reservation cannot be updated if its status is COMPLETED or CANCELLED.
+     *
+     * @return true if the reservation can be updated, false otherwise.
+     */
+    public boolean canBeUpdated() {
+        // Allow updates only if the reservation is neither COMPLETED nor CANCELLED.
+        return this.status != ReservationStatus.COMPLETED && this.status != ReservationStatus.CANCELLED;
+    } // End canBeUpdated method
 
 
     /**

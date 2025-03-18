@@ -32,6 +32,12 @@ public class TestManager {
             System.out.println("Reloading accounts to ensure consistency...");
             manager.reloadAccounts();
         } // End if statement
+
+        // Check again after reload, if still empty, warn the user
+        if (manager.getAccounts().isEmpty()) {
+            System.out.println("Warning: No accounts were loaded after reloading storage.");
+        }  // End if statement
+
         return manager;
     } // End getManager method
 } // End TestManager class

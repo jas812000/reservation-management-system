@@ -17,6 +17,7 @@ import com.swen_646_project_1.reservation.Reservation;
 import java.util.List;
 import java.util.Scanner;
 
+
 /**
  * Utility class to handle common test functionalities, such as user input processing,
  * selecting accounts and reservations, and handling errors consistently.
@@ -39,8 +40,15 @@ public class TestHelper {
 
         // Checks if the accounts list is empty, meaning there are no registered accounts in the system.
         if (accounts.isEmpty()) {
-            System.out.println("\nNo accounts found. Please create an account first.");
-            return null;
+            System.out.println("\nNo accounts found. Reloading.....");
+            manager.reloadAccounts();
+
+            // Check again after reload
+            accounts = manager.getAccounts();
+            if (accounts.isEmpty()) {
+                System.out.println("\n❌ No accounts available. Please create an account first.");
+                return null;
+            } // End if statement
         } // End if statement
 
         System.out.println("\nExisting Accounts:");
@@ -61,7 +69,9 @@ public class TestHelper {
         } // End if statement
 
         return selectedAccount;
-    }  // End selectAccount method
+    } // End selectAccount method
+
+
 
     /**
      * Displays a list of reservations under a selected account and prompts the user to choose one.
@@ -69,17 +79,25 @@ public class TestHelper {
      * @param account The account to retrieve reservations from.
      * @return The selected reservation number, or `null` if no valid reservation is selected.
      */
+
     public static String selectReservation(Account account) {
         // Retrieves all reservations associated with a specific account.
         // This allows the user to view and select a reservation for further actions
         // such as updating, canceling, or completing the reservation.
+
+        if (account == null) {
+            System.out.println("❌ Invalid account. Cannot retrieve reservations.");
+            return null;
+        } // End if statement
+
         List<Reservation> reservations = account.getAllReservations();
         if (reservations.isEmpty()) {
-            System.out.println("\nNo reservations found for this account.");
+            System.out.println("\n❌ No reservations found for this account.");
             return null;
         } // End if statement
 
         System.out.println("\nReservations under account " + account.getAccountNumber() + ":");
+
         // Loops through the list of reservations associated with an account,
         // used to display each reservation's details.
         for (Reservation res : reservations) {
@@ -91,7 +109,19 @@ public class TestHelper {
 
         // Normalize the reservation number
         return normalizeReservationNumber(userInput);
-    }  // End selectReservation method
+    } // End selectReservation method
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Centralized exception handling to prevent redundant try-catch blocks in multiple test classes.
@@ -146,15 +176,21 @@ public class TestHelper {
      */
     public static Account getAccountFromReservation(String reservationNumber) {
 
+        if (reservationNumber == null || reservationNumber.trim().isEmpty()) {
+            System.out.println("❌ Invalid reservation number.");
+            return null;
+        }
 
         System.out.println("📋 All accounts in memory before searching for reservation: " + manager.getAccounts());
 
-
-
-        if (reservationNumber == null) return null;
+        // Ensure accounts are loaded before searching
+        if (manager.getAccounts().isEmpty()) {
+            System.out.println("🔄 No accounts found in memory. Reloading...");
+            manager.reloadAccounts();
+        }
 
         String formattedReservationNumber = normalizeReservationNumber(reservationNumber); // Normalize user input
-
+        if (formattedReservationNumber == null) return null; // Invalid format
 
         for (Account acc : manager.getAccounts()) {  // Loop through all accounts
             for (Reservation res : acc.getAllReservations()) {
