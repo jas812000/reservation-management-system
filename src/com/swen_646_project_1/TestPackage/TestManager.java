@@ -23,7 +23,6 @@ public class TestManager {
      */
     public static Manager getManager() {
         if (manager == null) {
-            System.out.println("Initializing shared Manager instance...");
             manager = new Manager(); // Create only if not already initialized
         } // End if statement
 

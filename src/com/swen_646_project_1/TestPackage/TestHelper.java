@@ -167,15 +167,13 @@ public class TestHelper {
         if (reservationNumber == null || reservationNumber.trim().isEmpty()) {
             System.out.println("Invalid reservation number.");
             return null;
-        }
-
-        System.out.println("All accounts in memory before searching for reservation: " + manager.getAccounts());
+        } // End if statement
 
         // Ensure accounts are loaded before searching
         if (manager.getAccounts().isEmpty()) {
             System.out.println("No accounts found in memory. Reloading...");
             manager.reloadAccounts();
-        }
+        } // End if statement
 
         String formattedReservationNumber = normalizeReservationNumber(reservationNumber); // Normalize user input
         if (formattedReservationNumber == null) return null; // Invalid format

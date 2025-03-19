@@ -67,7 +67,6 @@ public class FindReservationTest {
         } // End if statement
 
         // Print all reservations currently loaded from Manager
-        System.out.println("📋 Reservations currently loaded for test account:");
         List<Reservation> reservationsBefore = testAccount.getAllReservations();
         if (reservationsBefore.isEmpty()) {
             System.out.println("No reservations found in testAccount!");
@@ -148,7 +147,6 @@ public class FindReservationTest {
 
         // Ensure `manager` is initialized before proceeding
         if (manager == null) {
-            System.out.println("`manager` was null, re-initializing...");
             setUp();
         } // End if statement
 
@@ -180,7 +178,6 @@ public class FindReservationTest {
                 "======================");
 
         if (manager == null) {
-            System.out.println("`manager` was null, re-initializing...");
             setUp();
         } // End if statement
 
@@ -205,7 +202,6 @@ public class FindReservationTest {
                 "======================");
 
         if (manager == null) {
-            System.out.println("`manager` was null, re-initializing...");
             setUp();
         } // End if statement
 
@@ -227,7 +223,6 @@ public class FindReservationTest {
     @Test
     public void testFindNonExistentReservation() {
         if (manager == null) {
-            System.out.println("`manager` was null, re-initializing...");
             setUp();
         }  // End if statement
 

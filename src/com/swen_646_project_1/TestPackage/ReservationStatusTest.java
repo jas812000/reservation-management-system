@@ -54,9 +54,8 @@ public class ReservationStatusTest {
                 System.out.println("     ***** Reservation completed successfully. *****     ");
             } // End if-else statements
 
-            // ✅ Save the updated reservation status
+            // Save the updated reservation status
             Manager.saveReservationToFile(reservation);
-            System.out.println("✅ Reservation status updated: " + reservation.getStatus());
 
         } catch (Exception e) {
             TestHelper.handleException(e, operation + " reservation");

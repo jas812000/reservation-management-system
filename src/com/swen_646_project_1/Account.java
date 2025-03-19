@@ -155,11 +155,7 @@ public class Account {
      */
     public Reservation getReservation(String reservationNumber) {
         if (reservationNumber == null) return null;
-
-
         String lookupKey = reservationNumber.trim().toUpperCase();
-        System.out.println("🔎 Looking up reservation with key: [" + lookupKey + "]");
-
         return reservations.get(lookupKey);
     } // End getReservation method
 
@@ -276,14 +272,12 @@ public class Account {
         } // End if statement
 
         // Store the reservation in the account's map
-        System.out.println("📝 Storing reservation with key: [" + normalizedKey + "]");
         reservations.put(normalizedKey, reservation);
 
         // Save the reservation to a file only if it is new
         try {
             Manager.saveReservationToFile(reservation);
-            System.out.println("Reservation " + reservation.getReservationNumber() + " successfully saved to file.");
-        } catch (IllegalSave_Exception e) {
+            } catch (IllegalSave_Exception e) {
             System.out.println("Error saving reservation: " + e.getMessage());
         } // End try-catch statements
 

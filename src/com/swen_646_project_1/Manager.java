@@ -80,7 +80,6 @@ public class Manager {
          * 5. If an exception occurs at the outer level, print the error message.
          */
 
-        System.out.println("Searching for account files in: " + DATA_DIRECTORY);
         File dataDir = new File(DATA_DIRECTORY);
 
         // If the directory does not exist, attempt to create it
@@ -96,8 +95,6 @@ public class Manager {
         if (accountFiles == null || accountFiles.length == 0) {
             System.out.println("No account files found in: " + DATA_DIRECTORY);
             return;
-        } else {
-            System.out.println("Found " + accountFiles.length + " account files.");
         } // End if statement
 
         // Load each account file
@@ -229,7 +226,7 @@ public class Manager {
 
         // Check if reservations are already loaded
         if (!account.getAllReservations().isEmpty()) {
-            System.out.println("Reservations already loaded for account: " + account.getAccountNumber());
+            System.out.println("Reservations already loaded for account: " + account.getAccountNumber() + "\n");
             return;
         } // End if statement
 
@@ -421,7 +418,7 @@ public class Manager {
         // Retrieve the account from the accounts map
         Account foundAccount = accounts.get(normalizedAccountNumber);
         if (foundAccount != null) {
-            System.out.println("Found account: " + foundAccount.getAccountNumber());
+            System.out.println("\nFound account: " + foundAccount.getAccountNumber());
         } // End if statement
 
         return foundAccount;

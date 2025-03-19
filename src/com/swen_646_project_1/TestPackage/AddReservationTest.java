@@ -21,6 +21,7 @@ import com.swen_646_project_1.reservation.HouseReservation;
 import com.swen_646_project_1.reservation.Reservation;
 import com.swen_646_project_1.Address;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -35,6 +36,20 @@ public class AddReservationTest {
         Scanner scanner = new Scanner(System.in);
         Manager manager = TestManager.getManager(); // Ensure using shared instance
 
+        // Retrieve all accounts from the Manager
+        List<Account> accounts = manager.getAccounts();
+
+        // Check if there are any accounts to display
+        if (accounts.isEmpty()) {
+            System.out.println("No existing accounts found.");
+            return;
+        } // End if statement
+
+        // Loop to display all accounts for selection
+        System.out.println("\nExisting Accounts:");
+        for (Account acc : accounts) {
+            System.out.println("- " + acc.getAccountNumber());
+        } // End for loop
 
         System.out.print("\nEnter account number for reservation: ");
         String accountNumber = scanner.nextLine().trim();
