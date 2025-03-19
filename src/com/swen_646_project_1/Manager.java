@@ -23,18 +23,16 @@ import java.util.*;
  * Data persistence is handled through file storage.
  */
 public class Manager {
-    /* Encapsulated Attribute
-     * Constant representing the directory path where account and reservation data is stored.
-     * Internal use only (no setter method needed)
-     */
+
+    // Data path
     private static final String DATA_DIRECTORY =
-            "/Users/james_stevens/IdeaProjects/SWEN 646 Project 1/src/com/resources/Accounts";
+            System.getProperty("user.dir") + "/src/com/resources/Accounts";
 
     // Initialize a map storing accounts, where the key is the account number and the value is the Account object.
     private final Map<String, Account> accounts;
 
+    // Single instance of Manager
     private static Manager instance;
-
 
     // Initialize variable
     static String prefix;
@@ -51,25 +49,13 @@ public class Manager {
     } // End Manager constructor
 
 
-
-
-
+    // Singleton pattern to ensure only one instance of Manager exists
     public static Manager getInstance() {
         if (instance == null) {
             instance = new Manager();
-        }
+        } // End if statement
         return instance;
-    }
-
-
-
-
-
-
-
-
-
-
+    } // End getInstance method
 
 
     /**
@@ -94,64 +80,37 @@ public class Manager {
          * 5. If an exception occurs at the outer level, print the error message.
          */
 
-
-        System.out.println("🔄 Searching for account files in: " + DATA_DIRECTORY);
-
-
-
-
-
+        System.out.println("Searching for account files in: " + DATA_DIRECTORY);
         File dataDir = new File(DATA_DIRECTORY);
 
         // If the directory does not exist, attempt to create it
         if (!dataDir.exists()) {
-            System.out.println("⚠️ Accounts directory does NOT exist! Creating directory...");
+            System.out.println("Accounts directory does NOT exist! Creating directory...");
             dataDir.mkdirs();
         } // End if statement
-
-        // Retrieve all account files
-        //File[] accountFiles = dataDir.listFiles((dir, name) -> name.startsWith("acc-") && name.endsWith(".txt"));
 
         // Search in all subdirectories to retrieve all account files
         File[] accountFiles = dataDir.listFiles(File::isDirectory);
 
-
-
         // If no account files exist, print message and return
         if (accountFiles == null || accountFiles.length == 0) {
-            System.out.println("⚠️ No account files found in: " + DATA_DIRECTORY);
+            System.out.println("No account files found in: " + DATA_DIRECTORY);
             return;
         } else {
-            System.out.println("📂 Found " + accountFiles.length + " account files.");
+            System.out.println("Found " + accountFiles.length + " account files.");
         } // End if statement
 
-
-
-
         // Load each account file
-
-
-
         for (File accountDir : accountFiles) {
-
-
             File accountFile = new File(accountDir, "acc-" + accountDir.getName() + ".txt");
-
             if (!accountFile.exists()) {
-                System.out.println("⚠️ No account file found in: " + accountDir.getAbsolutePath());
+                System.out.println("No account file found in: " + accountDir.getAbsolutePath());
                 continue;
-            }
-
+            } // End if statement
             try {
                 // Load account from file
                 Account account = loadAccountFromFile(accountFile);
-
-
-                System.out.println("✅ Successfully loaded account: " + account.getAccountNumber());
-
-
-
-
+                System.out.println("Successfully loaded account: " + account.getAccountNumber());
 
                 // Normalize account number
                 addAccountToMemory(account);
@@ -161,22 +120,11 @@ public class Manager {
 
                 // Load reservations for this account
                 loadReservationsForAccount(account, new File(DATA_DIRECTORY, account.getAccountNumber()));
-
-
-
-                System.out.println("✅ Successfully loaded normalized account: " + account.getAccountNumber());
-
-
-
             } catch (IllegalLoad_Exception e) {
-                System.out.println("ERROR: Failed to load account from file: " + accountFile.getName() + " | " + e.getMessage());
+                System.out.println("ERROR: Failed to load account from file: "
+                        + accountFile.getName() + " | " + e.getMessage());
             } // End try-catch statement
         } // End for loop
-
-
-
-        System.out.println("📋 Total accounts in memory after loading: " + accounts.size());
-
     } // End loadAccountsAndReservations method
 
 
@@ -195,7 +143,8 @@ public class Manager {
     private void ensureAccountDirectory(Account account) throws IllegalLoad_Exception {
         File accountDir = new File(DATA_DIRECTORY, account.getAccountNumber());
         if (!accountDir.exists() && !accountDir.mkdirs()) {
-            throw new IllegalLoad_Exception("Account Directory", accountDir.getAbsolutePath(), account.getAccountNumber());
+            throw new IllegalLoad_Exception("Account Directory",
+                    accountDir.getAbsolutePath(), account.getAccountNumber());
         }  // End if statement
     } // End ensureAccountDirectory method
 
@@ -229,26 +178,10 @@ public class Manager {
                 throw new IllegalLoad_Exception("Account File", file.getName(), "Empty account file.");
             } // End if statement
 
-
-
-
-            System.out.println("\n📂 --- Loading Account File ---");
-            System.out.println("📖 File: " + file.getName());
-            System.out.println("🔍 Data: " + data);
-
-
-
-
-
-
             // Convert the stored data into an Account object
             Account account = Account.fromString(data);
 
-
-            System.out.println("✅ Successfully parsed account: " + account.getAccountNumber());
-
-
-
+            // Normalize the account number by trimming whitespace and converting it to uppercase
             String accountNumber = account.getAccountNumber().trim().toUpperCase();
 
             // Store account in memory
@@ -257,67 +190,23 @@ public class Manager {
             // Determine account directory (where Reservations should be located)
             File accountDir = new File(DATA_DIRECTORY, accountNumber);
 
-
-
-
-
-
-
-
-
             // Ensure the account folder exists (if not, create it)
             if (!accountDir.exists()) {
-
-
-
-
-                System.out.println("⚠️ Account directory does not exist. Creating: " + accountDir.getAbsolutePath());
-
-
-
+                System.out.println("Account directory does not exist. Creating: " + accountDir.getAbsolutePath());
                 if (!accountDir.mkdirs()) {
                     throw new IllegalLoad_Exception("Account Directory", accountDir.getAbsolutePath(), accountNumber);
                 } else {
-
-
-
-
-                    System.out.println("✅ Account directory successfully created: " + accountDir.getAbsolutePath());
-
-
-
-
-                }
+                    System.out.println("Account directory successfully created: " + accountDir.getAbsolutePath());
+                } // End if-else statements
             } // End if statement
-
-
-
-
-
-
-
-
-            System.out.println("🔄 Loading reservations for account: " + account.getAccountNumber());
-
-
-
 
             // Load reservations from the `Reservations/` folder inside the account directory
             loadReservationsForAccount(account, accountDir);
 
-
-
-            System.out.println("✅ Reservations successfully loaded for: " + account.getAccountNumber());
-
-
-
-
-
-
-
             return account;
         } catch (IOException e) {
-            throw new IllegalLoad_Exception("Account File", file.getName(), "Unknown IO error while reading the file.");
+            throw new IllegalLoad_Exception("Account File", file.getName(),
+                    "Unknown IO error while reading the file.");
         } // End try-catch statements
     } // End loadAccountFromFile method
 
@@ -338,35 +227,20 @@ public class Manager {
          * 3. Handle potential errors while reading files.
          */
 
-
         // Check if reservations are already loaded
         if (!account.getAllReservations().isEmpty()) {
-            System.out.println("✅ Reservations already loaded for account: " + account.getAccountNumber());
+            System.out.println("Reservations already loaded for account: " + account.getAccountNumber());
             return;
-        }
-
-
-        System.out.println("🔄 Loading reservations for account: " + account.getAccountNumber());
-
-
+        } // End if statement
 
         // Define the Reservations directory inside the account folder
         File reservationsDir = new File(accountDir, "Reservations");
 
         // Ensure the Reservations directory exists
         if (!reservationsDir.exists() || !reservationsDir.isDirectory()) {
-
-            System.out.println("⚠️ Reservations directory missing for account: " + account.getAccountNumber());
-
+            System.out.println("Reservations directory missing for account: " + account.getAccountNumber());
             return; // Exit if no reservations exist
         } // End if statement
-
-
-
-        System.out.println("📂 Checking reservations directory: " + reservationsDir.getAbsolutePath());
-
-
-
 
         // Retrieve all reservation files from the Reservations directory
         File[] reservationFiles = reservationsDir.listFiles((dir, name) ->
@@ -374,30 +248,15 @@ public class Manager {
 
         // Check if reservation files exist
         if (reservationFiles == null || reservationFiles.length == 0) {
-            System.out.println("⚠️ No reservation files found for account: " + account.getAccountNumber());
+            System.out.println("No reservation files found for account: " + account.getAccountNumber());
             return;
         } // End if statement
-
-
-
-        System.out.println("📂 Found " + reservationFiles.length + " reservation files for account: " + account.getAccountNumber());
-
-
-
-
 
         // List to store reservations before sorting
         List<Reservation> reservationList = new ArrayList<>();
 
         // Iterate through each reservation file
         for (File file : reservationFiles) {
-
-
-
-            System.out.println("🔍 Processing reservation file: " + file.getName());
-
-
-
             // Open the specified file for reading using BufferedReader.
             // BufferedReader reads the file efficiently, line by line, to optimize memory usage.
             // FileReader is used to read character data from the file.
@@ -405,62 +264,21 @@ public class Manager {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 // Read the first line of the file, which contains reservation data
                 String data = reader.readLine();
-
-
-                System.out.println("📖 Raw file contents: " + data);
-
-
-
                 if (data == null || data.trim().isEmpty()) {
-
-
-
-                    System.out.println("⚠️ Skipping empty reservation file: " + file.getName());
-
-
-
-
                     continue; // Skip empty files
                 } // End if statement
-
-
-                System.out.println("📖 Raw file contents: " + data);
-
 
                 // Splits the reservation data string into an array using a comma (",") as the delimiter.
                 String[] parts = data.split(",");
 
-
-
-
-
                 if (parts.length == 0) {
-                    System.out.println("❌ Malformed reservation file: " + file.getName());
+                    System.out.println("Malformed reservation file: " + file.getName());
                     continue;
-                }
-
-
-
-
-
-                // Debugging - Check parsed parts
-                System.out.println("🔎 Parsed parts: " + Arrays.toString(parts));
-
-
-
-
+                } // End if statement
 
                 // Extracts the reservation type from the first element of the split array.
                 // The reservation type helps determine whether the reservation is for a Cabin, Hotel, or House.
                 String reservationType = parts[0];
-
-
-
-                // Debugging - Log reservation type before processing
-                System.out.println("🛏️ Identified reservation type: " + reservationType);
-
-
-
 
                 // Parses the reservation data based on the reservation type retrieved from the file.
                 // Uses a switch expression to create the appropriate Reservation subclass object.
@@ -476,37 +294,24 @@ public class Manager {
                             file.getName(), account.getAccountNumber());
                 }; // End switch Statement
 
-
-
-
-                System.out.println("✅ Successfully parsed reservation: " + reservation.getReservationNumber());
-
-
-
-
                 // Add to list before checking duplicates
                 reservationList.add(reservation);
 
             } catch (IOException e) {
-                System.out.println("❌ Error reading reservation file: " + file.getName() + " | " + e.getMessage());
+                System.out.println("Error reading reservation file: " + file.getName() + " | " + e.getMessage());
                 throw new IllegalLoad_Exception("Reservation File", file.getName(), account.getAccountNumber());
             } catch (IllegalLoad_Exception e) {
-                System.out.println("❌ Error parsing reservation file: " + file.getName() + " | " + e.getMessage());
+                System.out.println("Error parsing reservation file: " + file.getName() + " | " + e.getMessage());
             } // End try-catch statements
         } // End for loop
 
         // Sort reservations by numerical value of reservation number
         if (!reservationList.isEmpty()) {
 
-
-
-            System.out.println("📋 Sorting reservations numerically...");
-
-
-
-
+            // Sort the reservation list numerically by extracting digits from the reservation number
+            // and converting them to long for proper numerical sorting
             reservationList.sort(Comparator.comparing(reservation -> {
-                String reservationNum = reservation.getReservationNumber().replaceAll("\\D+", ""); // Extract digits
+                String reservationNum = reservation.getReservationNumber().replaceAll("\\D+", "");
                 return Long.parseLong(reservationNum); // Convert to long for numerical sorting
             }));
         } // End if statement
@@ -515,25 +320,11 @@ public class Manager {
         for (Reservation res : reservationList) {
             if (account.getReservation(res.getReservationNumber()) == null) {
                 account.addReservation(res);
-
-
-
-
-
-                System.out.println("✅ Added reservation to account: " + res.getReservationNumber());
+                System.out.println("Added reservation to account: " + res.getReservationNumber());
             } else {
-                System.out.println("⚠️ Skipping duplicate reservation: " + res.getReservationNumber());
+                System.out.println("Skipping duplicate reservation: " + res.getReservationNumber());
             } // End if statement
-
-
-
-
-
         } // End for loop
-
-        System.out.println("✅ Reservations successfully loaded for: " + account.getAccountNumber());
-
-
     } // End loadReservationsForAccount method
 
 
@@ -551,20 +342,8 @@ public class Manager {
         File reservationFile = new File(DATA_DIRECTORY + "/" + accountNumber + "/Reservations/" +
                 reservationNumber + ".txt");
 
-
-
-        System.out.println("📂 Attempting to load reservation from file: " + reservationFile.getAbsolutePath());
-
-
-
-
         // Check if the reservation file exists; if not, throw an exception
         if (!reservationFile.exists()) {
-
-
-            System.out.println("❌ Reservation file not found: " + reservationNumber);
-
-
             throw new IllegalLoad_Exception("Reservation File", reservationFile.getName(), accountNumber);
         } // End if statement
 
@@ -576,30 +355,23 @@ public class Manager {
             String data = reader.readLine(); // Read reservation data from file
 
             if (data == null || data.trim().isEmpty()) {
-                throw new IllegalLoad_Exception("Reservation File", reservationFile.getName(), "Empty reservation file.");
+                throw new IllegalLoad_Exception("Reservation File",
+                        reservationFile.getName(), "Empty reservation file.");
             } // End if statement
 
-
-
-
-            System.out.println("📖 Raw reservation file contents: " + data);
-
-
+            // Split the input data string by commas
+            // Extract the reservation type from the first element
             String[] parts = data.split(",");
             String reservationType = parts[0];
 
-
-
             // Determine the reservation type based on the data prefix and parse accordingly
-            Reservation reservation = switch (reservationType) {
+            return switch (reservationType) {
                 case "CabinReservation" -> CabinReservation.fromString(data);
                 case "HotelReservation" -> HotelReservation.fromString(data);
                 case "HouseReservation" -> HouseReservation.fromString(data);
-                default -> throw new IllegalLoad_Exception("Unknown Reservation Type", reservationFile.getName(), accountNumber);
+                default -> throw new IllegalLoad_Exception("Unknown Reservation Type",
+                        reservationFile.getName(), accountNumber);
             };
-
-            System.out.println("✅ Successfully parsed reservation: " + reservation.getReservationNumber());
-            return reservation;
 
         } catch (IOException e) {
             // If an error occurs while reading the file, throw an IllegalLoad_Exception
@@ -706,7 +478,6 @@ public class Manager {
         // Normalize reservation number
         reservationNumber = reservationNumber.trim().toUpperCase();
 
-
         // Retrieve account from Manager's list
         Account account = accounts.get(accountNumber);
 
@@ -717,24 +488,14 @@ public class Manager {
 
         // If still null, throw an exception
         if (account == null) {
-            throw new NullReservation_Exception(accountNumber, reservationNumber, "Account not found for this reservation.");
+            throw new NullReservation_Exception(accountNumber, reservationNumber,
+                    "Account not found for this reservation.");
         } // End if statement
 
-
-
-
-
-        // Debugging: Print all reservations before searching
-        System.out.println("🔍 Searching for reservation: " + reservationNumber);
-        System.out.println("📋 Reservations available:");
+        // Print all reservations before searching
         for (Reservation res : account.getAllReservations()) {
             System.out.println("  - " + res.getReservationNumber());
-        }
-
-
-
-
-
+        } // End for loop
 
         // Retrieve reservation
         Reservation reservation = account.getReservation(reservationNumber);
@@ -826,7 +587,7 @@ public class Manager {
          * 	    save account details to file
          * Handle exceptions related to duplicate accounts or saving errors.
          */
-
+        // Variable to store the newly assigned or updated account number
         String newAccountNumber;
 
         // Use manually assigned test account number if it's already set
@@ -906,100 +667,30 @@ public class Manager {
         File accountDir = new File(DATA_DIRECTORY, account.getAccountNumber()); // Account folder
         File reservationsDir = new File(accountDir, "Reservations"); // Reservations subfolder
 
-
-
-
-// Debugging: Show where account will be saved
-        System.out.println("🔄 Attempting to save account: " + account.getAccountNumber());
-        System.out.println("📁 Account directory path: " + accountDir.getAbsolutePath());
-        System.out.println("📁 Reservations directory path: " + reservationsDir.getAbsolutePath());
-
-
-
-
-
-
-
-
-
         //Ensure that the account's directory exists.
         // - If the directory does not exist, attempt to create it.
         // - If creation fails, throw an IllegalSave_Exception.
-
-
-        System.out.println("🔍 Checking account directory: " + accountDir.getAbsolutePath());
-
-
         if (!accountDir.exists() && !accountDir.mkdirs()) {
-
-
-
-            System.out.println("❌ ERROR: Failed to create account directory at: " + accountDir.getAbsolutePath());
-
-
-
             throw new IllegalSave_Exception("Account Directory", accountDir.getAbsolutePath(),
                     account.getAccountNumber());
         }  else {
-            System.out.println("✅ Account directory exists or was successfully created: " + accountDir.getAbsolutePath());
-        } // End if statement
-
-
-
-
+            System.out.println("Account directory exists or was successfully created: "
+                    + accountDir.getAbsolutePath());
+        } // End if-else statements
 
         // Ensure that the Reservations subfolder exists.
         // - If it does not exist, create it.
         // - This folder will store all reservation files associated with this account.
-
-
-
-        System.out.println("🔍 Checking reservations directory: " + reservationsDir.getAbsolutePath());
-
-
-
         if (!reservationsDir.exists() && !reservationsDir.mkdirs()) {
-
-
-
-            System.out.println("❌ ERROR: Failed to create reservations directory at: " + reservationsDir.getAbsolutePath());
-
-
-
-            throw new IllegalSave_Exception("Reservations Directory", reservationsDir.getAbsolutePath(), account.getAccountNumber());
+            throw new IllegalSave_Exception("Reservations Directory",
+                    reservationsDir.getAbsolutePath(), account.getAccountNumber());
         } else {
-            System.out.println("✅ Reservations directory exists or was successfully created: " + reservationsDir.getAbsolutePath());
-        } // End if statement
-
-
-
-
-
-
-
-
-
-
+            System.out.println("Reservations directory exists or was successfully created: "
+                    + reservationsDir.getAbsolutePath());
+        } // End if-else statements
 
         // Create the file path for the account file
         File accountFile = new File(accountDir, "acc-" + account.getAccountNumber() + ".txt");
-
-
-
-
-
-
-        // Debugging: Confirm file path before writing
-        System.out.println("📝 Writing account data to: " + accountFile.getAbsolutePath());
-
-
-
-
-
-
-
-
-
 
         // Open the file for writing using BufferedWriter.
         // If the file exists, this will overwrite its contents.
@@ -1008,20 +699,7 @@ public class Manager {
             // Convert Account to string and write to file
             writer.write(account.toString()); // Convert Account to string and write to file
             writer.newLine();
-
-
-
-            System.out.println("✅ Account data successfully written to file.");
-
-
-
         } catch (IOException e) {
-            // If an error occurs while writing, throw an IllegalSave_Exception with relevant details
-
-            System.out.println("❌ ERROR: Failed to write account data to file!");
-
-
-
             throw new IllegalSave_Exception("Account", accountFile.getName(), account.getAccountNumber());
         } // End Try-Catch statements
     } // End saveAccountToFile method
@@ -1168,7 +846,8 @@ public class Manager {
 
         // Step 4: Ensure the Reservations directory exists inside the account folder
         if (!reservationsDir.exists() && !reservationsDir.mkdirs()) {
-            throw new IllegalSave_Exception("Reservations Directory", reservationsDir.getAbsolutePath(), accountNumber);
+            throw new IllegalSave_Exception("Reservations Directory",
+                    reservationsDir.getAbsolutePath(), accountNumber);
         } // End if statement
 
         return reservationsDir; // Return the Reservations directory path
@@ -1203,36 +882,9 @@ public class Manager {
      */
     public void reloadAccounts() {
         // Clear existing accounts before reloading
-
-
-        System.out.println("🔄 Reloading all accounts...");
-
-
-
         accounts.clear();
-
-
-
         // Now manually reloads accounts
         loadAccountsAndReservations();
-
-
-
-
-        // Debugging - Check if any accounts were loaded
-        if (accounts.isEmpty()) {
-            System.out.println("⚠️ No accounts were loaded into memory!");
-        } else {
-            System.out.println("📋 Accounts successfully loaded into memory:");
-            for (String key : accounts.keySet()) {
-                System.out.println("  - " + key);
-            }
-        }
-
-
-
-
-
     } // End reloadAccounts
 
 } // end class Manager

@@ -215,7 +215,8 @@ public class HotelReservation extends Reservation {
     private static Address getAddress(String[] parts) {
         // Ensure correct number of fields
         if (parts.length < 14) {
-            throw new IllegalLoad_Exception("HotelReservation Data", "N/A", "Invalid data format. Found: " + parts.length);
+            throw new IllegalLoad_Exception("HotelReservation Data", "N/A",
+                    "Invalid data format. Found: " + parts.length);
         } // End if statement
 
         // Extract lodging physical address components

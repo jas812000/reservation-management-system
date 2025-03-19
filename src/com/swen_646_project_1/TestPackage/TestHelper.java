@@ -46,7 +46,7 @@ public class TestHelper {
             // Check again after reload
             accounts = manager.getAccounts();
             if (accounts.isEmpty()) {
-                System.out.println("\n❌ No accounts available. Please create an account first.");
+                System.out.println("\nNo accounts available. Please create an account first.");
                 return null;
             } // End if statement
         } // End if statement
@@ -72,7 +72,6 @@ public class TestHelper {
     } // End selectAccount method
 
 
-
     /**
      * Displays a list of reservations under a selected account and prompts the user to choose one.
      * If the account has no reservations, a message is displayed, and `null` is returned.
@@ -86,13 +85,13 @@ public class TestHelper {
         // such as updating, canceling, or completing the reservation.
 
         if (account == null) {
-            System.out.println("❌ Invalid account. Cannot retrieve reservations.");
+            System.out.println("Invalid account. Cannot retrieve reservations.");
             return null;
         } // End if statement
 
         List<Reservation> reservations = account.getAllReservations();
         if (reservations.isEmpty()) {
-            System.out.println("\n❌ No reservations found for this account.");
+            System.out.println("\nNo reservations found for this account.");
             return null;
         } // End if statement
 
@@ -110,17 +109,6 @@ public class TestHelper {
         // Normalize the reservation number
         return normalizeReservationNumber(userInput);
     } // End selectReservation method
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -177,15 +165,15 @@ public class TestHelper {
     public static Account getAccountFromReservation(String reservationNumber) {
 
         if (reservationNumber == null || reservationNumber.trim().isEmpty()) {
-            System.out.println("❌ Invalid reservation number.");
+            System.out.println("Invalid reservation number.");
             return null;
         }
 
-        System.out.println("📋 All accounts in memory before searching for reservation: " + manager.getAccounts());
+        System.out.println("All accounts in memory before searching for reservation: " + manager.getAccounts());
 
         // Ensure accounts are loaded before searching
         if (manager.getAccounts().isEmpty()) {
-            System.out.println("🔄 No accounts found in memory. Reloading...");
+            System.out.println("No accounts found in memory. Reloading...");
             manager.reloadAccounts();
         }
 
@@ -223,16 +211,6 @@ public class TestHelper {
      * @return A valid reservation number, or `null` if no valid selection is made.
      */
     public static String getValidatedReservation() {
-
-
-
-
-        System.out.println("📋 All accounts in memory before selection: " + manager.getAccounts());
-
-
-
-
-
 
         // Get a valid account number first or Exit if no valid account is selected
         String accountNumber = getValidatedAccount();
@@ -272,6 +250,6 @@ public class TestHelper {
 
         // Ensure "res-" is lowercase and the reservation type is uppercase
         return "res-" + reservationNumber.substring(4, 7).toUpperCase() + reservationNumber.substring(7);
-    } // End normalizeReservationNumber methog
+    } // End normalizeReservationNumber method
 
 } // End TestHelper class

@@ -125,8 +125,10 @@ public class HouseReservation extends Reservation {
                 String.join(";", lodgingPhysicalAddress.getStreet(), lodgingPhysicalAddress.getCity(),
                         lodgingPhysicalAddress.getState(), String.valueOf(lodgingPhysicalAddress.getZipCode())),
                 (lodgingMailingAddress != null ?
-                        "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(), lodgingMailingAddress.getCity(),
-                                lodgingMailingAddress.getState(), String.valueOf(lodgingMailingAddress.getZipCode())) + "\""
+                        "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(),
+                                lodgingMailingAddress.getCity(),
+                                lodgingMailingAddress.getState(),
+                                String.valueOf(lodgingMailingAddress.getZipCode())) + "\""
                         : ",N/A"),
                 startDate, numNights, numBeds, numBedrooms, numBathrooms,
                 lodgingSizeSqFt, lodgingPrice, status, numFloors);

@@ -31,8 +31,8 @@ public class InteractiveFindTest {
             manager.findAccount(accountNumber);
         } catch (NullAccount_Exception e) {
             System.out.println("Error: " + e.getMessage());
-        }
-    }
+        } // End try-catch statements
+    } // End findAccountInteractive method
 
     /**
      * Interactive test for finding a reservation.
@@ -48,6 +48,6 @@ public class InteractiveFindTest {
             manager.findReservation(accountNumber, reservationNumber);
         } catch (NullReservation_Exception e) {
             System.out.println("Error: " + e.getMessage());
-        }
-    }
+        } // End try-catch statements
+    } // End findReservationInteractive method
 } // End InteractiveFindTest class

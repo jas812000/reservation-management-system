@@ -36,17 +36,6 @@ public class ModifyAccountTest {
         // Retrieves a list of all existing accounts from the manager.
         List<Account> accounts = manager.getAccounts();
 
-
-
-        // Debugging: Print all retrieved accounts
-        System.out.println("📋 Retrieved accounts from manager: " + accounts);
-
-
-
-
-
-
-
         // Checks if the accounts list is empty, meaning there are no registered accounts in the system.
         // If no accounts exist, the user is prompted to create an account before performing further actions,
         // and the method terminates early.
@@ -55,24 +44,11 @@ public class ModifyAccountTest {
             return;
         } // End if statement
 
-
-
-
-
-        // 🔹 Add a loop to display all accounts for selection
+        // Loop to display all accounts for selection
         System.out.println("\nExisting Accounts:");
         for (Account acc : accounts) {
             System.out.println("- " + acc.getAccountNumber());
-        }
-
-
-
-
-
-
-
-
-
+        } // End for loop
 
         // Prompt user to select an account
         String accountNumber = TestHelper.selectAccount();
@@ -90,18 +66,6 @@ public class ModifyAccountTest {
         // If no account is found with the given account number, an error message is displayed,
         // and the method terminates early to prevent further execution.
         if (account == null) {
-
-
-
-
-
-            System.out.println("❌ Error: Account not found in memory: " + accountNumber);
-            System.out.println("📋 All accounts in memory: " + manager.getAccounts());
-
-
-
-
-
             System.out.println("Error: Account not found.");
             return;
         } // End if statement

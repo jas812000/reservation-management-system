@@ -5,15 +5,12 @@ package com.swen_646_project_1;
  * Imports the following:
  * - Reservation class to allow the Manager class to work with different types of reservations.
  * - Custom exception classes to handle various error scenarios related to reservations.
- * - ReservationStatus enum to manage different states of reservations.
  * - Java utility classes for handling data structures and operations like lists, maps, etc.
  */
 import com.swen_646_project_1.exceptions.*;
 import com.swen_646_project_1.reservation.Reservation;
-import com.swen_646_project_1.enums.ReservationStatus;
 import java.util.*;
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 /**
  * Represents a user account in the system.
@@ -22,11 +19,11 @@ import java.util.Objects;
 public class Account {
 
     // Encapsulated Attributes
-    private String accountNumber;                           // Unique identifier for account that cannot be changed
-    private Address address;                                // Stores the address object
-    private String phoneNumber;                             // Stores the phone number
-    private String email;                                   // Stores the email address
-    private final Map<String, Reservation> reservations;    // Map of reservation numbers to Reservation objects
+    private String accountNumber;                         // Unique identifier for account that cannot be changed
+    private Address address;                              // Stores the address object
+    private String phoneNumber;                           // Stores the phone number
+    private String email;                                 // Stores the email address
+    private final Map<String, Reservation> reservations;  // Map of reservation numbers to Reservation objects
 
     /**
      * Constructor to initialize an Account object with required details.
@@ -186,13 +183,14 @@ public class Account {
         if (newAddress == null) {
             throw new IllegalParameter_Exception(this.accountNumber, "N/A", "Address cannot be null.");
         } // End if statement
-        this.address.setAddress(newAddress.getStreet(), newAddress.getCity(), newAddress.getState(), newAddress.getZipCode());
+        this.address.setAddress(newAddress.getStreet(), newAddress.getCity(),
+                newAddress.getState(), newAddress.getZipCode());
     } // End updateAddress method
 
 
     /**
      * Updates the address by setting new values directly.
-     * Uses the `setAddress()` method from the Address class to ensure validation..
+     * Uses the `setAddress()` method from the Address class to ensure validation.
      * @param street New street name
      * @param city New city
      * @param state New state
@@ -268,6 +266,7 @@ public class Account {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
         } // End if statement
 
+        // Normalize the reservation key by trimming spaces and converting to uppercase.
         String normalizedKey = reservation.getReservationNumber().trim().toUpperCase();
 
         // Checks if the reservation already exists

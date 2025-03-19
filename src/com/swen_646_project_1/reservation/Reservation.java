@@ -2,11 +2,18 @@
 package com.swen_646_project_1.reservation;
 
 /*
- * Imports the following:
- * - Address class to handle lodging and mailing addresses in reservations
- * - Custom exception class to handle various error scenarios related to reservations.
- * - ReservationStatus enum to manage different states of reservations.
- * - Time utility for handling reservation start dates
+ * Imports necessary classes and utilities for reservation management:
+ * - Address: Handles lodging and mailing addresses in reservations.
+ * - Manager: Manages accounts and reservations in the system.
+ * - Custom Exceptions: Handles various error scenarios related to reservations.
+ *     - IllegalOperation_Exception: Thrown when an operation is not permitted.
+ *     - IllegalParameter_Exception: Thrown for invalid input parameters.
+ *     - IllegalSave_Exception: Thrown when saving data fails.
+ *     - IllegalState_Exception: Thrown when the reservation state is invalid.
+ * - ReservationStatus Enum: Defines different states of a reservation (e.g., Active, Cancelled).
+ * - Time Utility (LocalDate): Used for handling reservation start dates.
+ * - Reflection Utility (Field): May be used to modify object fields dynamically.
+ * - Objects Utility: Provides methods for comparing and handling object properties.
  */
 import com.swen_646_project_1.Address;
 import com.swen_646_project_1.Manager;
@@ -360,7 +367,6 @@ public abstract class Reservation {
                     this.reservationNumber, "Price cannot be negative.");
         }  // End if-else statements
     } // End setLodgingPrice method
-
 
     /**
      * Marks the reservation as completed.

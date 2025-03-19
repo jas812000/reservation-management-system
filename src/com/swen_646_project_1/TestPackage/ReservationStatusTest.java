@@ -2,8 +2,10 @@
 package com.swen_646_project_1.TestPackage;
 
 /*
- * Imports necessary class for testing reservation statuses.
+ * Imports necessary classes for managing and testing reservations.
  * - `Account`: Required to retrieve and manage reservations associated with an account.
+ * - `Manager`: Manages accounts and reservations in the system.
+ * - `Reservation`: Represents a generic reservation and provides base functionality.
  */
 import com.swen_646_project_1.Account;
 import com.swen_646_project_1.Manager;

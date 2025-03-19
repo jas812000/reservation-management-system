@@ -19,10 +19,12 @@ package com.swen_646_project_1.TestPackage;
  */
 import com.swen_646_project_1.*;
 import com.swen_646_project_1.exceptions.NullAccount_Exception;
+import java.util.List;
+import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.List;
+
 
 /**
  * Unit tests for the findAccount method.
@@ -31,6 +33,8 @@ public class FindAccountTest {
     // Create an instance of Manager and Account
     private Manager manager;
     private Account testAccount;
+    private static final String TEST_ACCOUNT_NUMBER = "A900000000";
+    private static final String BASE_DIRECTORY = System.getProperty("user.dir") + "/src/com/resources/Accounts";
 
     /**
      * Initializes test data before each test case runs.
@@ -41,20 +45,23 @@ public class FindAccountTest {
     public void setUp() {
         manager = new Manager();  // Initialize Manager
 
+        // Define test account directory path
+        File testAccountDir = new File(BASE_DIRECTORY, TEST_ACCOUNT_NUMBER);
+
+        // Ensure the directory exists
+        if (!testAccountDir.exists() && !testAccountDir.mkdirs()) {
+            System.err.println("Error: Failed to create test account directory at " + testAccountDir.getAbsolutePath());
+            fail("Setup failed due to directory creation error.");
+        } // End if statement
+
         // Create a test account
         Address address = new Address("123 Main St", "Dallas", "TX", 75001);
-        testAccount = new Account("A900000000", address, "123-456-7890", "test@email.com");
+        testAccount = new Account(TEST_ACCOUNT_NUMBER, address, "123-456-7890", "test@email.com");
 
-        // Attempt to add the test account to the Manager
+        // Add the test account to the Manager
         try {
-            // Check if the account already exists before adding
-            if (manager.getAccount(testAccount.getAccountNumber()) == null) {
-                manager.addAccount(testAccount);
-                manager.reloadAccounts();
-            } else {
-                System.out.println("Test account already exists, skipping creation.");
-                manager.reloadAccounts();
-            } // End if-else statement
+            manager.addAccount(testAccount);
+            manager.reloadAccounts();
         } catch (Exception e) {
             System.out.println("Error adding account: " + e.getMessage());
             fail("Setup failed due to exception: " + e.getMessage());
@@ -65,24 +72,21 @@ public class FindAccountTest {
      * Tests the `findAccount` method to ensure it retrieves the correct account.
      * - Calls `findAccount` with a known account number.
      * - Verifies that the account exists and has the expected attributes.
-     * - Ensures the retrieved account has no reservations initially.
+     * - Ensures the retrieved account starts fresh without prior reservations.
      */
     @Test
     public void testFindAccount() {
-
         assertNotNull(testAccount, "Test account should not be null");  // Ensures setup is working
+
         try {
-
             manager.reloadAccounts();
-
-            Account foundAccount = manager.getAccount(testAccount.getAccountNumber());
+            Account foundAccount = manager.getAccount(TEST_ACCOUNT_NUMBER);
 
             assertNotNull(foundAccount, "Failed to find test account in system.");
-            assertEquals("A900000000", foundAccount.getAccountNumber());
+            assertEquals(TEST_ACCOUNT_NUMBER, foundAccount.getAccountNumber());
 
-            // Retrieve reservations and verify they are empty
+            // Retrieve reservations and verify they are empty after reset
             List<String> reservations = foundAccount.getReservationNumbers();
-            //assertFalse(reservations.isEmpty(), "Test account should have no reservations initially.");
             assertTrue(reservations.isEmpty(), "Test account should have no reservations initially.");
 
         } catch (NullAccount_Exception e) {

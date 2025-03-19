@@ -101,13 +101,16 @@ public class AddReservationTest {
         switch (choice) {
             case 1 -> newReservation = new CabinReservation(
                     reservationNumber, accountNumber, physicalAddress, mailingAddress,
-                    startDate, numNights, 2, 1, 1, 500, pricePerNight, true, false);
+                    startDate, numNights, 2, 1, 1,
+                    500, pricePerNight, true, false);
             case 2 -> newReservation = new HotelReservation(
                     reservationNumber, accountNumber, physicalAddress, mailingAddress,
-                    startDate, numNights, 2, 1, 1, 500, pricePerNight, true);
+                    startDate, numNights, 2, 1, 1,
+                    500, pricePerNight, true);
             case 3 -> newReservation = new HouseReservation(
                     reservationNumber, accountNumber, physicalAddress, mailingAddress,
-                    startDate, numNights, 2, 1, 1, 500, pricePerNight, 2);
+                    startDate, numNights, 2, 1, 1,
+                    500, pricePerNight, 2);
             default -> throw new IllegalStateException("Unexpected value: " + choice);
         } // End switch statements
 

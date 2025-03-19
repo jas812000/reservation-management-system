@@ -7,17 +7,11 @@ package com.swen_646_project_1;
  *   - Account creation
  *   - Reservation management
  *   - Data integrity validation
- * - `com.swen_646_project_1.exceptions.*`: Handles custom exceptions, including:
- *   - `NullAccount_Exception`: Thrown when an account is not found.
- *   - `NullReservation_Exception`: Thrown when a reservation does not exist.
- *   - `DuplicateObject_Exception`: Prevents duplicate accounts or reservations.
- *   - `IllegalOperation_Exception`: Ensures valid reservation/account operations.
- *   - `IllegalParameter_Exception`: Guards against invalid method parameters.
- *   - `IllegalSave_Exception`: Manages errors when saving account/reservation data.
+ * - 'io': file handling
  * - `Scanner`: Captures user input for interactive menu selection in test cases.
  */
 import com.swen_646_project_1.TestPackage.*;
-import com.swen_646_project_1.exceptions.*;
+import java.io.File;
 import java.util.Scanner;
 
 /**
@@ -26,23 +20,34 @@ import java.util.Scanner;
  */
 public class Main {
 
-    private static final Manager manager = Manager.getInstance();
+    // Directory path
+    private static final String BASE_DIRECTORY = System.getProperty("user.dir") + "/src/com/resources/Accounts";
 
-
-
+    // Test account number for predefined test cases
+    private static final String TEST_ACCOUNT_NUMBER = "A900000000";
 
     public static void main(String[] args) {
 
-        // Run AccountTests, ReservationTests and AddressTests first
-        System.out.println("Initializing system tests...");
-        runAccountTests();
-        runReservationTests();
-        runAddressTests();
-        runFindAccountTests();
-        runFindReservationTests();
-        System.out.println("\n     ***** All system tests completed successfully. *****     ");
-        System.out.println("=================================================================================================\n");
-        System.out.println("=================================================================================================\n");
+        // Create a File object representing the test account directory
+        File testAccountDir = new File(BASE_DIRECTORY, TEST_ACCOUNT_NUMBER);
+
+        // Check if the test account directory exists
+        if (testAccountDir.exists() && testAccountDir.isDirectory()) {
+            System.out.println("Test account directory exists. Skipping system tests.");
+        } else {
+            // Run AccountTests, ReservationTests and AddressTests first
+            System.out.println("Initializing system tests...");
+            runAccountTests();
+            runReservationTests();
+            runAddressTests();
+            runFindAccountTests();
+            runFindReservationTests();
+            System.out.println("\n     ***** All system tests completed successfully. *****     ");
+            System.out.println("==================================================================" +
+                    "===============================\n");
+            System.out.println("===================================================================" +
+                    "==============================\n");
+        } // End if-else statements
 
         // Creates a scanner object
         Scanner scanner = new Scanner(System.in);
@@ -82,11 +87,16 @@ public class Main {
         } // End while loop
     } // End Main method
 
+
     /**
      * Runs unit tests for Account class.
      */
     private static void runAccountTests() {
-        System.out.println("\n========================================= Running Account Tests ========================================\n");
+        System.out.println("""
+                
+                ========================================= Running Account Tests ===========\
+                =============================
+                """);
         // Creates an instance of the AccountTest class to run unit tests.
         AccountTest accountTest = new AccountTest();
         // Ensures test data is ready
@@ -95,16 +105,19 @@ public class Main {
         System.out.println("\n     ***** Account tests completed successfully. *****     ");
     } // End runAccountTests method
 
+
     /**
      * Runs unit tests for different types of reservations.
      */
     private static void runReservationTests() {
-        System.out.println("\n============================================ Running Reservation Tests ============================================ ");
+        System.out.println("\n============================================ Running Reservation Tests ==" +
+                "========================================== ");
         // Get a prepared instance of ReservationTest
         ReservationTest reservationTest = getPreparedReservationTest();
 
         // ========= CABIN TESTS ==========
-        System.out.println("========================================= Running Cabin Reservation Tests ========================================\n");
+        System.out.println("========================================= Running Cabin Reservation Tests =====" +
+                "===================================\n");
         reservationTest.testCabinGetReservationNumber();
         reservationTest.testCabinGetAccountNumber();
         reservationTest.testCabinGetPhysicalAddress();
@@ -121,7 +134,11 @@ public class Main {
         System.out.println("\n***** Cabin tests completed successfully. *****");
 
         // ========== HOTEL TESTS ==========
-        System.out.println("\n ======================================== Running Hotel Reservation Tests ========================================\n");
+        System.out.println("""
+                
+                 ======================================== Running Hotel Reservation Tests =====\
+                ===================================
+                """);
         reservationTest.testHotelGetReservationNumber();
         reservationTest.testHotelGetAccountNumber();
         reservationTest.testHotelGetPhysicalAddress();
@@ -136,7 +153,11 @@ public class Main {
         System.out.println("\n***** Hotel tests completed successfully. *****");
 
         // ========== HOUSE TESTS ==========
-        System.out.println("\n======================================== Running House Reservation Tests ========================================\n");
+        System.out.println("""
+                
+                ======================================== Running House Reservation Tests \
+                ========================================
+                """);
         reservationTest.testHouseGetReservationNumber();
         reservationTest.testHouseGetAccountNumber();
         reservationTest.testHouseGetPhysicalAddress();
@@ -153,11 +174,16 @@ public class Main {
         System.out.println("\n     ***** Reservation tests completed successfully. *****     ");
     } // End runReservationTests method
 
+
     /**
      * Runs unit tests for Address class.
      */
     private static void runAddressTests() {
-        System.out.println("\n ======================================== Running Address Tests ========================================\n");
+        System.out.println("""
+                
+                 ======================================== Running Address Tests \
+                ========================================
+                """);
         // Creates an instance of the AddressTest class to run unit tests.
         AddressTest addressTest = new AddressTest();
         // Ensures test data is ready
@@ -166,11 +192,16 @@ public class Main {
         System.out.println("\n     ***** Address tests completed successfully. *****     ");
     } // End runAddressTests method
 
+
     /**
      * Runs unit tests for finding an account.
      */
     private static void runFindAccountTests() {
-        System.out.println("\n======================================== Running Find Account Tests ========================================\n");
+        System.out.println("""
+                
+                ======================================== Running Find Account Tests \
+                ========================================
+                """);
         // Creates an instance of the FindAccountTest class to run unit tests.
         FindAccountTest findAccountTest = new FindAccountTest();
         // Ensures test data is ready
@@ -179,11 +210,13 @@ public class Main {
         System.out.println("\n     ***** Find Account tests completed successfully. *****     ");
     } // End runFindAccountTests method
 
+
     /**
      * Runs unit tests for finding a reservation.
      */
     private static void runFindReservationTests() {
-        System.out.println("\n======================================== Running Find Reservation Tests ========================================");
+        System.out.println("\n======================================== Running Find Reservation Tests " +
+                "========================================");
         // Creates an instance of the FindReservationTest class to run unit tests.
         FindReservationTest findReservationTest = new FindReservationTest();
         findReservationTest.testFindCabinReservation();
@@ -191,6 +224,7 @@ public class Main {
         findReservationTest.testFindHouseReservation();
         System.out.println("\n     ***** Find Reservation tests completed successfully. *****     ");
     } // End runFindReservationTests method
+
 
     /**
      * Creates and initializes a `ReservationTest` instance.
@@ -204,7 +238,8 @@ public class Main {
         reservationTest.setUp();
         return reservationTest;
     } // End getPreparedReservationTest method
-    
+
+
     /**
      * Simulated method to fetch an account by its number.
      * In a real system, this would query a database or a data store.

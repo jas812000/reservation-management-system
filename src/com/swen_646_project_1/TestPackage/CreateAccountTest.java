@@ -27,7 +27,6 @@ public class CreateAccountTest {
         Scanner scanner = new Scanner(System.in);
         Manager manager = TestManager.getManager(); // Ensure using shared instance
 
-
         // Generate a new unique account number
         //String accountNumber = TestHelper.generateNewAccountNumber(manager.getAccounts());
         String accountNumber = manager.getNewAccountNumber();
@@ -52,25 +51,6 @@ public class CreateAccountTest {
 
             // Ensure correct file format when saving
             String accountFile = "acc-" + accountNumber + ".txt";
-
-
-
-
-
-            System.out.println("💾 Account file created: " + accountFile);
-            System.out.println("🔄 Verifying account exists: " + accountNumber);
-
-
-
-            System.out.println("Account saved: " + accountFile);
-
-
-
-
-
-
-
-
 
             // Displays a confirmation message if the account is successfully created.
             System.out.println("Account " + accountNumber + " successfully created.");
