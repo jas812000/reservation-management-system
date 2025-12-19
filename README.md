@@ -104,6 +104,7 @@ The CLI entry point is intentionally minimal.
 
 ```bash
 java -cp target/classes com.jamesstevens.rms.Main
+```
 
 ---
 
