@@ -1,0 +1,46 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Build output
+/target/
+/build/
+/out/
+
+# Runtime data
+/data/
+
+# macOS
+# IntelliJ
+.idea/
+*.iml
+
+# Build output
+/target/
+/build/
+/out/
+
+# Runtime data
+/data/
+
+# macOS
+.DS_Store
+# IntelliJ
+.idea/
+*.iml
+
+# Build output
+/target/
+/build/
+/out/
+
+# Runtime data
+/data/
+
+# macOS
+.DS_Store
+KS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
