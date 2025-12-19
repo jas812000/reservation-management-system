@@ -95,3 +95,41 @@ Failures are explicit, traceable, and covered by automated tests.
 ```bash
 mvn clean test
 
+---
+
+## Run (CLI)
+
+This project primarily focuses on backend logic and automated testing.  
+The CLI entry point is intentionally minimal.
+
+```bash
+java -cp target/classes com.jamesstevens.rms.Main
+
+---
+
+## Tools & Technologies
+- **Language:** Java 17
+- **Build Tool:** Maven
+- **Testing:** JUnit 5
+- **Modeling:** UML
+- **Persistence:** Structured text files
+- **Design Artifacts:** Software Design Document (SDD), class diagrams
+
+---
+
+## Purpose
+This project serves as a backend engineering case study demonstrating:
+- Object-oriented system design
+- Domain-driven validation
+- Maintainable architecture
+- Controlled state transitions
+- Automated testing practices
+- Translation of formal design documentation into working code
+
+---
+
+## License
+This project is licensed under the MIT License.  
+See the [LICENSE](LICENSE) file for details.
+
+---
