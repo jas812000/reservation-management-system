@@ -1,15 +1,21 @@
-# IntelliJ
+# Maven
+target/
+*.log
+
+# IntelliJ / JetBrains
 .idea/
 *.iml
-
-# Build output
-/target/
-/build/
-/out/
-
-# Runtime data
-/data/
+*.ipr
+*.iws
+out/
 
 # macOS
 .DS_Store
+
+# VS Code (optional)
+.vscode/
+
+# OS / temp
+*.swp
+*~
 

@@ -108,6 +108,20 @@ java -cp target/classes com.jamesstevens.rms.Main
 
 ---
 
+## Data / Persistence
+
+By default, persisted data is stored under:
+
+- ` ./data`
+
+You can override the data directory (useful for testing or running multiple datasets) with:
+```bash
+export RMS_DATA_DIR="/absolute/path/to/data"
+```
+
+---
+
+
 ## Tools & Technologies
 - **Language:** Java 17
 - **Build Tool:** Maven
