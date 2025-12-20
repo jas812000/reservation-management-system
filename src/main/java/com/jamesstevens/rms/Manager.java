@@ -1,6 +1,4 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms;
-
 /*
  * Imports the following:
  * - Reservation class to allow the Manager class to work with different types of reservations.
@@ -16,6 +14,7 @@ import com.jamesstevens.rms.reservation.HouseReservation;
 import com.jamesstevens.rms.reservation.Reservation;
 import java.io.*;
 import java.util.*;
+import java.time.LocalDate;
 
 /**
  * The Manager class serves as the main controller for managing accounts and reservations.
@@ -25,14 +24,32 @@ import java.util.*;
 public class Manager {
 
     // Data path
-    private static final String DATA_DIRECTORY =
-            System.getProperty("user.dir") + "/src/com/resources/Accounts";
+    private static String dataDirectory() {
+        return System.getProperty("RMS_DATA_DIR",
+                System.getProperty("user.dir") + "/data");
+    }
+    
+    static void resetInstanceForTests() {
+    	instance = null;	
+    }
+
+	
 
     // Initialize a map storing accounts, where the key is the account number and the value is the Account object.
     private final Map<String, Account> accounts;
 
     // Single instance of Manager
     private static Manager instance;
+
+    /**
+     * Test/support helper: clears in-memory accounts.
+     * Does not delete persisted files.
+     */
+    public void clearAccounts() {
+        if (accounts != null) {
+            accounts.clear();
+        }
+    }
 
     // Initialize variable
     static String prefix;
@@ -80,7 +97,7 @@ public class Manager {
          * 5. If an exception occurs at the outer level, print the error message.
          */
 
-        File dataDir = new File(DATA_DIRECTORY);
+        File dataDir = new File(dataDirectory());
 
         // If the directory does not exist, attempt to create it
         if (!dataDir.exists()) {
@@ -93,7 +110,7 @@ public class Manager {
 
         // If no account files exist, print message and return
         if (accountFiles == null || accountFiles.length == 0) {
-            System.out.println("No account files found in: " + DATA_DIRECTORY);
+            System.out.println("No account files found in: " + dataDirectory());
             return;
         } // End if statement
 
@@ -116,7 +133,8 @@ public class Manager {
                 ensureAccountDirectory(account);
 
                 // Load reservations for this account
-                loadReservationsForAccount(account, new File(DATA_DIRECTORY, account.getAccountNumber()));
+                loadReservationsForAccount(account, new File(dataDirectory(), account.getAccountNumber()));
+
             } catch (IllegalLoad_Exception e) {
                 System.out.println("ERROR: Failed to load account from file: "
                         + accountFile.getName() + " | " + e.getMessage());
@@ -138,7 +156,7 @@ public class Manager {
      * Ensures that the account directory exists within the data directory.
      */
     private void ensureAccountDirectory(Account account) throws IllegalLoad_Exception {
-        File accountDir = new File(DATA_DIRECTORY, account.getAccountNumber());
+        File accountDir = new File(dataDirectory(), account.getAccountNumber());
         if (!accountDir.exists() && !accountDir.mkdirs()) {
             throw new IllegalLoad_Exception("Account Directory",
                     accountDir.getAbsolutePath(), account.getAccountNumber());
@@ -185,7 +203,7 @@ public class Manager {
             accounts.put(accountNumber, account);
 
             // Determine account directory (where Reservations should be located)
-            File accountDir = new File(DATA_DIRECTORY, accountNumber);
+            File accountDir = new File(dataDirectory(), accountNumber);
 
             // Ensure the account folder exists (if not, create it)
             if (!accountDir.exists()) {
@@ -336,7 +354,7 @@ public class Manager {
             throws IllegalLoad_Exception {
 
         // New file path for the reservation file based on account and reservation numbers
-        File reservationFile = new File(DATA_DIRECTORY + "/" + accountNumber + "/Reservations/" +
+        File reservationFile = new File(dataDirectory() + "/" + accountNumber + "/Reservations/" +
                 reservationNumber + ".txt");
 
         // Check if the reservation file exists; if not, throw an exception
@@ -472,11 +490,12 @@ public class Manager {
      */
     public void findReservation(String accountNumber, String reservationNumber) throws NullReservation_Exception {
 
-        // Normalize reservation number
-        reservationNumber = reservationNumber.trim().toUpperCase();
+        // Normalize account and  reservation numbers
+        String normalizedAccountNumber = accountNumber.trim().toUpperCase();
+        String normalizedReservationNumber = reservationNumber.trim().toUpperCase();
 
         // Retrieve account from Manager's list
-        Account account = accounts.get(accountNumber);
+        Account account = accounts.get(normalizedAccountNumber);
 
         // If account is null, try loading it from storage
         if (account == null) {
@@ -495,7 +514,7 @@ public class Manager {
         } // End for loop
 
         // Retrieve reservation
-        Reservation reservation = account.getReservation(reservationNumber);
+        Reservation reservation = account.getReservation(normalizedReservationNumber);
 
         // If reservation is not found in memory, attempt to load from file
         if (reservation == null) {
@@ -520,7 +539,7 @@ public class Manager {
      * @return The Account object if found, otherwise null.
      */
     private Account loadAccountIfExists(String accountNumber) {
-        File accountFile = new File(DATA_DIRECTORY + "/acc-" + accountNumber + ".txt");
+        File accountFile = new File(dataDirectory() + "/acc-" + accountNumber + ".txt");
 
         // Check if file exists before attempting to load
         if (!accountFile.exists()) {
@@ -659,9 +678,9 @@ public class Manager {
          * The file name follows the convention: ACCOUNTNUMBER.txt
          */
         // Define the directory structure.
-        // - The account's directory is stored inside the main DATA_DIRECTORY.
+        // - The account's directory is stored inside the main dataDirectory().
         // - The reservation files will be placed inside a "Reservations" subfolder.
-        File accountDir = new File(DATA_DIRECTORY, account.getAccountNumber()); // Account folder
+        File accountDir = new File(dataDirectory(), account.getAccountNumber()); // Account folder
         File reservationsDir = new File(accountDir, "Reservations"); // Reservations subfolder
 
         //Ensure that the account's directory exists.
@@ -835,7 +854,7 @@ public class Manager {
      */
     private static File ensureAccountDirectoriesExist(String accountNumber) throws IllegalSave_Exception {
         // Step 1: Define the account directory
-        File accountDir = new File(DATA_DIRECTORY, accountNumber);
+        File accountDir = new File(dataDirectory(), accountNumber);
 
         // Step 2: Define the Reservations subfolder inside the account folder
         File reservationsDir = new File(accountDir, "Reservations");

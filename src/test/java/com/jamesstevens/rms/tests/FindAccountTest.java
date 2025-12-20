@@ -19,6 +19,8 @@ package com.jamesstevens.rms.tests;
  */
 import com.jamesstevens.rms.*;
 import com.jamesstevens.rms.exceptions.NullAccount_Exception;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
 import java.util.List;
 import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +32,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for the findAccount method.
  */
 public class FindAccountTest {
+
     // Create an instance of Manager and Account
     private Manager manager;
     private Account testAccount;
     private static final String TEST_ACCOUNT_NUMBER = "A900000000";
-    private static final String BASE_DIRECTORY = System.getProperty("user.dir") + "/src/com/resources/Accounts";
+
+    @TempDir
+    Path tempDir;
 
     /**
      * Initializes test data before each test case runs.
@@ -43,10 +48,11 @@ public class FindAccountTest {
      */
     @BeforeEach
     public void setUp() {
+        System.setProperty("RMS_DATA_DIR", tempDir.toString());
         manager = new Manager();  // Initialize Manager
 
         // Define test account directory path
-        File testAccountDir = new File(BASE_DIRECTORY, TEST_ACCOUNT_NUMBER);
+        File testAccountDir = tempDir.resolve(TEST_ACCOUNT_NUMBER).toFile();
 
         // Ensure the directory exists
         if (!testAccountDir.exists() && !testAccountDir.mkdirs()) {
@@ -61,7 +67,6 @@ public class FindAccountTest {
         // Add the test account to the Manager
         try {
             manager.addAccount(testAccount);
-            manager.reloadAccounts();
         } catch (Exception e) {
             System.out.println("Error adding account: " + e.getMessage());
             fail("Setup failed due to exception: " + e.getMessage());

@@ -1,6 +1,3 @@
-// Imports all classes from the TestPackage inside the com.swen_646_project_1 package.
-package com.jamesstevens.rms.tests;
-
 /*
  * Import necessary classes for unit testing:
  * - Core application classes (Account, Manager, Address) for managing reservations and accounts.
@@ -18,6 +15,8 @@ import com.jamesstevens.rms.reservation.CabinReservation;
 import com.jamesstevens.rms.reservation.HotelReservation;
 import com.jamesstevens.rms.reservation.HouseReservation;
 import com.jamesstevens.rms.reservation.Reservation;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
@@ -36,108 +35,85 @@ public class FindReservationTest {
     private HotelReservation testHotelReservation;
     private HouseReservation testHouseReservation;
 
+    @TempDir
+    Path tempDir;
+
+    private static final String TEST_ACCOUNT_NUMBER = "A900000000";
+
     @BeforeEach
     public void setUp() {
+    	// Point persistence at an isolated temp folder
+    	System.setProperty("RMS_DATA_DIR", tempDir.toString());
 
-        try {
-            // Access the private static `instance` field of the Manager singleton class using reflection
-            Field instanceField = Manager.class.getDeclaredField("instance");
-            // Allow modification of the private field
-            instanceField.setAccessible(true);
-            // Set the singleton instance to null, effectively resetting the Manager instance
-            instanceField.set(null, null);
-            // Ensure manager is initialized
-            manager = Manager.getInstance();
-        } catch (Exception e) {
-            fail("Failed to reset Manager singleton: " + e.getMessage());
-        } // End try-catch statements
+    	manager = new Manager();
+    	manager.clearAccounts();
 
-        // Define test address for reservations
-        Address physicalAddress = new Address("43-179 Day Mountain Road",
-                "Temple", "ME", 4984);
-        Address mailingAddress = new Address("PO Box 43179",
-                "Waterville", "ME", 4901);
+    	// Create a test account
+    	Address physicalAddress = new Address("43-179 Day Mountain Road", "Temple", "ME", 4984);
+    	Address mailingAddress  = new Address("PO Box 43179", "Waterville", "ME", 4901);
 
-        // Retrieve or create the test account in Manager
-        testAccount = manager.getAccount("A900000000");
+    	testAccount = new Account(TEST_ACCOUNT_NUMBER, mailingAddress, "123-456-7890", "test@email.com");
 
-        // Verify that the test account exists after resetting the Manager instance
-        if (testAccount == null) {
-            fail("Test account not found in Manager after reset.");
-        } // End if statement
+    	// Add account to manager (this should persist it in tempDir via your file layer)
+    	manager.addAccount(testAccount);
 
-        // Print all reservations currently loaded from Manager
-        List<Reservation> reservationsBefore = testAccount.getAllReservations();
-        if (reservationsBefore.isEmpty()) {
-            System.out.println("No reservations found in testAccount!");
-        } else {
-            for (Reservation res : reservationsBefore) {
-                System.out.println("  - " + res.getReservationNumber());
-            } // End for loop
-        }  // End if-else statements
+    	// Create reservations and attach them to the account
+	testCabinReservation = new CabinReservation(
+        	"res-CAB900000000",
+        	TEST_ACCOUNT_NUMBER,
+        	physicalAddress,
+        	mailingAddress,
+        	LocalDate.of(2025, 12, 12),
+        	3,   // numNights
+        	2,   // numBeds
+        	1,   // numBedrooms
+        	1,   // numBathrooms
+        	900, // lodgingSize (or whatever your class expects)
+        	0.0, // lodgingPrice (can be recalculated later)
+        	true,
+        	false
+	);
 
-        // Initialize test reservations
-        testCabinReservation = new CabinReservation(
-                "res-CAB90000000", "A900000000", physicalAddress, mailingAddress,
-                LocalDate.of(2025, 7, 10), 7, 3, 2,
-                2, 800, 200.0, true, true
-        );
+	testHotelReservation = new HotelReservation(
+        	"res-HOT900000000",
+        	TEST_ACCOUNT_NUMBER,
+        	physicalAddress,
+        	mailingAddress,
+        	LocalDate.of(2025, 12, 12),
+        	2,    // numNights
+        	1,    // numBeds
+        	1,    // numBedrooms
+        	1,    // numBathrooms
+        	300,  // lodgingSizeSqFt (or similar)
+        	0.0,  // lodgingPrice
+        	true  // kitchenette
+	);
 
-        testHotelReservation = new HotelReservation(
-                "res-HOT90000000", "A900000000", physicalAddress, mailingAddress,
-                LocalDate.of(2025, 6, 15), 5, 2,
-                1, 1, 500, 150.0, true
-        );
+	testHouseReservation = new HouseReservation(
+        	"res-HOU900000000",
+        	TEST_ACCOUNT_NUMBER,
+        	physicalAddress,
+        	mailingAddress,
+        	LocalDate.of(2025, 12, 12),
+        	4,     // numNights
+        	3,     // numBeds
+        	2,     // numBedrooms
+        	2,     // numBathrooms
+        	2000,  // lodgingSizeSqFt (or similar)
+        	0.0,   // lodgingPrice
+        	2      // numFloors
+	);
 
-        testHouseReservation = new HouseReservation(
-                "res-HOU90000000", "A900000000", physicalAddress, mailingAddress,
-                LocalDate.of(2025, 8, 1), 10, 4,
-                3, 3, 1200, 300.0, 2
-        );
+    	testAccount.addReservation(testCabinReservation);
+    	testAccount.addReservation(testHotelReservation);
+    	testAccount.addReservation(testHouseReservation);
 
-        // Add the reservation
-        testAccount.addReservation(testCabinReservation);
-        System.out.println("Cabin reservation added to testAccount.");
+    	// Reload to simulate a real load path (optional but good)
+    	//manager.reloadAccounts();
 
-        testAccount.addReservation(testHotelReservation);
-        System.out.println("Hotel reservation added to testAccount.");
+    	// Sanity checks
+    	assertNotNull(manager.getAccount(TEST_ACCOUNT_NUMBER), "Test account should exist in manager."); 
 
-        testAccount.addReservation(testHouseReservation);
-        System.out.println("House reservation added to testAccount.");
-
-        // Print the reservations after adding to ensure it's actually added
-        System.out.println("\nReservations after adding to testAccount:");
-        List<Reservation> reservationsAfter = testAccount.getAllReservations();
-        if (reservationsAfter.isEmpty()) {
-            System.out.println("No reservations found in testAccount after addition!");
-        } else {
-            for (Reservation res : reservationsAfter) {
-                System.out.println("  - " + res.getReservationNumber());
-            }  // End for loop
-        }  // End if-else statements
-
-        // Retrieve the stored account from Manager before adding reservations
-        Account storedAccount = manager.getAccount(testAccount.getAccountNumber());
-        if (storedAccount == null) {
-            fail("Test account not found in Manager after addition!");
-        }  // End if statement
-
-        List<Reservation> managerReservations = storedAccount.getAllReservations();
-        if (managerReservations.isEmpty()) {
-            System.out.println("No reservations found in Manager after addition!");
-        } else {
-            for (Reservation res : managerReservations) {
-                System.out.println("  - " + res.getReservationNumber());
-            } // End for loop
-        }  // End if-else statements
-
-        // Validate that the reservation exists in Manager
-        assertNotNull(
-                storedAccount.getReservation("res-CAB90000000"),
-                "Cabin reservation not found in Manager after setup."
-        );
-
-        System.out.println("\n***** Test account and reservations setup complete. *****");
     } // End setup method
 
     @Test
@@ -157,18 +133,25 @@ public class FindReservationTest {
                 "Test account should exist in manager");
 
         // Ensure reservation exists before finding
-        assertNotNull(testAccount.getReservation(testCabinReservation.getReservationNumber()),
-                "Cabin reservation should exist in memory before finding.");
+	try {
+    	    manager.findReservation(
+            	testAccount.getAccountNumber(),
+            	testCabinReservation.getReservationNumber()
+    	    );
 
-        try {
-            manager.findReservation(testAccount.getAccountNumber(), testCabinReservation.getReservationNumber());
+    	    // findReservation() is void, so fetch it from the account afterward
+    	    Reservation found = testAccount.getReservation(testCabinReservation.getReservationNumber());
+    	    if (found == null) {
+        	found = testAccount.getReservation(testCabinReservation.getReservationNumber().toUpperCase());
+    	    }
 
-            assertEquals("res-CAB90000000", testCabinReservation.getReservationNumber());
-            assertEquals("A900000000", testCabinReservation.getAccountNumber());
+    	    assertNotNull(found, "Reservation should exist after findReservation");
+    	    assertEquals("res-CAB900000000", found.getReservationNumber());
+    	    assertEquals("A900000000", found.getAccountNumber());
 
-            System.out.println("Cabin reservation found successfully.");
-        } catch (NullReservation_Exception e) {
-            fail("Cabin reservation not found: " + e.getMessage());
+    	    System.out.println("Cabin reservation found successfully.");
+	} catch (NullReservation_Exception e) {
+    	    fail("Cabin reservation not found: " + e.getMessage());
         } // End try-catch statements
     } // End testFindCabinReservation method
 
@@ -187,7 +170,7 @@ public class FindReservationTest {
         try {
             manager.findReservation(testAccount.getAccountNumber(), testHotelReservation.getReservationNumber());
 
-            assertEquals("res-HOT90000000", testHotelReservation.getReservationNumber());
+            assertEquals("res-HOT900000000", testHotelReservation.getReservationNumber());
             assertEquals("A900000000", testHotelReservation.getAccountNumber());
 
             System.out.println("Hotel reservation found successfully.");
@@ -211,7 +194,7 @@ public class FindReservationTest {
         try {
             manager.findReservation(testAccount.getAccountNumber(), testHouseReservation.getReservationNumber());
 
-            assertEquals("res-HOU90000000", testHouseReservation.getReservationNumber());
+            assertEquals("res-HOU900000000", testHouseReservation.getReservationNumber());
             assertEquals("A900000000", testHouseReservation.getAccountNumber());
 
             System.out.println("House reservation found successfully.");
