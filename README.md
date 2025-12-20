@@ -94,7 +94,7 @@ Failures are explicit, traceable, and covered by automated tests.
 ### Run tests
 ```bash
 mvn clean test
-
+```
 ---
 
 ## Run (CLI)
