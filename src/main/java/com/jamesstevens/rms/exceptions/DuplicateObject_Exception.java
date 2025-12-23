@@ -1,22 +1,23 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms.exceptions;
 
-/*
- * Exception thrown when a duplicate object is encountered.
- * This can occur when attempting to insert an object that already exists
- * in a collection, database, or any system that enforces uniqueness.
- * The generated exception message should indicate the account number and/or reservation number and why it failed.
+/**
+ * Runtime exception thrown when a duplicate object is encountered where uniqueness is required.
+ * <p>
+ * This commonly occurs when attempting to insert an object that already exists in a collection,
+ * database, or any system enforcing unique keys.
+ * </p>
  */
 public class DuplicateObject_Exception extends RuntimeException {
 
     /**
-     * Constructor for DuplicateObject_Exception.
-     * @param accountNumber The account number associated with the duplicate object.
-     * @param reservationNumber The reservation number associated with the duplicate object.
+     * Creates a new {@code DuplicateObject_Exception}.
+     *
+     * @param accountNumber     the account number associated with the duplicate object
+     * @param reservationNumber the reservation number associated with the duplicate object
      */
     public DuplicateObject_Exception(String accountNumber, String reservationNumber) {
         super("Duplicate entry detected | Account: " + accountNumber + ", Reservation: " + reservationNumber);
-    } // End DuplicateObject_Exception constructor
+    }
+}
 
-} // End DuplicateObject_Exception class
 

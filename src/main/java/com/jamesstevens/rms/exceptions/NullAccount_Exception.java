@@ -1,21 +1,21 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms.exceptions;
 
-/*
- * Throws NullAccount_Exception if an account is missing or not found.
- *    - User tries to perform an action on a non-existent account. ("Account not found.")
- *    - User tries to create a directory or save data for a missing account. ("Cannot proceed with a missing account.")
- * The generated exception message should indicate the account number (if available) and why it failed.
+/**
+ * Runtime exception thrown when an account is missing, not found, or otherwise unavailable.
+ * <p>
+ * This is typically raised when an operation is attempted on a non-existent account, or when
+ * persistence-related actions require an account that is not present.
+ * </p>
  */
 public class NullAccount_Exception extends RuntimeException {
 
     /**
-     * Constructor for NullAccount_Exception.
-     * @param accountNumber The account number associated with the error (or "N/A" if unknown).
-     * @param reason The reason why the operation is not allowed.
+     * Creates a new {@code NullAccount_Exception}.
+     *
+     * @param accountNumber the account number associated with the failure, or {@code "N/A"} if unknown
+     * @param reason        a human-readable explanation of why the operation is not allowed
      */
     public NullAccount_Exception(String accountNumber, String reason) {
         super("Account error: " + reason + " | Account: " + accountNumber);
-    } // End NullAccount_Exception constructor
-
-} // End NullAccount_Exception class
+    }
+}

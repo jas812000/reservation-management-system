@@ -1,43 +1,37 @@
-// Imports all classes from the TestPackage inside the com.swen_646_project_1 package.
 package com.jamesstevens.rms.tests;
 
-/*
- * Imports the `Manager` class for managing accounts and reservations.
- * - `Manager`: Provides system-wide management of accounts and reservations.
- */
 import com.jamesstevens.rms.Manager;
 
-/*
- * Singleton class to provide a shared `Manager` instance across tests.
- * The `TestManager` class ensures that all test cases use the same instance of
- * `Manager` to maintain consistency in account and reservation management.
+/**
+ * Provides a shared {@link Manager} instance for interactive/manual test classes.
+ * <p>
+ * This class lazily initializes a single {@code Manager} instance. It does not repeatedly
+ * reload storage because {@link Manager#getAccounts()} already triggers a reload in your
+ * current implementation.
+ * </p>
  */
-public class TestManager {
-    // Creates an instance of manager
-    private static Manager manager = null;
+public final class TestManager {
+
+    private static Manager manager;
+
+    private TestManager() {
+        // Utility class; no instances
+    }
 
     /**
-     * Returns the shared Manager instance.
-     * Ensures only one instance is used throughout the application.
-     * @return The Manager instance.
+     * Returns the shared {@link Manager} instance for interactive/manual tests.
+     * <p>
+     * A {@link Manager} loads persisted state during construction. Since your
+     * {@link Manager#getAccounts()} method already reloads from disk, this method avoids
+     * extra reload calls to prevent redundant I/O and confusing test behavior.
+     * </p>
+     *
+     * @return shared manager instance
      */
     public static Manager getManager() {
         if (manager == null) {
-            manager = new Manager(); // Create only if not already initialized
-        } // End if statement
-
-        // Ensure accounts are loaded
-        if (manager.getAccounts().isEmpty()) {
-            System.out.println("Reloading accounts to ensure consistency...");
-            manager.reloadAccounts();
-        } // End if statement
-
-        // Check again after reload, if still empty, warn the user
-        if (manager.getAccounts().isEmpty()) {
-            System.out.println("Warning: No accounts were loaded after reloading storage.");
-        }  // End if statement
-
+            manager = new Manager();
+        }
         return manager;
-    } // End getManager method
-} // End TestManager class
-
+    }
+}

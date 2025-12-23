@@ -1,65 +1,72 @@
-// Imports all classes from the TestPackage inside the com.swen_646_project_1 package.
 package com.jamesstevens.rms.tests;
 
-/*
- * Imports necessary classes for managing reservations in the Reservation Management System.
- * - `Account`: Represents a user account in the reservation system.
- * - `Manager`: Handles system-wide account and reservation management.
- * - `DuplicateObject_Exception`: Custom exception for handling duplicate reservations.
- * - `CabinReservation`, `HotelReservation`, `HouseReservation`, `Reservation`:
- *   Different types of lodging reservations supported in the system.
- * - `Address`: Represents the physical address associated with reservations.
- * - `LocalDate`: Used to manage reservation start dates and durations.
- * - `Scanner`: Facilitates user input for interactive command-line operations.
- */
 import com.jamesstevens.rms.Account;
+import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.Manager;
 import com.jamesstevens.rms.exceptions.DuplicateObject_Exception;
 import com.jamesstevens.rms.reservation.CabinReservation;
 import com.jamesstevens.rms.reservation.HotelReservation;
 import com.jamesstevens.rms.reservation.HouseReservation;
 import com.jamesstevens.rms.reservation.Reservation;
-import com.jamesstevens.rms.Address;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
 /**
- * Handles adding reservations for different lodging types.
+ * Interactive/manual test utility for adding a new reservation to an existing account.
+ * <p>
+ * This class is intentionally <b>not</b> a JUnit test. It is used for manual runs from a main method
+ * or test harness to exercise the "add reservation" workflow.
+ * </p>
+ * <p>
+ * Address rules enforced here:
+ * </p>
+ * <ul>
+ *     <li><b>Cabin</b>: physical and mailing addresses may differ.</li>
+ *     <li><b>Hotel/House</b>: mailing address is forced to match physical address.</li>
+ * </ul>
  */
+@SuppressWarnings("unused")
 public class AddReservationTest {
+
     /**
-     * Prompts the user to enter reservation details and creates a new reservation.
+     * Prompts for account and reservation details and adds a new reservation to the selected account.
+     * <p>
+     * This method assumes:
+     * </p>
+     * <ul>
+     *     <li>At least one account exists in storage.</li>
+     *     <li>User input is provided via the console.</li>
+     * </ul>
+     * <p>
+     * If the reservation is successfully added, it will be persisted through the normal save path
+     * (via {@link Account#addReservation(Reservation)}).
+     * </p>
      */
     public static void testAddReservation() {
-        // Instantiate scanner and manager objects
         Scanner scanner = new Scanner(System.in);
-        Manager manager = TestManager.getManager(); // Ensure using shared instance
+        Manager manager = TestManager.getManager();
 
-        // Retrieve all accounts from the Manager
         List<Account> accounts = manager.getAccounts();
-
-        // Check if there are any accounts to display
         if (accounts.isEmpty()) {
             System.out.println("No existing accounts found.");
             return;
-        } // End if statement
+        }
 
-        // Loop to display all accounts for selection
         System.out.println("\nExisting Accounts:");
         for (Account acc : accounts) {
             System.out.println("- " + acc.getAccountNumber());
-        } // End for loop
+        }
 
         System.out.print("\nEnter account number for reservation: ");
-        String accountNumber = scanner.nextLine().trim();
+        String accountNumber = scanner.nextLine().trim().toUpperCase();
 
-        // Retrieve the account from the manager
         Account account = manager.getAccount(accountNumber);
         if (account == null) {
             System.out.println("Error: Account not found. Please check the account number.");
             return;
-        } // End if statement
+        }
 
         System.out.println("Select reservation type: ");
         System.out.println("1 - Cabin");
@@ -67,38 +74,24 @@ public class AddReservationTest {
         System.out.println("3 - House");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        scanner.nextLine(); // consume newline
 
         String reservationType = switch (choice) {
             case 1 -> "Cabin";
             case 2 -> "Hotel";
             case 3 -> "House";
             default -> throw new IllegalArgumentException("Unknown reservation type: " + choice);
-        }; // End switch statement
+        };
 
-        // Generate unique reservation number
         String reservationNumber = manager.getNewReservationNumber(reservationType);
 
-        // Declare variables to store reservation details
-        // Stores the physical address of the lodging for the reservation
         Address physicalAddress;
-
-        // Stores the mailing address of the lodging
-        // This may be different from the physical address for certain reservation types
         Address mailingAddress;
 
-        // Specifies the start date of the reservation
-        // Here, it's set to June 15, 2025
         LocalDate startDate = LocalDate.of(2025, 6, 15);
-
-        // Defines the total number of nights the reservation will last
         int numNights = 8;
-
-        // Stores the price per night for the lodging
-        // The price is set to $150.00 per night
         double pricePerNight = 150.0;
 
-        // Cabin Reservation requires both physical and mailing addresses
         if (choice == 1) {
             System.out.println("\nEnter Physical Address");
             physicalAddress = TestHelper.getUserAddressInput();
@@ -108,33 +101,38 @@ public class AddReservationTest {
         } else {
             System.out.println("\nEnter Address:");
             physicalAddress = TestHelper.getUserAddressInput();
-            mailingAddress = physicalAddress; // Mailing address is the same for Hotel and House
-        } // End if-else statements
 
-        // Create appropriate reservation type based on user choice
-        Reservation newReservation;
-        switch (choice) {
-            case 1 -> newReservation = new CabinReservation(
+            /*
+             * IMPORTANT: Hotel/House mailing address must never diverge from physical.
+             * Force mailing to match physical.
+             */
+            mailingAddress = physicalAddress;
+        }
+
+        Reservation newReservation = switch (choice) {
+            case 1 -> new CabinReservation(
                     reservationNumber, accountNumber, physicalAddress, mailingAddress,
                     startDate, numNights, 2, 1, 1,
-                    500, pricePerNight, true, false);
-            case 2 -> newReservation = new HotelReservation(
-                    reservationNumber, accountNumber, physicalAddress, mailingAddress,
+                    500, pricePerNight, true, false
+            );
+            case 2 -> new HotelReservation(
+                    reservationNumber, accountNumber, physicalAddress, physicalAddress,
                     startDate, numNights, 2, 1, 1,
-                    500, pricePerNight, true);
-            case 3 -> newReservation = new HouseReservation(
-                    reservationNumber, accountNumber, physicalAddress, mailingAddress,
+                    500, pricePerNight, true
+            );
+            case 3 -> new HouseReservation(
+                    reservationNumber, accountNumber, physicalAddress, physicalAddress,
                     startDate, numNights, 2, 1, 1,
-                    500, pricePerNight, 2);
+                    500, pricePerNight, 2
+            );
             default -> throw new IllegalStateException("Unexpected value: " + choice);
-        } // End switch statements
+        };
 
-        // Try adding the reservation to the account and handle exceptions
         try {
-            manager.getAccount(accountNumber).addReservation(newReservation);
+            account.addReservation(newReservation);
             System.out.println("Reservation " + reservationNumber + " added successfully.");
         } catch (DuplicateObject_Exception e) {
             System.out.println("Reservation already exists.");
-        } // End try-catch statements
-    } // End testAddReservation method
-} // End AddReservationTest class
+        }
+    }
+}

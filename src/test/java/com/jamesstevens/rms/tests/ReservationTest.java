@@ -1,50 +1,60 @@
-// Imports all classes from the TestPackage inside the com.swen_646_project_1 package.
 package com.jamesstevens.rms.tests;
 
-/*
- * Imports necessary classes for testing reservation functionalities.
- * - `Address`: Represents the physical address associated with a reservation.
- * - `HotelReservation`, `CabinReservation`, `HouseReservation`: Different lodging types available in the system.
- * - `BeforeEach`: JUnit 5 annotation to set up test data before each test.
- * - `Test`: JUnit 5 annotation to define unit test cases.
- * - `LocalDate`: Used for handling reservation start dates.
- * - `Assertions.*`: Provides methods for verifying expected outcomes in unit tests.
- */
 import com.jamesstevens.rms.Address;
-import com.jamesstevens.rms.reservation.HotelReservation;
+import com.jamesstevens.rms.exceptions.IllegalOperation_Exception;
 import com.jamesstevens.rms.reservation.CabinReservation;
+import com.jamesstevens.rms.reservation.HotelReservation;
 import com.jamesstevens.rms.reservation.HouseReservation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit test class for testing reservation functionalities.
- * This class verifies that different types of reservations
- * (Hotel, Cabin, and House) correctly handle attributes like:
- * - Number of beds, bedrooms, and bathrooms.
- * - Lodging size in square feet.
- * - Special features such as a kitchenette, loft, or multiple floors.
+ * Unit tests for verifying core reservation attributes across all reservation types.
+ * <p>
+ * This test suite validates that {@link CabinReservation}, {@link HotelReservation},
+ * and {@link HouseReservation} correctly store and expose their fields.
+ * </p>
+ * <p>
+ * It also validates the system's address invariants:
+ * </p>
+ * <ul>
+ *     <li><b>Hotel/House</b>: Mailing address must never diverge from physical address.</li>
+ *     <li><b>Cabin</b>: Mailing address may diverge from physical address.</li>
+ * </ul>
  */
 public class ReservationTest {
-    // Declare attributes for different reservation types
+
     private HotelReservation hotelReservation;
     private CabinReservation cabinReservation;
     private HouseReservation houseReservation;
 
     /**
-     * Initializes test data before each test case runs.
-     * Creates sample reservations for a hotel, cabin, and house.
+     * Initializes sample reservations before each test.
+     * <p>
+     * Cabin reservations use separate physical and mailing addresses.
+     * Hotel and House reservations use the same address for both physical and mailing.
+     * </p>
      */
     @BeforeEach
     public void setUp() {
-        Address physicalAddress = new Address("43-179 Day Mountain Road", "Temple",
-                "ME", Integer.parseInt("04984"));
-        Address mailingAddress = new Address("PO Box 43179", "Waterville",
-                "ME", Integer.parseInt("04901"));
+        Address physicalAddress = new Address(
+                "43-179 Day Mountain Road",
+                "Temple",
+                "ME",
+                4984
+        );
 
-        // Cabin Reservation
+        Address mailingAddress = new Address(
+                "PO Box 43179",
+                "Waterville",
+                "ME",
+                4901
+        );
+
         cabinReservation = new CabinReservation(
                 "res-CAB90000000",
                 "A900000000",
@@ -61,7 +71,6 @@ public class ReservationTest {
                 true
         );
 
-        // Hotel Reservation
         hotelReservation = new HotelReservation(
                 "res-HOT90000000",
                 "A900000001",
@@ -77,7 +86,6 @@ public class ReservationTest {
                 true
         );
 
-        // House Reservation
         houseReservation = new HouseReservation(
                 "res-HOU90000000",
                 "A900000002",
@@ -92,402 +100,157 @@ public class ReservationTest {
                 300.0,
                 2
         );
-    } // End setUp method
+    }
 
-    // ====================== CABIN TESTS ======================
+    /* ====================== CABIN TESTS ====================== */
 
     /**
-     * Tests if the cabin reservation returns the correct account number.
+     * Verifies that a cabin reservation stores its identifiers correctly.
      */
     @Test
-    public void testCabinGetReservationNumber() {
-        System.out.println("Cabin Reservation Number Entered: res-CAB90000000");
-        System.out.println("Cabin Reservation Number Retrieved: " + cabinReservation.getReservationNumber());
+    public void testCabinReservationIdentifiers() {
         assertEquals("res-CAB90000000", cabinReservation.getReservationNumber());
-    } // End testCabinGetReservationNumber method
-
-    /**
-     * Tests if the cabin reservation returns the correct reservation number.
-     */
-    @Test
-    public void testCabinGetAccountNumber() {
-        System.out.println("Cabin Account Number Entered: A900000000");
-        System.out.println("Cabin Account Number Retrieved: " + cabinReservation.getAccountNumber());
         assertEquals("A900000000", cabinReservation.getAccountNumber());
-    } // End testCabinGetAccountNumber method
+    }
 
     /**
-     * Tests if the cabin reservation returns the correct physical address.
+     * Verifies that a cabin reservation stores separate physical and mailing addresses.
      */
     @Test
-    public void testCabinGetPhysicalAddress() {
-        // Define expected values
-        String expectedStreet = "43-179 Day Mountain Road";
-        String expectedCity = "Temple";
-        String expectedState = "ME";
-        int expectedZipCode = 4984;  // ZIP code as an integer
+    public void testCabinAddresses() {
+        Address physical = cabinReservation.getLodgingPhysicalAddress();
+        Address mailing = cabinReservation.getLodgingMailingAddress();
 
-        // Retrieve actual values from the reservation object
-        Address retrievedAddress = cabinReservation.getLodgingPhysicalAddress();
+        assertEquals("43-179 Day Mountain Road", physical.getStreet());
+        assertEquals("Temple", physical.getCity());
+        assertEquals("ME", physical.getState());
+        assertEquals(4984, physical.getZipCode());
 
-        // Print entered vs. retrieved values
-        System.out.println("Cabin Physical Address Entered: "
-                + expectedStreet + ", " + expectedCity + ", " + expectedState + ", " + expectedZipCode);
-        System.out.println("Cabin Physical Address Retrieved: " + retrievedAddress);
-
-        // Assertions to verify correctness
-        assertEquals(expectedStreet, retrievedAddress.getStreet());
-        assertEquals(expectedCity, retrievedAddress.getCity());
-        assertEquals(expectedState, retrievedAddress.getState());
-        assertEquals(expectedZipCode, retrievedAddress.getZipCode());
-    } // End testCabinGetPhysicalAddress method
+        assertEquals("PO Box 43179", mailing.getStreet());
+        assertEquals("Waterville", mailing.getCity());
+        assertEquals("ME", mailing.getState());
+        assertEquals(4901, mailing.getZipCode());
+    }
 
     /**
-     * Tests if the cabin reservation returns the correct mailing address.
+     * Verifies that a cabin reservation stores its non-address attributes correctly.
      */
     @Test
-    public void testCabinGetMailingAddress() {
-        // Define expected values
-        String expectedStreet = "PO Box 43179";
-        String expectedCity = "Waterville";
-        String expectedState = "ME";
-        int expectedZipCode = 4901;  // ZIP code as an integer (04901 → 4901)
-
-        // Retrieve actual values from the reservation object
-        Address retrievedAddress = cabinReservation.getLodgingMailingAddress();
-
-        // Print entered vs. retrieved values
-        System.out.println("Cabin Mailing Address Entered: "
-                + expectedStreet + ", " + expectedCity + ", " + expectedState + ", " + expectedZipCode);
-        System.out.println("Cabin Mailing Address Retrieved: " + retrievedAddress);
-
-        // Assertions to verify correctness
-        assertEquals(expectedStreet, retrievedAddress.getStreet());
-        assertEquals(expectedCity, retrievedAddress.getCity());
-        assertEquals(expectedState, retrievedAddress.getState());
-        assertEquals(expectedZipCode, retrievedAddress.getZipCode());
-    } // End testCabinGetMailingAddress method
-
-    /**
-     * Tests if the cabin reservation returns the correct date.
-     */
-    @Test
-    public void testCabinGetReservationDate() {
-        System.out.println("Cabin Reservation Date Entered: 2025-07-10");
-        System.out.println("Cabin Reservation Date Retrieved: " + cabinReservation.getStartDate());
+    public void testCabinAttributes() {
         assertEquals(LocalDate.of(2025, 7, 10), cabinReservation.getStartDate());
-    } // End testCabinGetReservationDate method
-
-    /**
-     * Tests if the cabin reservation returns the correct number of nights.
-     */
-    @Test
-    public void testCabinGetNumNights() {
-        System.out.println("Cabin Number of Nights Entered: 7");
-        System.out.println("Cabin Number of Nights Retrieved: " + cabinReservation.getNumNights());
         assertEquals(7, cabinReservation.getNumNights());
-    } // End testCabinGetNumNights method
-
-    /**
-     * Tests if the cabin reservation returns the correct number of beds.
-     */
-    @Test
-    public void testCabinGetNumBeds() {
-        System.out.println("Cabin Beds Entered: 3");
-        System.out.println("Cabin Beds Retrieved: " + cabinReservation.getNumBeds());
         assertEquals(3, cabinReservation.getNumBeds());
-    } // End testCabinGetNumBeds method
-
-    /**
-     * Tests if the cabin reservation returns the correct number of bathrooms.
-     */
-    @Test
-    public void testCabinGetNumBedrooms() {
-        System.out.println("Cabin Bedrooms Entered: 2");
-        System.out.println("Cabin Bedrooms Retrieved: " + cabinReservation.getNumBedrooms());
         assertEquals(2, cabinReservation.getNumBedrooms());
-    } // End testCabinGetNumBedrooms method
-
-    /**
-     * Tests if the cabin reservation returns the correct number of bathrooms.
-     */
-    @Test
-    public void testCabinGetNumBathrooms() {
-        System.out.println("Cabin Bathrooms Entered: 2");
-        System.out.println("Cabin Bathrooms Retrieved: " + cabinReservation.getNumBathrooms());
         assertEquals(2, cabinReservation.getNumBathrooms());
-    } // End testCabinGetNumBathrooms method
-
-    /**
-     * Tests if the cabin reservation returns the correct lodging size.
-     */
-    @Test
-    public void testCabinGetLodgingSize() {
-        System.out.println("Cabin Lodging Size Entered: 800 sqft");
-        System.out.println("Cabin Lodging Size Retrieved: " + cabinReservation.getLodgingSizeSqFt() + " sqft");
         assertEquals(800, cabinReservation.getLodgingSizeSqFt());
-    } // End testCabinGetLodgingSize method
-
-    /**
-     * Tests if the cabin reservation returns the correct price.
-     */
-    @Test
-    public void testCabinGetLodgingPrice() {
-        System.out.printf("Cabin Lodging Price Per Night Entered: $%.2f%n", 200.00);
-        System.out.printf("Cabin Lodging Price Per Night Retrieved: $%.2f%n", cabinReservation.getLodgingPrice());
-        assertEquals(200.00, cabinReservation.getLodgingPrice(), 0.01);
-    } // End testCabinGetLodgingPrice method
-
-    /**
-     * Tests if the cabin has a full kitchen available.
-     */
-    @Test
-    public void testCabinHasFullKitchen() {
-        System.out.println("Cabin Kitchen Available: true");
-        System.out.println("Retrieved: " + cabinReservation.isFullKitchenAvailable());
+        assertEquals(200.0, cabinReservation.getLodgingPrice(), 0.01);
         assertTrue(cabinReservation.isFullKitchenAvailable());
-    } // End testCabinHasFullKitchen method
-
-    /**
-     * Tests if the cabin has a loft available.
-     */
-    @Test
-    public void testCabinHasLoft() {
-        System.out.println("Cabin Kitchen Available: true");
-        System.out.println("Retrieved: " + cabinReservation.isLoftAvailable());
         assertTrue(cabinReservation.isLoftAvailable());
-    } // End testCabinHasLoft method
-
-
-    // ====================== HOTEL TESTS ======================
+    }
 
     /**
-     * Tests if the Hotel reservation returns the correct account number.
+     * Verifies that cabin reservations allow mailing address to diverge from physical address.
+     * <p>
+     * This enforces the business rule that cabins may have distinct mailing and physical addresses.
+     * </p>
      */
     @Test
-    public void testHotelGetReservationNumber() {
-        System.out.println("Hotel Reservation Number Entered: res-HOT90000000");
-        System.out.println("Hotel Reservation Number Retrieved: " + hotelReservation.getReservationNumber());
+    public void testCabinMailingCanDivergeFromPhysical() {
+        cabinReservation.setLodgingPhysicalAddress("10 Pine", "Portland", "ME", 4101);
+        cabinReservation.setLodgingMailingAddress("PO Box 77", "Bangor", "ME", 4401);
+
+        assertNotEquals(
+                cabinReservation.getLodgingPhysicalAddress().toString(),
+                cabinReservation.getLodgingMailingAddress().toString()
+        );
+    }
+
+    /* ====================== HOTEL TESTS ====================== */
+
+    /**
+     * Verifies that a hotel reservation stores its identifiers correctly.
+     */
+    @Test
+    public void testHotelReservationIdentifiers() {
         assertEquals("res-HOT90000000", hotelReservation.getReservationNumber());
-    } // End testHotelGetReservationNumber method
-
-    /**
-     * Tests if the Hotel reservation returns the correct reservation number.
-     */
-    @Test
-    public void testHotelGetAccountNumber() {
-        System.out.println("Hotel Account Number Entered: A900000001");
-        System.out.println("Hotel Account Number Retrieved: " + hotelReservation.getAccountNumber());
         assertEquals("A900000001", hotelReservation.getAccountNumber());
-    } // End testHotelGetAccountNumber method
+    }
 
     /**
-     * Tests if the Hotel reservation returns the correct physical address.
+     * Verifies that a hotel reservation stores its non-address attributes correctly.
      */
     @Test
-    public void testHotelGetPhysicalAddress() {
-        System.out.println("Hotel Physical Address Entered: 43-179 Day Mountain Road, Temple, ME, 04984");
-        System.out.println("Hotel Physical Address Retrieved: " + hotelReservation.getLodgingPhysicalAddress());
-        assertEquals("43-179 Day Mountain Road", hotelReservation.getLodgingPhysicalAddress().getStreet());
-        assertEquals("Temple", hotelReservation.getLodgingPhysicalAddress().getCity());
-        assertEquals("ME", hotelReservation.getLodgingPhysicalAddress().getState());
-        assertEquals(4984, hotelReservation.getLodgingPhysicalAddress().getZipCode());
-    } // End testHotelGetPhysicalAddress method
-
-    /**
-     * Tests if the Hotel reservation returns the correct date.
-     */
-    @Test
-    public void testHotelGetReservationDate() {
-        System.out.println("Hotel Reservation Date Entered: 2025-06-15");
-        System.out.println("Hotel Reservation Date Retrieved: " + hotelReservation.getStartDate());
+    public void testHotelAttributes() {
         assertEquals(LocalDate.of(2025, 6, 15), hotelReservation.getStartDate());
-    } // End testHotelGetReservationDate method
-
-    /**
-     * Tests if the Hotel reservation returns the correct number of nights.
-     */
-    @Test
-    public void testHotelGetNumNights() {
-        System.out.println("Hotel Number of Nights Entered: 5");
-        System.out.println("Hotel Number of Nights Retrieved: " + hotelReservation.getNumNights());
         assertEquals(5, hotelReservation.getNumNights());
-    } // End testHotelGetNumNights method
-
-    /**
-     * Tests if the hotel reservation returns the correct number of beds.
-     */
-    @Test
-    public void testHotelGetNumBeds() {
-        System.out.println("Hotel Beds Entered: 2");
-        System.out.println("Hotel Beds Retrieved: " + hotelReservation.getNumBeds());
         assertEquals(2, hotelReservation.getNumBeds());
-    } // End testHotelGetNumBeds method
-
-    /**
-     * Tests if the hotel reservation returns the correct number of bedrooms.
-     */
-    @Test
-    public void testHotelGetNumBedrooms() {
-        System.out.println("Hotel Bedrooms Entered: 1");
-        System.out.println("Hotel Bedrooms Retrieved: " + hotelReservation.getNumBedrooms());
         assertEquals(1, hotelReservation.getNumBedrooms());
-    } // End testHotelGetNumBedrooms method
-
-    /**
-     * Tests if the hotel reservation returns the correct number of bathrooms.
-     */
-    @Test
-    public void testHotelGetNumBathrooms() {
-        System.out.println("Hotel Bathrooms Entered: 1");
-        System.out.println("Hotel Bathrooms Retrieved: " + hotelReservation.getNumBathrooms());
         assertEquals(1, hotelReservation.getNumBathrooms());
-    } // End testHotelGetNumBathrooms method
-
-    /**
-     * Tests if the hotel reservation returns the correct lodging size in square feet.
-     */
-    @Test
-    public void testHotelGetLodgingSizeSqFt() {
-        System.out.println("Hotel Square Footage Entered: 500 sqft");
-        System.out.println("Hotel Square Footage Retrieved: " + hotelReservation.getLodgingSizeSqFt());
         assertEquals(500, hotelReservation.getLodgingSizeSqFt());
-    } // End testHotelGetLodgingSizeSqFt method
-
-    /**
-     * Tests if the Hotel reservation returns the correct price.
-     */
-    @Test
-    public void testHotelGetLodgingPrice() {
-        System.out.printf("Hotel Lodging Price Per Night Entered: $%.2f%n", 150.00);
-        System.out.printf("Hotel Lodging Price Per Night Retrieved: $%.2f%n", hotelReservation.getLodgingPrice());
-        assertEquals(150.00, hotelReservation.getLodgingPrice(), 0.01);
-    } // End testHotelGetLodgingPrice method
-
-    /**
-     * Tests if the Hotel has a full kitchenette available.
-     */
-    @Test
-    public void testHotelHasFullKitchenette() {
-        System.out.println("Hotel Kitchenette Available: true");
-        System.out.println("Hotel Kitchenette Retrieved: " + hotelReservation.hasKitchenette());
+        assertEquals(150.0, hotelReservation.getLodgingPrice(), 0.01);
         assertTrue(hotelReservation.hasKitchenette());
-    } // End testHotelHasFullKitchen method
-
-
-// ====================== HOUSE TESTS ======================
+    }
 
     /**
-     * Tests if the Hotel reservation returns the correct account number.
+     * Verifies the hotel invariant that mailing address must not diverge from physical address.
+     * <p>
+     * Updating physical address must also update mailing to match.
+     * Attempting to explicitly set a separate mailing address should be rejected.
+     * </p>
      */
     @Test
-    public void testHouseGetReservationNumber() {
-        System.out.println("House Reservation Number Entered: res-HOU90000000");
-        System.out.println("House Reservation Number Retrieved: " + houseReservation.getReservationNumber());
+    public void testHotelMailingCannotDivergeFromPhysical() {
+        hotelReservation.setLodgingPhysicalAddress("1 Main", "Dallas", "TX", 75001);
+
+        assertEquals(
+                hotelReservation.getLodgingPhysicalAddress().toString(),
+                hotelReservation.getLodgingMailingAddress().toString()
+        );
+
+        assertThrows(IllegalOperation_Exception.class, () ->
+                hotelReservation.setLodgingMailingAddress("PO Box 9", "Dallas", "TX", 75002)
+        );
+    }
+
+    /* ====================== HOUSE TESTS ====================== */
+
+    /**
+     * Verifies that a house reservation stores its identifiers correctly.
+     */
+    @Test
+    public void testHouseReservationIdentifiers() {
         assertEquals("res-HOU90000000", houseReservation.getReservationNumber());
-    } // End testHouseGetReservationNumber method
-
-    /**
-     * Tests if the House reservation returns the correct reservation number.
-     */
-    @Test
-    public void testHouseGetAccountNumber() {
-        System.out.println("House Account Number Entered: A900000002");
-        System.out.println("House Account Number Retrieved: " + houseReservation.getAccountNumber());
         assertEquals("A900000002", houseReservation.getAccountNumber());
-    } // End testHouseGetAccountNumber method
+    }
 
     /**
-     * Tests if the House reservation returns the correct physical address.
+     * Verifies that a house reservation stores its non-address attributes correctly.
      */
     @Test
-    public void testHouseGetPhysicalAddress() {
-        System.out.println("House Physical Address Entered: 43-179 Day Mountain Road, Temple, ME, 04984");
-        System.out.println("House Physical Address Retrieved: " + houseReservation.getLodgingPhysicalAddress());
-        assertEquals("43-179 Day Mountain Road", houseReservation.getLodgingPhysicalAddress().getStreet());
-        assertEquals("Temple", houseReservation.getLodgingPhysicalAddress().getCity());
-        assertEquals("ME", houseReservation.getLodgingPhysicalAddress().getState());
-        assertEquals(4984, houseReservation.getLodgingPhysicalAddress().getZipCode());
-    } // End testHouseGetPhysicalAddress method
-
-    /**
-     * Tests if the House reservation returns the correct date.
-     */
-    @Test
-    public void testHouseGetReservationDate() {
-        System.out.println("House Reservation Date Entered: 2025-08-01");
-        System.out.println("House Reservation Date Retrieved: " + houseReservation.getStartDate());
+    public void testHouseAttributes() {
         assertEquals(LocalDate.of(2025, 8, 1), houseReservation.getStartDate());
-    } // End testHouseGetReservationDate method
-
-    /**
-     * Tests if the House reservation returns the correct number of nights.
-     */
-    @Test
-    public void testHouseGetNumNights() {
-        System.out.println("House Number of Nights Entered: 10");
-        System.out.println("House Number of Nights Retrieved: " + houseReservation.getNumNights());
         assertEquals(10, houseReservation.getNumNights());
-    } // End testHouseGetNumNights method
-
-    /**
-     * Tests if the House reservation returns the correct number of beds.
-     */
-    @Test
-    public void testHouseGetNumBeds() {
-        System.out.println("House Beds Entered: 4");
-        System.out.println("House Beds Retrieved: " + houseReservation.getNumBeds());
         assertEquals(4, houseReservation.getNumBeds());
-    } // End testHouseGetNumBeds method
-
-    /**
-     * Tests if the house reservation returns the correct number of bedrooms.
-     */
-    @Test
-    public void testHouseGetNumBedrooms() {
-        System.out.println("House Bedrooms Entered: 3");
-        System.out.println("House Bedrooms Retrieved: " + houseReservation.getNumBedrooms());
         assertEquals(3, houseReservation.getNumBedrooms());
-    } // End testHouseGetNumBedrooms method
-
-    /**
-     * Tests if the House reservation returns the correct number of bathrooms.
-     */
-    @Test
-    public void testHouseGetNumBathrooms() {
-        System.out.println("House Bathrooms Entered: 3");
-        System.out.println("House Bathrooms Retrieved: " + houseReservation.getNumBathrooms());
         assertEquals(3, houseReservation.getNumBathrooms());
-    } // End testHouseGetNumBathrooms method
-
-    /**
-     * Tests if the house reservation returns the correct lodging size in square feet.
-     */
-    @Test
-    public void testHouseGetLodgingSizeSqFt() {
-        System.out.println("House Square Footage Entered: 1200 sqft");
-        System.out.println("House Square Footage Retrieved: " + houseReservation.getLodgingSizeSqFt());
         assertEquals(1200, houseReservation.getLodgingSizeSqFt());
-    } // End testHouseGetLodgingSizeSqFt method
-
-    /**
-     * Tests if the House reservation returns the correct price.
-     */
-    @Test
-    public void testHouseGetLodgingPrice() {
-        System.out.printf("House Lodging Price Per Night Entered: $%.2f%n", 300.00);
-        System.out.printf("House Lodging Price Per Night Retrieved: $%.2f%n", houseReservation.getLodgingPrice());
-        assertEquals(300.00, houseReservation.getLodgingPrice(), 0.01);
-    } // End testHouseGetLodgingPrice method
-
-    /**
-     * Tests if the house reservation returns the correct number of floors.
-     */
-    @Test
-    public void testHouseGetNumFloors() {
-        System.out.println("House Floors Entered: 2");
-        System.out.println("House Floors Retrieved: " + houseReservation.getNumFloors());
+        assertEquals(300.0, houseReservation.getLodgingPrice(), 0.01);
         assertEquals(2, houseReservation.getNumFloors());
-    } // End testHouseGetNumFloors method
+    }
 
-} // End ReservationTest class
+    /**
+     * Verifies the house invariant that mailing address must not diverge from physical address.
+     * <p>
+     * Updating physical address must also update mailing to match.
+     * </p>
+     */
+    @Test
+    public void testHouseMailingCannotDivergeFromPhysical() {
+        houseReservation.setLodgingPhysicalAddress("2 Oak", "Austin", "TX", 73301);
+
+        assertEquals(
+                houseReservation.getLodgingPhysicalAddress().toString(),
+                houseReservation.getLodgingMailingAddress().toString()
+        );
+    }
+}

@@ -1,84 +1,121 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms;
 
-// Custom exception classes to handle various error scenarios related to addresses.
 import com.jamesstevens.rms.exceptions.IllegalParameter_Exception;
 
 /**
- * Represents a physical address.
- * Contains details such as street, city, state, and zip code.
+ * Represents a physical mailing or lodging address.
+ * <p>
+ * An address consists of a street, city, 2-letter state abbreviation, and a 5-digit zip code.
+ * </p>
  */
 public class Address {
+
     private String street;
     private String city;
     private String state;
     private int zipCode;
 
-
     /**
-     * Constructor to initialize an Address object.
-     * @param street The street name and number.
-     * @param city The city of the address.
-     * @param state The state of the address.
-     * @param zipCode The zip code of the address.
+     * Constructs a new {@code Address}.
+     *
+     * @param street  street name and number (required)
+     * @param city    city name (required)
+     * @param state   2-letter state abbreviation (required)
+     * @param zipCode 5-digit zip code
+     * @throws IllegalParameter_Exception if any field is invalid
      */
     public Address(String street, String city, String state, int zipCode) {
+        validateAddress(street, city, state, zipCode);
         this.street = street;
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
-    } // End Constructor
-
+    }
 
     /**
-     * Getters that retrieve the street, city, state and zip code.
+     * Returns the street line.
+     *
+     * @return street
      */
-    public String getStreet() { return street; } // End getStreet method
-    public String getCity() { return city; } // End getCity method
-    public String getState() { return state; } // End getState method
-    public int getZipCode() { return zipCode; } // End getZipCode method
-
+    public String getStreet() {
+        return street;
+    }
 
     /**
-     * Setters that update the street, city, state, and zip code.
-     * Reuse validateAddress method to avoid redundant checks.
+     * Returns the city name.
+     *
+     * @return city
+     */
+    public String getCity() {
+        return city;
+    }
+
+    /**
+     * Returns the 2-letter state abbreviation.
+     *
+     * @return state abbreviation
+     */
+    public String getState() {
+        return state;
+    }
+
+    /**
+     * Returns the zip code.
+     *
+     * @return zip code
+     */
+    public int getZipCode() {
+        return zipCode;
+    }
+
+    /**
+     * Updates all address fields after validating the provided values.
+     *
+     * @param street  street name and number (required)
+     * @param city    city name (required)
+     * @param state   2-letter state abbreviation (required)
+     * @param zipCode 5-digit zip code
+     * @throws IllegalParameter_Exception if any field is invalid
      */
     public void setAddress(String street, String city, String state, int zipCode) {
-        validateAddress(street, city, state, zipCode); // Validate new address values
+        validateAddress(street, city, state, zipCode);
         this.street = street;
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
-    } // End setAddress method
-
+    }
 
     /**
-     * Validates address parameters to ensure they are properly formatted.
-     * @throws IllegalParameter_Exception If any parameter is invalid.
+     * Validates that all address values meet basic formatting requirements.
+     *
+     * @param street  street name and number
+     * @param city    city name
+     * @param state   2-letter state abbreviation
+     * @param zipCode zip code as a 5-digit integer
+     * @throws IllegalParameter_Exception if any parameter is invalid
      */
     private void validateAddress(String street, String city, String state, int zipCode) {
         if (street == null || street.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Street cannot be empty.");
-        } // End if statement
+        }
         if (city == null || city.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "City cannot be empty.");
-        } // End if statement
+        }
         if (state == null || state.length() != 2) {
             throw new IllegalParameter_Exception("N/A", "N/A", "State must be a valid 2-letter abbreviation.");
-        } // End if statement
-        if (zipCode < Integer.parseInt("00500") || zipCode > Integer.parseInt("99999")) {
+        }
+        if (zipCode < 500 || zipCode > 99999) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Zip code must be a 5-digit number.");
-        } // End if statement
-    } // End validateAddress method
-
+        }
+    }
 
     /**
-     * Returns a string representation of the address.
-     * @return Formatted address as a string.
+     * Returns a human-readable address string.
+     *
+     * @return formatted address string
      */
     @Override
     public String toString() {
         return street + ", " + city + ", " + state + " " + zipCode;
-    } // End toString method
-
-} // End Address class
+    }
+}

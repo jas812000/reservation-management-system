@@ -1,121 +1,117 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms.reservation;
 
-/*
- * Imports necessary classes and utilities for reservation management:
- * - Address: Handles lodging and mailing addresses in reservations.
- * - Manager: Manages accounts and reservations in the system.
- * - Custom Exceptions: Handles various error scenarios related to reservations.
- *     - IllegalOperation_Exception: Thrown when an operation is not permitted.
- *     - IllegalParameter_Exception: Thrown for invalid input parameters.
- *     - IllegalSave_Exception: Thrown when saving data fails.
- *     - IllegalState_Exception: Thrown when the reservation state is invalid.
- * - ReservationStatus Enum: Defines different states of a reservation (e.g., Active, Cancelled).
- * - Time Utility (LocalDate): Used for handling reservation start dates.
- * - Reflection Utility (Field): May be used to modify object fields dynamically.
- * - Objects Utility: Provides methods for comparing and handling object properties.
- */
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.Manager;
-import com.jamesstevens.rms.exceptions.IllegalOperation_Exception;
-import com.jamesstevens.rms.exceptions.IllegalParameter_Exception;
 import com.jamesstevens.rms.enums.ReservationStatus;
-import com.jamesstevens.rms.exceptions.IllegalSave_Exception;
-import com.jamesstevens.rms.exceptions.IllegalState_Exception;
-import java.time.LocalDate;
+import com.jamesstevens.rms.exceptions.*;
+
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
  * Abstract base class representing a reservation.
- * This class defines common attributes and methods for all reservations.
- * Specific reservation types (child classes) must extend this class and implement price calculation.
+ * <p>
+ * A reservation belongs to an account and describes the lodging details, start date, duration,
+ * price, and current status. Concrete reservation types (e.g., cabin, hotel, house) extend this
+ * class and implement pricing and serialization/deserialization logic.
+ * </p>
+ *
+ * <h2>Address rules</h2>
+ * <ul>
+ *   <li><b>Hotel/House:</b> lodging mailing address must always equal lodging physical address.</li>
+ *   <li><b>Cabin:</b> lodging mailing address may differ from lodging physical address.</li>
+ * </ul>
+ * <p>
+ * This behavior is controlled by {@link #supportsSeparateMailingAddress()} and enforced by
+ * {@link #enforceMailingAddressRule()}.
+ * </p>
  */
 public abstract class Reservation {
 
-    // Attributes
-    protected final String reservationNumber;   // Unique identifier for reservation that cannot be changed
-    protected String accountNumber;             // Account number associated with this reservation
-    protected Address lodgingPhysicalAddress;    // Physical address of the lodging for this reservation
-    protected Address lodgingMailingAddress;     // Mailing address of the lodging if different from physical address
-    protected LocalDate startDate;              // Start date of the reservation
-    protected int numNights;                    // Number of nights for the stay
-    protected int numBeds;                      // Number of beds available in the lodging
-    protected int numBedrooms;                  // Number of bedrooms in the lodging
-    protected int numBathrooms;                 // Number of bathrooms in the lodging
-    protected int lodgingSizeSqFt;              // Size of the lodging in square feet
-    protected double lodgingPrice;              // Price per night for the lodging
-    protected ReservationStatus status;         // Current status of the reservation
+    protected final String reservationNumber;
+    protected String accountNumber;
+
+    protected Address lodgingPhysicalAddress;
+    protected Address lodgingMailingAddress;
+
+    protected LocalDate startDate;
+    protected int numNights;
+    protected int numBeds;
+    protected int numBedrooms;
+    protected int numBathrooms;
+    protected int lodgingSizeSqFt;
+    protected double lodgingPrice;
+
+    protected ReservationStatus status;
 
     /**
-     * Constructor to initialize a Reservation object.
-     * @param reservationNumber      Unique identifier for the reservation (cannot be null or empty).
-     * @param accountNumber          Account number associated with the reservation (cannot be null or empty).
-     * @param lodgingPhysicalAddress Physical address of the lodging (cannot be null or empty).
-     * @param lodgingMailingAddress  Mailing address of the lodging (optional).
-     * @param startDate              Start date of the reservation (cannot be null).
-     * @param numNights              Number of nights for the stay (must be positive).
-     * @param numBeds                Number of beds available in the lodging.
-     * @param numBedrooms            Number of bedrooms in the lodging.
-     * @param numBathrooms           Number of bathrooms in the lodging.
-     * @param lodgingSizeSqFt        Size of the lodging in square feet (must be positive).
-     * @param lodgingPrice           Price per night for the lodging (must be positive).
+     * Constructs a new {@code Reservation}.
+     *
+     * @param reservationNumber      unique reservation identifier (required)
+     * @param accountNumber          associated account number (required)
+     * @param lodgingPhysicalAddress lodging physical address (required)
+     * @param lodgingMailingAddress  lodging mailing address (optional for types that allow it)
+     * @param startDate              reservation start date (required)
+     * @param numNights              number of nights (must be positive)
+     * @param numBeds                number of beds (must be positive)
+     * @param numBedrooms            number of bedrooms (must be positive)
+     * @param numBathrooms           number of bathrooms (must be positive)
+     * @param lodgingSizeSqFt        lodging square footage (must be positive)
+     * @param lodgingPrice           lodging price per night (must be non-negative)
+     * @throws IllegalParameter_Exception if any required input is invalid
      */
-    public Reservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
-                       Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
-                       int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice) {
-        /*
- 		 * Validate input parameters to ensure they are not null, empty, or	invalid.
- 		 *
- 		 * 1. Check if the reservation number is null or empty.
- 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
- 		 *
- 		 * 2. Check if the account number is null or empty.
-		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
-		 *
- 		 * 3. Check if the lodging physical address is null or empty.
- 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
- 		 *
- 		 * 4. Check if the start date is null.
- 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
- 		 *
- 		 * 5. Check if the number of nights is negative.
- 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
- 		 *
- 		 * 6. Check if the lodging size in square feet is zero or negative.
- 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
- 		 *
- 		 * 7. Check if the lodging price is negative.
- 		 *      If true, throw an IllegalParameter_Exception with an appropriate message.
- 		 */
-        // Validate input parameters
+    public Reservation(
+            String reservationNumber,
+            String accountNumber,
+            Address lodgingPhysicalAddress,
+            Address lodgingMailingAddress,
+            LocalDate startDate,
+            int numNights,
+            int numBeds,
+            int numBedrooms,
+            int numBathrooms,
+            int lodgingSizeSqFt,
+            double lodgingPrice
+    ) {
         if (reservationNumber == null || reservationNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Reservation number cannot be empty.");
-        } // End if statement
+        }
         if (accountNumber == null || accountNumber.isEmpty()) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
-        } // End if statement
+        }
         if (lodgingPhysicalAddress == null) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging physical address cannot be empty.");
-        } // End if statement
+            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging physical address cannot be null.");
+        }
         if (startDate == null) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Start date cannot be null.");
-        } // End if statement
+        }
         if (numNights <= 0) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Number of nights must be positive.");
-        } // End if statement
+        }
+        if (numBeds <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of beds must be positive.");
+        }
+        if (numBedrooms <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of bedrooms must be positive.");
+        }
+        if (numBathrooms <= 0) {
+            throw new IllegalParameter_Exception("N/A", "N/A", "Number of bathrooms must be positive.");
+        }
         if (lodgingSizeSqFt <= 0) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Lodging size must be positive.");
-        } // End if statement
+        }
         if (lodgingPrice < 0) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Lodging price cannot be negative.");
-        } // End if statement
+        }
 
-        // Assign values after validation
         this.reservationNumber = reservationNumber;
         this.accountNumber = accountNumber;
-        this.lodgingPhysicalAddress = lodgingPhysicalAddress;
-        this.lodgingMailingAddress = lodgingMailingAddress;
+
+        // Defensive copies (Address is mutable).
+        this.lodgingPhysicalAddress = copyAddress(lodgingPhysicalAddress);
+        this.lodgingMailingAddress = (lodgingMailingAddress == null) ? null : copyAddress(lodgingMailingAddress);
+
         this.startDate = startDate;
         this.numNights = numNights;
         this.numBeds = numBeds;
@@ -123,395 +119,560 @@ public abstract class Reservation {
         this.numBathrooms = numBathrooms;
         this.lodgingSizeSqFt = lodgingSizeSqFt;
         this.lodgingPrice = lodgingPrice;
+
         this.status = ReservationStatus.DRAFT;
 
-    } // End Reservation constructor
-
+        enforceMailingAddressRule();
+    }
 
     /**
-     * Getter that retrieves the unique reservation number.
-     * @return The reservation number as a String.
+     * Indicates whether this reservation type supports a mailing address that differs from the physical address.
+     * <p>
+     * Default behavior is {@code false} (Hotel/House behavior). Cabin overrides this to {@code true}.
+     * </p>
+     *
+     * @return {@code true} if mailing address may differ; otherwise {@code false}
+     */
+    protected boolean supportsSeparateMailingAddress() {
+        return false;
+    }
+
+    /**
+     * Enforces the address rule for this reservation type.
+     * <p>
+     * For Hotel/House (default), mailing is forced to match physical.
+     * For Cabin, if mailing is missing, it is defaulted to physical.
+     * </p>
+     */
+    protected final void enforceMailingAddressRule() {
+        if (!supportsSeparateMailingAddress()) {
+            lodgingMailingAddress = copyAddress(lodgingPhysicalAddress);
+        } else {
+            if (lodgingMailingAddress == null && lodgingPhysicalAddress != null) {
+                lodgingMailingAddress = copyAddress(lodgingPhysicalAddress);
+            }
+        }
+    }
+
+    /**
+     * Creates a defensive copy of an {@link Address}.
+     *
+     * @param a address to copy (must not be null)
+     * @return a new {@code Address} instance with the same field values
+     */
+    protected final Address copyAddress(Address a) {
+        return new Address(a.getStreet(), a.getCity(), a.getState(), a.getZipCode());
+    }
+
+    /**
+     * Returns the unique reservation number.
+     *
+     * @return reservation number
      */
     public String getReservationNumber() {
-        return this.reservationNumber;
-    } // End getReservationNumber method
-
+        return reservationNumber;
+    }
 
     /**
-     * Getter that retrieves the account number associated with this reservation.
+     * Returns the account number associated with this reservation.
+     *
+     * @return account number
      */
     public String getAccountNumber() {
-        return this.accountNumber;
-    } // End getAccountNumber method
-
+        return accountNumber;
+    }
 
     /**
-     * Setter that updates the account number if the provided value is not null or empty.
+     * Updates the account number reference for this reservation.
+     * <p>
+     * This is typically used during deserialization or internal bookkeeping.
+     * </p>
+     *
+     * @param accountNumber new account number (must be non-null/non-empty)
      */
     public void setAccountNumber(String accountNumber) {
         if (accountNumber != null && !accountNumber.isEmpty()) {
             this.accountNumber = accountNumber;
-        } // End if statement
-
-    } // End setAccountNumber method
-
+        }
+    }
 
     /**
-     * Getter that retrieves the reservation status.
-     * @return The current status of the reservation.
+     * Returns the current reservation status.
+     *
+     * @return reservation status
      */
     public ReservationStatus getStatus() {
-        return this.status;
-    } // End getStatus method
-
+        return status;
+    }
 
     /**
-     * Setter that updates the reservation status if the provided value is not null or empty.
+     * Updates the reservation status.
+     *
+     * @param status new status (must not be null)
+     * @throws IllegalParameter_Exception if {@code status} is null
      */
     public void setStatus(ReservationStatus status) {
         if (status == null) {
             throw new IllegalParameter_Exception("N/A", "N/A", "Status cannot be null.");
-        } // End if statement
+        }
         this.status = status;
-    } // End setStatus method
-
+    }
 
     /**
-     * Getter that retrieves the lodging physical address.
-     * @return The lodging physical address as a String.
+     * Returns the lodging physical address.
+     *
+     * @return physical address
      */
     public Address getLodgingPhysicalAddress() {
-        return this.lodgingPhysicalAddress;
-    } // End getLodgingPhysicalAddress method
-
-
-    /**
-     * Setter that updates the lodging physical address if the provided value is not null or empty.
-     */
-    public void setLodgingPhysicalAddress(Address lodgingPhysicalAddress) {
-        if (lodgingPhysicalAddress != null) {
-            this.lodgingPhysicalAddress = lodgingPhysicalAddress;
-        } else {
-            throw new IllegalParameter_Exception(this.accountNumber, this.reservationNumber, "Invalid address.");
-        }
-    } // End setLodgingPhysicalAddress method
-
+        return lodgingPhysicalAddress;
+    }
 
     /**
-     * Getter that retrieves the lodging mailing address.
-     * @return The lodging mailing address as a String.
+     * Returns the lodging mailing address.
+     *
+     * @return mailing address
      */
     public Address getLodgingMailingAddress() {
-        return this.lodgingMailingAddress;
-    } // End getLodgingMailingAddress method
-
+        return lodgingMailingAddress;
+    }
 
     /**
-     * Setter that updates the lodging mailing address.
+     * Updates the lodging physical address and persists the reservation.
+     * <p>
+     * If this reservation does not support a separate mailing address, the mailing address is also updated
+     * to match the physical address.
+     * </p>
+     *
+     * @param street street line (required)
+     * @param city city (required)
+     * @param state 2-letter state code (required)
+     * @param zip 5-digit zip code
+     * @throws IllegalState_Exception if the reservation is locked (completed/canceled)
+     * @throws IllegalParameter_Exception if any address component is invalid
+     * @throws IllegalSave_Exception if persistence fails
      */
-    public void setLodgingMailingAddress(Address lodgingMailingAddress) {
-        this.lodgingMailingAddress = lodgingMailingAddress;
-    } // End setLodgingMailingAddress method
+    public void setLodgingPhysicalAddress(String street, String city, String state, int zip) {
+        if (isLocked()) {
+            throw new IllegalState_Exception(accountNumber, reservationNumber,
+                    "Cannot update addresses for a completed or cancelled reservation.");
+        }
 
+        Address updated = new Address(street, city, state, zip);
+        this.lodgingPhysicalAddress = updated;
+
+        if (!supportsSeparateMailingAddress()) {
+            this.lodgingMailingAddress = updated;
+        } else if (this.lodgingMailingAddress == null) {
+            this.lodgingMailingAddress = updated;
+        }
+
+        Manager.saveReservationToFile(this);
+    }
 
     /**
-     * Getter that retrieves the start date of the reservation.
-     * @return The start date as a LocalDate.
+     * Updates the lodging mailing address and persists the reservation.
+     * <p>
+     * For reservation types that do not support separate mailing addresses (Hotel/House),
+     * this setter forces mailing to match the current physical address.
+     * </p>
+     *
+     * @param street street line
+     * @param city city
+     * @param state 2-letter state code
+     * @param zip 5-digit zip code
+     * @throws IllegalState_Exception if the reservation is locked (completed/canceled)
+     * @throws IllegalOperation_Exception if separate mailing addresses are not supported
+     * @throws IllegalParameter_Exception if any address component is invalid
+     * @throws IllegalSave_Exception if persistence fails
      */
-    public LocalDate getStartDate() {return this.startDate; } // End getStartDate method
+    public void setLodgingMailingAddress(String street, String city, String state, int zip) {
+        if (isLocked()) {
+            throw new IllegalState_Exception(accountNumber, reservationNumber,
+                    "Cannot update addresses for a completed or cancelled reservation.");
+        }
 
+        if (!supportsSeparateMailingAddress()) {
+            throw new IllegalOperation_Exception(
+                    "Update Mailing Address",
+                    accountNumber,
+                    reservationNumber,
+                    "This reservation type does not support a separate mailing address."
+            );
+        }
+
+        this.lodgingMailingAddress = new Address(street, city, state, zip);
+        Manager.saveReservationToFile(this);
+    }
 
     /**
-     * Setter that updates the start date if the provided value is not null or empty.
+     * Returns the reservation start date.
+     *
+     * @return start date
+     */
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * Updates the reservation start date.
+     *
+     * @param startDate new start date (must not be null)
+     * @throws IllegalParameter_Exception if {@code startDate} is null
      */
     public void setStartDate(LocalDate startDate) {
-        if (startDate != null) {
-            this.startDate = startDate;
-        } else {
-            throw new IllegalParameter_Exception(this.accountNumber,
-                    this.reservationNumber, "Start date cannot be null.");
+        if (startDate == null) {
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Start date cannot be null.");
         }
-    } // End setStartDate method
-
+        this.startDate = startDate;
+    }
 
     /**
-     * Getter that retrieves the number of nights for the stay.
-     * @return The number of nights as an integer.
+     * Returns the number of nights.
+     *
+     * @return number of nights
      */
     public int getNumNights() {
-        return this.numNights;
-    } // End getNumNights method
-
+        return numNights;
+    }
 
     /**
-     * Updates the number of nights for the reservation.
-     * Ensures the value is positive.
-     * @param numNights New number of nights.
+     * Updates the number of nights.
+     *
+     * @param numNights new number of nights (must be positive)
+     * @throws IllegalParameter_Exception if {@code numNights} is not positive
      */
     public void setNumNights(int numNights) {
         if (numNights <= 0) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Number of nights must be positive.");
-        } // End if statement
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Number of nights must be positive.");
+        }
         this.numNights = numNights;
-    } // End setNumNights method
-
+    }
 
     /**
-     * Getter that retrieves the number of beds available.
-     * @return The number of beds as an integer.
+     * Returns the number of beds.
+     *
+     * @return number of beds
      */
     public int getNumBeds() {
-        return this.numBeds;
-    } // End getNumBeds method
-
+        return numBeds;
+    }
 
     /**
-     * Updates the number of beds in the lodging.
-     * Ensures the value is positive.
-     * @param numBeds New number of beds.
+     * Updates the number of beds.
+     *
+     * @param numBeds new number of beds (must be positive)
+     * @throws IllegalParameter_Exception if {@code numBeds} is not positive
      */
     public void setNumBeds(int numBeds) {
         if (numBeds <= 0) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Number of beds must be positive.");
-        } // End if statement
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Number of beds must be positive.");
+        }
         this.numBeds = numBeds;
-    } // End setNumBeds method
-
+    }
 
     /**
-     * Getter that retrieves the number of bedrooms in the lodging.
-     * @return The number of bedrooms as an integer.
+     * Returns the number of bedrooms.
+     *
+     * @return number of bedrooms
      */
     public int getNumBedrooms() {
-        return this.numBedrooms;
-    } // End getNumBedrooms method
-
+        return numBedrooms;
+    }
 
     /**
-     * Updates the number of bedrooms in the lodging.
-     * Ensures the value is positive.
-     * @param numBedrooms New number of bedrooms.
+     * Updates the number of bedrooms.
+     *
+     * @param numBedrooms new number of bedrooms (must be positive)
+     * @throws IllegalParameter_Exception if {@code numBedrooms} is not positive
      */
     public void setNumBedrooms(int numBedrooms) {
         if (numBedrooms <= 0) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Number of bedrooms must be positive.");
-        } // End if statement
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Number of bedrooms must be positive.");
+        }
         this.numBedrooms = numBedrooms;
-    } // End setNumBedrooms method
-
+    }
 
     /**
-     * Getter that retrieves the number of bathrooms in the lodging.
-     * @return The number of bathrooms as an integer.
+     * Returns the number of bathrooms.
+     *
+     * @return number of bathrooms
      */
     public int getNumBathrooms() {
-        return this.numBathrooms;
-    } // End getNumBathrooms method
-
+        return numBathrooms;
+    }
 
     /**
-     * Updates the number of bathrooms in the lodging.
-     * Ensures the value is positive.
-     * @param numBathrooms New number of bathrooms.
+     * Updates the number of bathrooms.
+     *
+     * @param numBathrooms new number of bathrooms (must be positive)
+     * @throws IllegalParameter_Exception if {@code numBathrooms} is not positive
      */
     public void setNumBathrooms(int numBathrooms) {
         if (numBathrooms <= 0) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Number of bathrooms must be positive.");
-        } // End if statement
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Number of bathrooms must be positive.");
+        }
         this.numBathrooms = numBathrooms;
-    } // End setNumBathrooms method
-
+    }
 
     /**
-     * Getter that retrieves the size of the lodging in square feet.
-     * @return The lodging size in square feet as an integer.
+     * Returns the lodging square footage.
+     *
+     * @return square footage
      */
     public int getLodgingSizeSqFt() {
-        return this.lodgingSizeSqFt;
-    } // End getLodgingSizeSqFt method
-
+        return lodgingSizeSqFt;
+    }
 
     /**
-     * Updates the square footage of the lodging.
-     * Ensures the value is positive.
-     * @param sizeSqFt New size in square feet.
+     * Updates the lodging square footage.
+     *
+     * @param sizeSqFt new square footage (must be positive)
+     * @throws IllegalParameter_Exception if {@code sizeSqFt} is not positive
      */
     public void setLodgingSizeSqFt(int sizeSqFt) {
         if (sizeSqFt <= 0) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Lodging size must be positive.");
-        } // End if statement
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Lodging size must be positive.");
+        }
         this.lodgingSizeSqFt = sizeSqFt;
-    } // End setLodgingSizeSqFt method
-
+    }
 
     /**
-     * Getter that retrieves the price per night.
-     * @return The price per night as a double.
+     * Returns the lodging price per night.
+     *
+     * @return price per night
      */
     public double getLodgingPrice() {
-        return this.lodgingPrice;
-    } // End getLodgingPrice method
-
+        return lodgingPrice;
+    }
 
     /**
-     * Setter that updates the price per night for the lodging.
-     * Ensures the lodging price is not set to a negative value.
+     * Updates the lodging price per night.
      *
-     * @param lodgingPrice The new price per night as a double.
+     * @param lodgingPrice new price per night (must be non-negative)
+     * @throws IllegalParameter_Exception if {@code lodgingPrice} is negative
      */
     public void setLodgingPrice(double lodgingPrice) {
-        if (lodgingPrice >= 0) {
-            this.lodgingPrice = lodgingPrice;
-        } else {
-            throw new IllegalParameter_Exception(this.accountNumber,
-                    this.reservationNumber, "Price cannot be negative.");
-        }  // End if-else statements
-    } // End setLodgingPrice method
+        if (lodgingPrice < 0) {
+            throw new IllegalParameter_Exception(accountNumber, reservationNumber, "Price cannot be negative.");
+        }
+        this.lodgingPrice = lodgingPrice;
+    }
 
     /**
-     * Marks the reservation as completed.
-     * Throws IllegalState_Exception if the reservation is already completed or cancelled.
+     * Marks the reservation as completed and persists the update.
+     *
+     * @throws IllegalState_Exception if the reservation is canceled or already completed
      */
     public void completeReservation() {
-        /*
-         * if reservation is already completed or cancelled
-         * 	    throw IllegalState_Exception
-         * else
-         * 	    update reservation status to completed
-         */
-        if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
-                    "Cannot complete a cancelled or already completed reservation.");
-        } // End if statement
+        if (status == ReservationStatus.COMPLETED || status == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(
+                    accountNumber,
+                    reservationNumber,
+                    "Cannot complete a cancelled or already completed reservation."
+            );
+        }
 
-        this.status = ReservationStatus.COMPLETED;
-        System.out.println("Reservation " + reservationNumber + " has been completed.");
+        status = ReservationStatus.COMPLETED;
 
-        // Ensure the updated status is saved
         try {
             Manager.saveReservationToFile(this);
-            System.out.println("🔍 Reservation status saved: COMPLETED");
         } catch (IllegalSave_Exception e) {
             System.out.println("Error saving updated reservation: " + e.getMessage());
-        } // End try-catch statements
-
-    } // End completeReservation method
-
+        }
+    }
 
     /**
-     * Cancels the reservation.
-     * Throws IllegalState_Exception if the reservation is already completed or cancelled.
+     * Cancels the reservation and persists the update.
+     *
+     * @throws IllegalState_Exception if the reservation is completed or already canceled
      */
     public void cancelReservation() {
-        /*
-         * if reservation is already completed or cancelled
-         * 	    throw IllegalState_Exception
-         * else
-         * 	    update reservation status to cancelled
-         */
-        if (this.status == ReservationStatus.COMPLETED || this.status == ReservationStatus.CANCELLED) {
-            throw new IllegalState_Exception(this.accountNumber, this.reservationNumber,
-                    "Cannot cancel a completed or already cancelled reservation.");
-        } // End if statement
+        if (status == ReservationStatus.COMPLETED || status == ReservationStatus.CANCELLED) {
+            throw new IllegalState_Exception(
+                    accountNumber,
+                    reservationNumber,
+                    "Cannot cancel a completed or already cancelled reservation."
+            );
+        }
 
-        this.status = ReservationStatus.CANCELLED;
-        this.lodgingPrice = 0.00; // Set price to zero after cancellation
-        System.out.println("Reservation " + reservationNumber + " has been cancelled.");
-        // Ensure the updated status is saved
+        status = ReservationStatus.CANCELLED;
+        lodgingPrice = 0.00;
+
         try {
             Manager.saveReservationToFile(this);
         } catch (IllegalSave_Exception e) {
             System.out.println("Error saving updated reservation: " + e.getMessage());
-        } // End try-catch statements
-
-    } // End cancelReservation method
-
+        }
+    }
 
     /**
-     * Updates the current reservation details based on another reservation object.
-     * Ensures that changes are only applied if they differ from the existing values.
+     * Updates this reservation's mutable fields from another reservation of the same runtime type.
+     * <p>
+     * Identity fields ({@code reservationNumber}, {@code accountNumber}) are not modified.
+     * Lodging addresses are deep-copied to prevent sharing mutable {@link Address} references.
+     * </p>
+     * <p>
+     * After updates, {@link #enforceMailingAddressRule()} is applied to preserve the correct address invariant
+     * for the reservation type.
+     * </p>
      *
-     * @param updatedReservation The reservation object containing updated details.
-     * @return true if changes were made, false otherwise.
+     * @param updatedReservation reservation containing new values
+     * @return {@code true} if at least one field was changed; otherwise {@code false}
+     * @throws IllegalArgumentException if {@code updatedReservation} is not the same runtime type
+     * @throws RuntimeException         if a reflection access error occurs
      */
     public boolean updateDetailsFrom(Reservation updatedReservation) {
-        // Checks if the provided reservation is valid.
-        if (updatedReservation == null) return false;
+        if (updatedReservation == null) {
+            return false;
+        }
 
-        // Flag to track if any updates were made
+        if (!getClass().equals(updatedReservation.getClass())) {
+            throw new IllegalArgumentException("Updated reservation must be the same type as the current reservation.");
+        }
+
         boolean changed = false;
 
-        try {
-            // Get the runtime class of the current reservation instance.
-            Class<?> clazz = this.getClass();
-            // Traverse the class hierarchy to check all fields including inherited ones
-            while (clazz != null) {
-                // Iterate through each declared field in the class
-                for (Field field : clazz.getDeclaredFields()) {
-                    field.setAccessible(true);      // Allow access to private fields
+        Address updatedPhysical = updatedReservation.getLodgingPhysicalAddress();
+        if (updatedPhysical != null && addressesDiffer(lodgingPhysicalAddress, updatedPhysical)) {
+            setLodgingPhysicalAddress(
+                    updatedPhysical.getStreet(),
+                    updatedPhysical.getCity(),
+                    updatedPhysical.getState(),
+                    updatedPhysical.getZipCode()
+            );
+            changed = true;
+        }
 
-                    // Retrieve the old and new values for the field
+        Address updatedMailing = updatedReservation.getLodgingMailingAddress();
+        if (supportsSeparateMailingAddress()) {
+            if (updatedMailing == null) {
+                if (lodgingMailingAddress != null) {
+                    // If you want to allow clearing mailing for Cabin:
+                    lodgingMailingAddress = null;
+                    changed = true;
+                }
+            } else if (addressesDiffer(lodgingMailingAddress, updatedMailing)) {
+                setLodgingMailingAddress(
+                        updatedMailing.getStreet(),
+                        updatedMailing.getCity(),
+                        updatedMailing.getState(),
+                        updatedMailing.getZipCode()
+                );
+                changed = true;
+            }
+        }
+
+        try {
+            Class<?> clazz = getClass();
+            while (clazz != null) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    field.setAccessible(true);
+
+                    String name = field.getName();
+
+                    if ("reservationNumber".equals(name) || "accountNumber".equals(name)) {
+                        continue;
+                    }
+                    if ("lodgingPhysicalAddress".equals(name) || "lodgingMailingAddress".equals(name)) {
+                        continue;
+                    }
+
                     Object oldValue = field.get(this);
                     Object newValue = field.get(updatedReservation);
 
-                    // If the values are different, update the field
                     if (!Objects.equals(oldValue, newValue)) {
                         field.set(this, newValue);
-                        changed = true;     // Mark that at least one field was updated
-                    } // End if statement
-                } // End for loop
-
-                // Move to the superclass to check inherited fields
+                        changed = true;
+                    }
+                }
                 clazz = clazz.getSuperclass();
-            } // End while loop
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Error updating reservation: " + e.getMessage());
-        } // End try-catch statements
+        }
 
-        return changed; // Return whether changes were applied
-    } // End updateDetailsFrom method
+        // Enforce Hotel/House invariant after updates
+        Address beforeMailing = lodgingMailingAddress;
+        enforceMailingAddressRule();
+        if (beforeMailing != null && lodgingMailingAddress != null && addressesDiffer(beforeMailing, lodgingMailingAddress)) {
+            changed = true;
+        }
 
+        return changed;
+    }
 
     /**
-     * Determines whether the reservation can be updated.
-     * A reservation cannot be updated if its status is COMPLETED or CANCELLED.
+     * Compares two {@link Address} instances by value and returns {@code true} if they differ.
      *
-     * @return true if the reservation can be updated, false otherwise.
+     * @param a first address (non-null)
+     * @param b second address (non-null)
+     * @return {@code true} if any address field differs; otherwise {@code false}
      */
-    public boolean canBeUpdated() {
-        // Allow updates only if the reservation is neither COMPLETED nor CANCELLED.
-        return this.status != ReservationStatus.COMPLETED && this.status != ReservationStatus.CANCELLED;
-    } // End canBeUpdated method
-
+    private boolean addressesDiffer(Address a, Address b) {
+        return !Objects.equals(a.getStreet(), b.getStreet())
+                || !Objects.equals(a.getCity(), b.getCity())
+                || !Objects.equals(a.getState(), b.getState())
+                || a.getZipCode() != b.getZipCode();
+    }
 
     /**
-     * Abstract method to calculate the price per night for the reservation.
-     * Must be implemented by subclasses.
-     * @return The price per night as a double.
+     * Indicates whether the reservation is locked from modification.
+     *
+     * @return {@code true} if status is COMPLETED or CANCELLED; otherwise {@code false}
+     */
+    public boolean isLocked() {
+        return status == ReservationStatus.COMPLETED
+                || status == ReservationStatus.CANCELLED;
+    }
+
+    /**
+     * Calculates the lodging price per night for this reservation type.
+     *
+     * @return computed price per night
      */
     public abstract double calculatePricePerNight();
 
-
     /**
-     * Abstract method that creates a string representation of the reservation details.
-     * Must be implemented by subclasses.
-     * @return A formatted string containing reservation details.
+     * Returns the serialized reservation record used for persistence.
+     * <p>
+     * Concrete subclasses define the exact format and must ensure
+     * {@code fromString(String)} can parse the value returned here.
+     * </p>
+     *
+     * @return formatted reservation record
      */
     @Override
     public abstract String toString();
 
-
     /**
-     * Method for creating a Reservation object from a string.
-     * Subclasses must implement this method to handle their unique data formats.
-     * @param data A string containing reservation details.
-     * Calling this method from the base class will result in an IllegalOperation_Exception.
+     * Parses a persisted reservation record into the correct {@link Reservation} subtype.
+     * <p>
+     * The first CSV token must be the concrete type name, such as:
+     * {@code CabinReservation}, {@code HotelReservation}, or {@code HouseReservation}.
+     * </p>
+     *
+     * @param data persisted reservation record line
+     * @return parsed reservation object
+     * @throws IllegalLoad_Exception if the record is null, blank, or the type token is invalid
      */
-    public static Reservation fromString(String data) throws IllegalOperation_Exception {
-        /*
-         * throw IllegalOperation_Exception
-         * fromString() must be implemented by subclasses.
-         */
-        throw new IllegalOperation_Exception("fromString", "N/A", "N/A", "Must be implemented by subclasses.");
-    } // End fromString method
-} // end abstract class Reservation
+    public static Reservation fromString(String data) {
+        if (data == null || data.trim().isEmpty()) {
+            throw new IllegalLoad_Exception("Reservation Data", "N/A", "Empty reservation record.");
+        }
+
+        String[] parts = data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+        if (parts.length == 0) {
+            throw new IllegalLoad_Exception("Reservation Data", "N/A", "Reservation record could not be parsed.");
+        }
+
+        String type = parts[0].trim();
+
+        return switch (type) {
+            case "CabinReservation" -> CabinReservation.fromString(data);
+            case "HotelReservation" -> HotelReservation.fromString(data);
+            case "HouseReservation" -> HouseReservation.fromString(data);
+            default -> throw new IllegalLoad_Exception("Reservation Data", "N/A",
+                    "Unknown reservation type: " + type);
+        };
+    }
+}

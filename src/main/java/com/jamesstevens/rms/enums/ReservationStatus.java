@@ -1,11 +1,28 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms.enums;
 
 /**
- * Enum representing reservation statuses.
+ * Represents the possible lifecycle states of a reservation.
+ * <p>
+ * This enum is used to track the current status of a reservation
+ * from creation through completion or cancellation.
+ * </p>
  */
 public enum ReservationStatus {
-    DRAFT,          // The reservation is in draft mode and has not been finalized.
-    COMPLETED,      // The reservation has been completed successfully.
-    CANCELLED      // The reservation has been cancelled and is no longer active.
-} // End Enum
+
+    /**
+     * The reservation has been created but not yet finalized.
+     */
+    DRAFT,
+
+    /**
+     * The reservation has been fully completed and confirmed.
+     */
+    COMPLETED,
+
+    /**
+     * The reservation has been cancelled and is no longer active.
+     */
+    CANCELLED
+}
+
+

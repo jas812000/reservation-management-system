@@ -1,235 +1,242 @@
-// Declares the package name for the project, grouping related classes together.
 package com.jamesstevens.rms.reservation;
 
-/*
- * Imports the following:
- * - Time utility for handling reservation start dates
- * - Address class to handle lodging and mailing addresses in reservations
- * - ReservationStatus enum to manage different states of reservations.
- * - Custom exception class to handle various error scenarios related to reservations.
- */
-import java.time.LocalDate;
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.enums.ReservationStatus;
 import com.jamesstevens.rms.exceptions.IllegalLoad_Exception;
 
+import java.time.LocalDate;
+
 /**
- * Represents a hotel reservation.
- * Inherits from Reservation class.
- * Includes an additional attribute for kitchenette availability.
+ * Reservation subtype representing a hotel reservation.
+ * <p>
+ * Adds a {@code kitchenetteAvailable} feature which can affect pricing.
+ * </p>
+ * <p>
+ * Address rule: for hotels, the mailing address is always enforced to match the physical address
+ * by the base {@link Reservation} implementation.
+ * </p>
  */
 public class HotelReservation extends Reservation {
 
-    // Attributes
-    private boolean kitchenetteAvailable;     // Indicates whether the hotel room includes a kitchenette
+    private boolean kitchenetteAvailable;
 
     /**
-     * Constructor to initialize a HotelReservation object.
+     * Constructs a new {@code HotelReservation}.
      *
-     * @param reservationNumber      Unique identifier for the reservation (cannot be null or empty).
-     * @param accountNumber          Account number associated with the reservation (cannot be null or empty).
-     * @param lodgingPhysicalAddress Physical address of the hotel (cannot be null or empty).
-     * @param lodgingMailingAddress  Mailing address of the lodging (optional, can be null).
-     * @param startDate              The start date of the reservation (cannot be null).
-     * @param numNights              Number of nights for the reservation (must be positive).
-     * @param numBeds                Number of beds in the hotel room.
-     * @param numBedrooms            Number of bedrooms in the hotel room.
-     * @param numBathrooms           Number of bathrooms in the hotel room.
-     * @param lodgingSizeSqFt        Size of the hotel room in square feet (must be positive).
-     * @param lodgingPrice           Price per night for the hotel room (must be positive).
-     * @param kitchenetteAvailable   Indicates if the hotel room includes a kitchenette
+     * @param reservationNumber      unique reservation identifier
+     * @param accountNumber          account number for the reservation
+     * @param lodgingPhysicalAddress physical lodging address (required)
+     * @param lodgingMailingAddress  mailing lodging address (ignored for hotels; forced to match physical)
+     * @param startDate              reservation start date (required)
+     * @param numNights              number of nights (positive)
+     * @param numBeds                number of beds (positive)
+     * @param numBedrooms            number of bedrooms (positive)
+     * @param numBathrooms           number of bathrooms (positive)
+     * @param lodgingSizeSqFt        square footage (positive)
+     * @param lodgingPrice           price per night (non-negative)
+     * @param kitchenetteAvailable   whether kitchenette is available
      */
-    public HotelReservation(String reservationNumber, String accountNumber, Address lodgingPhysicalAddress,
-                            Address lodgingMailingAddress, LocalDate startDate, int numNights, int numBeds,
-                            int numBedrooms, int numBathrooms, int lodgingSizeSqFt, double lodgingPrice,
-                            boolean kitchenetteAvailable) {
-        // Calls the superclass (Reservation) constructor to initialize common reservation attributes.
-        super(reservationNumber, accountNumber, lodgingPhysicalAddress, lodgingMailingAddress, startDate, numNights,
-                numBeds, numBedrooms, numBathrooms, lodgingSizeSqFt, lodgingPrice);
-
-        // Assign specific attributes for HotelReservation.
+    public HotelReservation(
+            String reservationNumber,
+            String accountNumber,
+            Address lodgingPhysicalAddress,
+            Address lodgingMailingAddress,
+            LocalDate startDate,
+            int numNights,
+            int numBeds,
+            int numBedrooms,
+            int numBathrooms,
+            int lodgingSizeSqFt,
+            double lodgingPrice,
+            boolean kitchenetteAvailable
+    ) {
+        super(
+                reservationNumber,
+                accountNumber,
+                lodgingPhysicalAddress,
+                lodgingMailingAddress,
+                startDate,
+                numNights,
+                numBeds,
+                numBedrooms,
+                numBathrooms,
+                lodgingSizeSqFt,
+                lodgingPrice
+        );
         this.kitchenetteAvailable = kitchenetteAvailable;
-
-    } // End HotelReservation constructor
-
+    }
 
     /**
-     * Retrieves whether the hotel room has a kitchenette.
-     * @return True if the hotel room has a kitchenette, otherwise false.
+     * Indicates whether a kitchenette is available.
+     *
+     * @return {@code true} if kitchenette is available; otherwise {@code false}
      */
     public boolean hasKitchenette() {
         return kitchenetteAvailable;
-    } // end hasKitchenette method
-
+    }
 
     /**
-     * Updates the kitchenette availability in the hotel room.
-     * @param kitchenetteAvailable True if the room has a kitchenette, false otherwise.
+     * Updates kitchenette availability.
+     *
+     * @param kitchenetteAvailable new value
      */
     public void setKitchenetteAvailable(boolean kitchenetteAvailable) {
         this.kitchenetteAvailable = kitchenetteAvailable;
-    } // End setKitchenetteAvailable method
-
+    }
 
     /**
-     * Calculates the price per night for the hotel reservation.
-     * Implementation will likely depend on specific pricing logic.
-     * @return The price per night as a double
+     * Calculates the price per night for a hotel reservation.
+     *
+     * @return nightly price (0.00 if canceled)
      */
     @Override
     public double calculatePricePerNight() {
-        /*
-         * return price per night for the hotel room
-         * * may include additional cost if kitchenette is available
-         */
-        // If reservation is cancelled, price should be $0.00
-        if (this.status == ReservationStatus.CANCELLED) {
+        if (status == ReservationStatus.CANCELLED) {
             return 0.00;
-        } // End if statement
-        double basePrice = 120.0; // Base price
+        }
 
-        if (this.lodgingSizeSqFt > 900) {
-            basePrice += 15.0; // Additional fee for large lodging
-        } // End if statement
-        basePrice += 50.0; // Flat fee for hotel
+        double basePrice = 120.0;
+        if (lodgingSizeSqFt > 900) {
+            basePrice += 15.0;
+        }
+
+        basePrice += 50.0;
         if (kitchenetteAvailable) {
-            basePrice += 10.0; // Additional fee for kitchenette
-        } // End if statement
+            basePrice += 10.0;
+        }
 
-        return basePrice; // Updated price
-
-    } // End calculatePricePerNight method
-
+        return basePrice;
+    }
 
     /**
-     * Returns a string representation of the hotel reservation details.
-     * @return A formatted string containing reservation details
+     * Serializes this reservation into the persistence format.
+     *
+     * @return formatted string record
      */
     @Override
     public String toString() {
-        /*
-         * format and return hotel reservation details as a string
-         */
-        return String.format("HotelReservation,%s,%s,\"%s\"%s,%s,%d,%d,%d,%d,%d,%.2f,%s,%b",
-                reservationNumber, accountNumber,
+        return String.format(
+                "HotelReservation,%s,%s,\"%s\"%s,%s,%d,%d,%d,%d,%d,%.2f,%s,%b",
+                reservationNumber,
+                accountNumber,
                 String.join(";", lodgingPhysicalAddress.getStreet(),
                         lodgingPhysicalAddress.getCity(),
-                        lodgingPhysicalAddress.getState(), String.valueOf(lodgingPhysicalAddress.getZipCode())),
-                (lodgingMailingAddress != null ?
-                        "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(),
-                                lodgingMailingAddress.getCity(),
-                                lodgingMailingAddress.getState(),
-                                String.valueOf(lodgingMailingAddress.getZipCode())) + "\"": ",N/A"),
-                startDate, numNights, numBeds, numBedrooms, numBathrooms,
-                lodgingSizeSqFt, lodgingPrice, status, kitchenetteAvailable);
-    } // End toString method
-
+                        lodgingPhysicalAddress.getState(),
+                        String.valueOf(lodgingPhysicalAddress.getZipCode())),
+                (lodgingMailingAddress != null
+                        ? "," + "\"" + String.join(";", lodgingMailingAddress.getStreet(),
+                        lodgingMailingAddress.getCity(),
+                        lodgingMailingAddress.getState(),
+                        String.valueOf(lodgingMailingAddress.getZipCode())) + "\""
+                        : ",N/A"),
+                startDate,
+                numNights,
+                numBeds,
+                numBedrooms,
+                numBathrooms,
+                lodgingSizeSqFt,
+                lodgingPrice,
+                status,
+                kitchenetteAvailable
+        );
+    }
 
     /**
-     * Creates a HotelReservation object from a formatted string.
-     * @param data A string containing hotel reservation details in a predefined format
-     * @return A HotelReservation object created from the provided data
+     * Parses a persisted {@code HotelReservation} record into an object.
+     *
+     * @param data persisted record line
+     * @return parsed {@code HotelReservation}
+     * @throws IllegalLoad_Exception if the record format is invalid or cannot be parsed
      */
     public static HotelReservation fromString(String data) {
-        /*
-         * Parse data string
-         * Extract hotel reservation details
-         * Return new HotelReservation object with extracted details
-         */
-        // Use regex to split while preserving quoted substrings
-        String[] parts = data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-
-        // Ensure correct number of fields
+        String[] parts = splitCsvPreservingQuotes(data);
         if (parts.length < 14) {
             throw new IllegalLoad_Exception("HotelReservation Data", "N/A",
                     "Invalid data format. Found: " + parts.length);
-        } // End if statement
+        }
 
-        // Extract lodging physical address components
-        Address lodgingPhysicalAddress = getAddress(parts);
+        Address physical = parsePhysicalAddress(parts);
+        Address mailing = parseMailingAddress(parts);
+        ReservationStatus parsedStatus = ReservationStatus.valueOf(parts[12].trim());
 
-        // Extract lodging mailing address components
-        Address lodgingMailingAddress = getLodgingMailingAddress(parts);
-
-        // Parse reservation status correctly
-        ReservationStatus status = ReservationStatus.valueOf(parts[12].trim());
-
-        // Create HotelReservation object
         HotelReservation reservation = new HotelReservation(
-                parts[1], // reservationNumber
-                parts[2], // accountNumber
-                lodgingPhysicalAddress,
-                lodgingMailingAddress,
-                LocalDate.parse(parts[5]), // startDate
-                Integer.parseInt(parts[6]), // numNights
-                Integer.parseInt(parts[7]), // numBeds
-                Integer.parseInt(parts[8]), // numBedrooms
-                Integer.parseInt(parts[9]), // numBathrooms
-                Integer.parseInt(parts[10]), // lodgingSizeSqFt
-                Double.parseDouble(parts[11]), // lodgingPrice
-                Boolean.parseBoolean(parts[13]) // kitchenetteAvailable
+                parts[1].trim(),
+                parts[2].trim(),
+                physical,
+                mailing,
+                LocalDate.parse(parts[5].trim()),
+                Integer.parseInt(parts[6].trim()),
+                Integer.parseInt(parts[7].trim()),
+                Integer.parseInt(parts[8].trim()),
+                Integer.parseInt(parts[9].trim()),
+                Integer.parseInt(parts[10].trim()),
+                Double.parseDouble(parts[11].trim()),
+                Boolean.parseBoolean(parts[13].trim())
         );
 
-        // Set the parsed status
-        reservation.setStatus(status);
-
+        reservation.setStatus(parsedStatus);
         return reservation;
-    } // End fromString method
-
+    }
 
     /**
-     * Parses and retrieves the lodging mailing address from the given data parts.
-     * If the mailing address is specified as "N/A", this method returns null.
+     * Splits a CSV record while preserving quoted sections.
      *
-     * @param parts A string array containing reservation details, with the mailing address at index 4.
-     * @return An Address object representing the lodging mailing address, or null if not available.
-     * @throws IllegalLoad_Exception if the mailing address format is invalid.
+     * @param data raw CSV line
+     * @return array of fields
      */
-    private static Address getLodgingMailingAddress(String[] parts) {
-        // Check if a valid mailing address is provided
-        if (!parts[4].equals("N/A")) {
-            String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
+    private static String[] splitCsvPreservingQuotes(String data) {
+        return data.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+    }
 
-            // Validate the mailing address format (should contain at least 4 parts)
+    /**
+     * Parses and returns the lodging mailing address from the serialized reservation fields.
+     * <p>
+     * The mailing address field is expected at index 4. If the value is {@code "N/A"}, this method
+     * returns {@code null}. Otherwise, the field is expected to be quoted and formatted as:
+     * {@code "street;city;state;zip"}.
+     * </p>
+     *
+     * @param parts tokenized reservation record
+     * @return parsed mailing {@link Address}, or {@code null} if not provided
+     * @throws IllegalLoad_Exception if the field is present but not in the expected format
+     */
+    private static Address parseMailingAddress(String[] parts) {
+        if (!parts[4].trim().equals("N/A")) {
+            String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
             if (mailingAddressParts.length < 4) {
                 throw new IllegalLoad_Exception("HotelReservation Address", "N/A", "Invalid mailing address format.");
-            } // End if statement
-
-            // Return an Address object with extracted components
-            return new Address(mailingAddressParts[0], mailingAddressParts[1],
-                    mailingAddressParts[2], Integer.parseInt(mailingAddressParts[3]));
-        } // End if statement
-
-        // Return null if mailing address is "N/A"
+            }
+            return new Address(
+                    mailingAddressParts[0],
+                    mailingAddressParts[1],
+                    mailingAddressParts[2],
+                    Integer.parseInt(mailingAddressParts[3])
+            );
+        }
         return null;
-    } // End getlodgingMailingAddress method
-
+    }
 
     /**
-     * Parses and retrieves the lodging physical address from the given data parts.
+     * Parses and returns the lodging physical address from the serialized reservation fields.
+     * <p>
+     * The physical address field is expected at index 3 and formatted as:
+     * {@code "street;city;state;zip"} (quoted).
+     * </p>
      *
-     * @param parts A string array containing reservation details, expected to have at least 14 elements.
-     * @return An Address object representing the lodging physical address.
-     * @throws IllegalLoad_Exception if the data format is invalid or if the physical address format is incorrect.
+     * @param parts tokenized reservation record
+     * @return parsed physical {@link Address}
+     * @throws IllegalLoad_Exception if the physical address field is missing or not in the expected format
      */
-    private static Address getAddress(String[] parts) {
-        // Ensure correct number of fields
-        if (parts.length < 14) {
-            throw new IllegalLoad_Exception("HotelReservation Data", "N/A",
-                    "Invalid data format. Found: " + parts.length);
-        } // End if statement
-
-        // Extract lodging physical address components
+    private static Address parsePhysicalAddress(String[] parts) {
         String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
-
-        // Validate the physical address format (should contain at least 4 components)
         if (physicalAddressParts.length < 4) {
             throw new IllegalLoad_Exception("HotelReservation Address", "N/A", "Invalid physical address format.");
-        } // End if statement
-
-        // Return an Address object with extracted components
-        return new Address(physicalAddressParts[0], physicalAddressParts[1],
-                physicalAddressParts[2], Integer.parseInt(physicalAddressParts[3]));
-    } // End getAddress method
-
-} // End class HotelReservation
+        }
+        return new Address(
+                physicalAddressParts[0],
+                physicalAddressParts[1],
+                physicalAddressParts[2],
+                Integer.parseInt(physicalAddressParts[3])
+        );
+    }
+}

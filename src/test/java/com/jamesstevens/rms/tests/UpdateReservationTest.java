@@ -1,188 +1,166 @@
-// Imports all classes from the TestPackage inside the com.swen_646_project_1 package.
 package com.jamesstevens.rms.tests;
 
-/*
- * Imports necessary classes for testing reservation updates.
- * - `Account`: Needed to retrieve and modify reservation data.
- * - `IllegalState_Exception`: Exception thrown when modifying a reservation that is already completed or canceled.
- * - `IllegalOperation_Exception`: Exception thrown when an update is attempted on a non-existent reservation.
- * - `CabinReservation`, `HotelReservation`, `HouseReservation`: Specific reservation types with unique attributes.
- * - `Reservation`: The parent class representing a generic reservation.
- * - `java.time.*`: Provides date and time utilities for handling reservation start dates.
- * - `Scanner`: Enables user input for modifying reservation details.
- */
 import com.jamesstevens.rms.Account;
-import com.jamesstevens.rms.exceptions.IllegalState_Exception;
+import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.exceptions.IllegalOperation_Exception;
-import com.jamesstevens.rms.reservation.CabinReservation;
-import com.jamesstevens.rms.reservation.HotelReservation;
-import com.jamesstevens.rms.reservation.HouseReservation;
-import com.jamesstevens.rms.reservation.Reservation;
-import java.time.*;
+import com.jamesstevens.rms.exceptions.IllegalState_Exception;
+import com.jamesstevens.rms.reservation.*;
+
+import java.time.LocalDate;
 import java.util.Scanner;
 
 /**
- * Test class for updating reservations.
- * Ensures proper validation when modifying reservations.
+ * Manual/interactive test utility for updating existing reservations.
+ * <p>
+ * This test constructs a new updated reservation instance, applies user-entered
+ * changes, and submits it through {@link Account#updateReservation(String, Reservation)}
+ * to validate the full update pipeline (including address rules).
+ * </p>
  */
+@SuppressWarnings("unused")
 public class UpdateReservationTest {
+
     /**
-     * Tests updating an existing reservation.
-     * - Prompts the user to select an account.
-     * - Retrieves the selected reservation.
-     * - Attempts to update the reservation, handling exceptions if the update is not allowed.
+     * Executes the interactive update flow for a single reservation.
      */
     public static void testUpdateReservation() {
-
         Scanner scanner = new Scanner(System.in);
 
-        // Select an account from available accounts
         String reservationNumber = TestHelper.getValidatedReservation();
-        if (reservationNumber == null) return; // Exits early if no valid reservation is selected
+        if (reservationNumber == null) return;
 
-        // Retrieve the associated account from the reservation number
         Account account = TestHelper.getAccountFromReservation(reservationNumber);
-        if (account == null) {
-            System.out.println("No account found for reservation: " + reservationNumber);
+        if (account == null) return;
+
+        Reservation current = account.getReservation(reservationNumber);
+        if (current == null) {
+            System.out.println("Reservation not found.");
             return;
-        } // End if statement
+        }
 
-        // Retrieve the existing reservation
-        Reservation currentReservation = account.getReservation(reservationNumber);
-        if (currentReservation == null) {
-            System.out.println("Error: Reservation not found.");
-            return;
-        } // End if statement
+        System.out.println("\nUpdating " + current.getClass().getSimpleName());
 
-        System.out.println("\n========== Updating Reservation ==========");
-        System.out.println("Reservation Type: " + currentReservation.getClass().getSimpleName());
+        Reservation updated = createReservationCopy(current);
 
-        // Manually copy the original reservation instead of cloning
-        Reservation originalReservation = createReservationCopy(currentReservation);
+        updateCommonFields(scanner, updated);
+        updateAddresses(scanner, updated);
 
-        // Update common fields
-        updateCommonReservationFields(scanner, currentReservation);
+        if (updated instanceof CabinReservation cabin) {
+            System.out.print("Full kitchen available (true/false): ");
+            cabin.setFullKitchenAvailable(Boolean.parseBoolean(scanner.nextLine()));
 
-        // Handle update based on reservation type
-        if (currentReservation instanceof CabinReservation cabin) {
-            System.out.print("Full Kitchen Available (true/false): ");
-            cabin.setFullKitchenAvailable(Boolean.parseBoolean(scanner.nextLine().trim()));
-            System.out.print("Loft Available (true/false): ");
-            cabin.setLoftAvailable(Boolean.parseBoolean(scanner.nextLine().trim()));
+            System.out.print("Loft available (true/false): ");
+            cabin.setLoftAvailable(Boolean.parseBoolean(scanner.nextLine()));
+
             cabin.setLodgingPrice(cabin.calculatePricePerNight());
-        } else if (currentReservation instanceof HotelReservation hotel) {
-            System.out.print("Kitchenette Available (true/false): ");
-            hotel.setKitchenetteAvailable(Boolean.parseBoolean(scanner.nextLine().trim()));
+        } else if (updated instanceof HotelReservation hotel) {
+            System.out.print("Kitchenette available (true/false): ");
+            hotel.setKitchenetteAvailable(Boolean.parseBoolean(scanner.nextLine()));
+
             hotel.setLodgingPrice(hotel.calculatePricePerNight());
-        } else if (currentReservation instanceof HouseReservation house) {
-            System.out.print("Enter number of floors: ");
-            house.setNumFloors(Integer.parseInt(scanner.nextLine().trim()));                
+        } else if (updated instanceof HouseReservation house) {
+            System.out.print("Number of floors: ");
+            house.setNumFloors(Integer.parseInt(scanner.nextLine()));
+
             house.setLodgingPrice(house.calculatePricePerNight());
-        } else {
-            System.out.println("Error: Unsupported reservation type.");
-            return;
-        } // End if-else statements
+        }
 
-        assert originalReservation != null;
-        if (!originalReservation.equals(currentReservation)) {
-            try {
-                account.updateReservation(reservationNumber, currentReservation);
-                System.out.println("Reservation updated successfully.");
-            } catch (IllegalState_Exception | IllegalOperation_Exception e) {
-                System.out.println("Error updating reservation: " + e.getMessage());
-            } // End try-catch statements
-        } else {
-            System.out.println("No changes detected. Reservation not updated.");
-        } // End if-else statements
-    } // End testUpdateReservation method
+        try {
+            account.updateReservation(reservationNumber, updated);
+            System.out.println("Reservation updated successfully.");
+        } catch (IllegalState_Exception | IllegalOperation_Exception e) {
+            System.out.println("Update failed: " + e.getMessage());
+        }
+    }
 
+    private static void updateCommonFields(Scanner scanner, Reservation r) {
+        System.out.print("Start date (yyyy-MM-dd): ");
+        r.setStartDate(LocalDate.parse(scanner.nextLine()));
 
-    /**
-     * Prompts the user for common reservation fields and updates the values.
-     * Applies to all reservation types (Cabin, Hotel, House).
-     *
-     * @param scanner Scanner instance for user input.
-     * @param reservation The reservation object to update.
-     */
-    private static void updateCommonReservationFields(Scanner scanner, Reservation reservation) {
-        System.out.print("Enter reservation start date (yyyy-MM-dd): ");
-        reservation.setStartDate(LocalDate.parse(scanner.nextLine().trim()));
+        System.out.print("Number of nights: ");
+        r.setNumNights(Integer.parseInt(scanner.nextLine()));
 
-        System.out.print("Enter new number of nights: ");
-        reservation.setNumNights(Integer.parseInt(scanner.nextLine().trim()));
+        System.out.print("Beds: ");
+        r.setNumBeds(Integer.parseInt(scanner.nextLine()));
 
-        System.out.print("Enter new number of beds: ");
-        reservation.setNumBeds(Integer.parseInt(scanner.nextLine().trim()));
+        System.out.print("Bedrooms: ");
+        r.setNumBedrooms(Integer.parseInt(scanner.nextLine()));
 
-        System.out.print("Enter new number of bedrooms: ");
-        reservation.setNumBedrooms(Integer.parseInt(scanner.nextLine().trim()));
+        System.out.print("Bathrooms: ");
+        r.setNumBathrooms(Integer.parseInt(scanner.nextLine()));
 
-        System.out.print("Enter new number of bathrooms: ");
-        reservation.setNumBathrooms(Integer.parseInt(scanner.nextLine().trim()));
+        System.out.print("Square footage: ");
+        r.setLodgingSizeSqFt(Integer.parseInt(scanner.nextLine()));
+    }
 
-        System.out.print("Enter new square footage: ");
-        reservation.setLodgingSizeSqFt(Integer.parseInt(scanner.nextLine().trim()));
-    } // End updateCommonReservationFields method
+    private static void updateAddresses(Scanner scanner, Reservation r) {
+        System.out.println("\nUpdate physical address:");
+        Address physical = TestHelper.getUserAddressInput();
+        r.setLodgingPhysicalAddress(
+                physical.getStreet(),
+                physical.getCity(),
+                physical.getState(),
+                physical.getZipCode()
+        );
 
+        System.out.println("\nUpdate mailing address:");
+        Address mailing = TestHelper.getUserAddressInput();
+        r.setLodgingMailingAddress(
+                mailing.getStreet(),
+                mailing.getCity(),
+                mailing.getState(),
+                mailing.getZipCode()
+        );
+    }
 
-    /**
-     * Creates a deep copy of a given reservation.
-     * - This method ensures that modifications to the copied reservation do not affect the original instance.
-     * - Uses instanceof checks to determine the specific subclass of the reservation and creates an appropriate copy.
-     * - If the reservation type is unrecognized, it returns null.
-     *
-     * @param reservation The reservation instance to be copied.
-     * @return A new Reservation object that is an independent copy of the original.
-     */
-    private static Reservation createReservationCopy(Reservation reservation) {
-        if (reservation instanceof CabinReservation cabin) {
+    private static Reservation createReservationCopy(Reservation r) {
+        if (r instanceof CabinReservation c) {
             return new CabinReservation(
-                    cabin.getReservationNumber(),
-                    cabin.getAccountNumber(),
-                    cabin.getLodgingPhysicalAddress(),
-                    cabin.getLodgingMailingAddress(),
-                    cabin.getStartDate(),
-                    cabin.getNumNights(),
-                    cabin.getNumBeds(),
-                    cabin.getNumBedrooms(),
-                    cabin.getNumBathrooms(),
-                    cabin.getLodgingSizeSqFt(),
-                    cabin.getLodgingPrice(),
-                    cabin.isFullKitchenAvailable(),
-                    cabin.isLoftAvailable()
+                    c.getReservationNumber(),
+                    c.getAccountNumber(),
+                    c.getLodgingPhysicalAddress(),
+                    c.getLodgingMailingAddress(),
+                    c.getStartDate(),
+                    c.getNumNights(),
+                    c.getNumBeds(),
+                    c.getNumBedrooms(),
+                    c.getNumBathrooms(),
+                    c.getLodgingSizeSqFt(),
+                    c.getLodgingPrice(),
+                    c.isFullKitchenAvailable(),
+                    c.isLoftAvailable()
             );
-        } else if (reservation instanceof HotelReservation hotel) {
+        } else if (r instanceof HotelReservation h) {
             return new HotelReservation(
-                    hotel.getReservationNumber(),
-                    hotel.getAccountNumber(),
-                    hotel.getLodgingPhysicalAddress(),
-                    hotel.getLodgingMailingAddress(),
-                    hotel.getStartDate(),
-                    hotel.getNumNights(),
-                    hotel.getNumBeds(),
-                    hotel.getNumBedrooms(),
-                    hotel.getNumBathrooms(),
-                    hotel.getLodgingSizeSqFt(),
-                    hotel.getLodgingPrice(),
-                    hotel.hasKitchenette()
+                    h.getReservationNumber(),
+                    h.getAccountNumber(),
+                    h.getLodgingPhysicalAddress(),
+                    h.getLodgingMailingAddress(),
+                    h.getStartDate(),
+                    h.getNumNights(),
+                    h.getNumBeds(),
+                    h.getNumBedrooms(),
+                    h.getNumBathrooms(),
+                    h.getLodgingSizeSqFt(),
+                    h.getLodgingPrice(),
+                    h.hasKitchenette()
             );
-        } else if (reservation instanceof HouseReservation house) {
+        } else if (r instanceof HouseReservation h) {
             return new HouseReservation(
-                    house.getReservationNumber(),
-                    house.getAccountNumber(),
-                    house.getLodgingPhysicalAddress(),
-                    house.getLodgingMailingAddress(),
-                    house.getStartDate(),
-                    house.getNumNights(),
-                    house.getNumBeds(),
-                    house.getNumBedrooms(),
-                    house.getNumBathrooms(),
-                    house.getLodgingSizeSqFt(),
-                    house.getLodgingPrice(),
-                    house.getNumFloors()
+                    h.getReservationNumber(),
+                    h.getAccountNumber(),
+                    h.getLodgingPhysicalAddress(),
+                    h.getLodgingMailingAddress(),
+                    h.getStartDate(),
+                    h.getNumNights(),
+                    h.getNumBeds(),
+                    h.getNumBedrooms(),
+                    h.getNumBathrooms(),
+                    h.getLodgingSizeSqFt(),
+                    h.getLodgingPrice(),
+                    h.getNumFloors()
             );
-        } // End if-else statements
-        return null;
-    } // End createReservationCopy method
-
-} // End UpdateReservationTest class
+        }
+        throw new IllegalStateException("Unsupported reservation type.");
+    }
+}
