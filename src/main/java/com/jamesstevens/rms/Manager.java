@@ -1,9 +1,6 @@
 package com.jamesstevens.rms;
 
 import com.jamesstevens.rms.exceptions.*;
-import com.jamesstevens.rms.reservation.CabinReservation;
-import com.jamesstevens.rms.reservation.HotelReservation;
-import com.jamesstevens.rms.reservation.HouseReservation;
 import com.jamesstevens.rms.reservation.Reservation;
 
 import java.io.*;
@@ -19,12 +16,11 @@ import java.util.*;
 public class Manager {
 
     private final Map<String, Account> accounts;
-    static String prefix;
 
     /**
      * Returns the base directory where RMS data is stored.
      * <p>
-     * If the environment variable {@code RMS_DATA_DIR} is set, it is used; otherwise,
+     * If the system property {@code RMS_DATA_DIR} is set, it is used; otherwise,
      * a {@code /data} directory under the working directory is used.
      * </p>
      *
@@ -63,7 +59,7 @@ public class Manager {
     private void loadAccountsAndReservations() {
         File dataDir = new File(dataDirectory());
         if (!dataDir.exists() && !dataDir.mkdirs()) {
-            throw new IllegalLoad_Exception(
+            throw new IllegalLoadException(
                     "Data Directory",
                     dataDir.getAbsolutePath(),
                     "Unable to create data directory."
@@ -81,39 +77,7 @@ public class Manager {
                 continue;
             }
 
-            try {
-                Account account = loadAccountFromFile(accountFile);
-                addAccountToMemory(account);
-                ensureAccountDirectory(account);
-                loadReservationsForAccount(account, new File(dataDirectory(), account.getAccountNumber()));
-            } catch (IllegalLoad_Exception e) {
-                System.out.println("ERROR: Failed to load account from file: "
-                        + accountFile.getName() + " | " + e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Stores an account in the in-memory map using a normalized account number key.
-     *
-     * @param account account to store
-     */
-    private void addAccountToMemory(Account account) {
-        String accountNumber = account.getAccountNumber().trim().toUpperCase();
-        accounts.put(accountNumber, account);
-    }
-
-    /**
-     * Ensures the account directory exists within the data directory.
-     *
-     * @param account account whose directory must exist
-     * @throws IllegalLoad_Exception if the directory cannot be created
-     */
-    private void ensureAccountDirectory(Account account) throws IllegalLoad_Exception {
-        File accountDir = new File(dataDirectory(), account.getAccountNumber());
-        if (!accountDir.exists() && !accountDir.mkdirs()) {
-            throw new IllegalLoad_Exception("Account Directory",
-                    accountDir.getAbsolutePath(), account.getAccountNumber());
+            loadAccountFromFile(accountFile);
         }
     }
 
@@ -125,13 +89,13 @@ public class Manager {
      *
      * @param file account file (e.g., {@code acc-A100000000.txt})
      * @return loaded account instance
-     * @throws IllegalLoad_Exception if the file is unreadable or invalid
+     * @throws IllegalLoadException if the file is unreadable or invalid
      */
-    private Account loadAccountFromFile(File file) throws IllegalLoad_Exception {
+    private Account loadAccountFromFile(File file) throws IllegalLoadException {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String data = reader.readLine();
             if (data == null || data.trim().isEmpty()) {
-                throw new IllegalLoad_Exception("Account File", file.getName(), "Empty account file.");
+                throw new IllegalLoadException("Account File", file.getName(), "Empty account file.");
             }
 
             Account account = Account.fromString(data);
@@ -140,14 +104,18 @@ public class Manager {
 
             File accountDir = new File(dataDirectory(), accountNumber);
             if (!accountDir.exists() && !accountDir.mkdirs()) {
-                throw new IllegalLoad_Exception("Account Directory", accountDir.getAbsolutePath(), accountNumber);
+                throw new IllegalLoadException("Account Directory", accountDir.getAbsolutePath(), accountNumber);
             }
 
             loadReservationsForAccount(account, accountDir);
             return account;
         } catch (IOException e) {
-            throw new IllegalLoad_Exception("Account File", file.getName(),
-                    "Unknown IO error while reading the file.");
+            throw new IllegalLoadException(
+                    "Account File",
+                    file.getName(),
+                    "N/A",
+                    e
+            );
         }
     }
 
@@ -160,7 +128,7 @@ public class Manager {
      *
      * @param account    account to populate
      * @param accountDir account directory containing {@code Reservations/}
-     * @throws IllegalLoad_Exception if reservation files cannot be read
+     * @throws IllegalLoadException if reservation files cannot be read
      */
     private void loadReservationsForAccount(Account account, File accountDir) {
         if (!account.getAllReservations().isEmpty()) {
@@ -192,9 +160,12 @@ public class Manager {
                 reservationList.add(reservation);
 
             } catch (IOException e) {
-                throw new IllegalLoad_Exception("Reservation File", file.getName(), account.getAccountNumber());
-            } catch (RuntimeException e) {
-                System.out.println("Error parsing reservation file: " + file.getName() + " | " + e.getMessage());
+                throw new IllegalLoadException(
+                        "Reservation File",
+                        file.getName(),
+                        account.getAccountNumber(),
+                        e
+                );
             }
         }
 
@@ -207,7 +178,7 @@ public class Manager {
 
         for (Reservation res : reservationList) {
             if (account.getReservation(res.getReservationNumber()) == null) {
-                account.addReservation(res);
+                account.addLoadedReservation(res);
             }
         }
     }
@@ -218,42 +189,43 @@ public class Manager {
      * @param accountNumber     target account number
      * @param reservationNumber target reservation number
      * @return loaded reservation instance
-     * @throws IllegalLoad_Exception if the file does not exist or cannot be read/parsed
+     * @throws IllegalLoadException if the file does not exist or cannot be read/parsed
      */
     private Reservation loadReservationFromFile(String accountNumber, String reservationNumber)
-            throws IllegalLoad_Exception {
+            throws IllegalLoadException {
 
         File reservationFile = new File(dataDirectory() + "/" + accountNumber + "/Reservations/" +
                 reservationNumber + ".txt");
 
         if (!reservationFile.exists()) {
-            throw new IllegalLoad_Exception("Reservation File", reservationFile.getName(), accountNumber);
+            throw new IllegalLoadException("Reservation File", reservationFile.getName(), accountNumber);
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(reservationFile))) {
             String data = reader.readLine();
             if (data == null || data.trim().isEmpty()) {
-                throw new IllegalLoad_Exception("Reservation File",
+                throw new IllegalLoadException("Reservation File",
                         reservationFile.getName(), "Empty reservation file.");
             }
 
             return Reservation.fromString(data);
 
         } catch (IOException e) {
-            throw new IllegalLoad_Exception("Reservation File", reservationFile.getName(), accountNumber);
+            throw new IllegalLoadException(
+                    "Reservation File",
+                    reservationFile.getName(),
+                    accountNumber,
+                    e
+            );
         }
     }
 
     /**
      * Returns an immutable snapshot of all accounts.
-     * <p>
-     * This triggers a reload to reflect persisted state.
-     * </p>
      *
      * @return immutable list of accounts
      */
     public List<Account> getAccounts() {
-        reloadAccounts();
         return List.copyOf(accounts.values());
     }
 
@@ -276,15 +248,15 @@ public class Manager {
      * Displays an account and its associated reservation numbers.
      *
      * @param accountNumber account number to find
-     * @throws NullAccount_Exception if the account cannot be found
+     * @throws NullAccountException if the account cannot be found
      */
-    public void findAccount(String accountNumber) throws NullAccount_Exception {
+    public void findAccount(String accountNumber) throws NullAccountException {
         Account account = getAccount(accountNumber);
         if (account == null) {
             account = loadAccountIfExists(accountNumber);
         }
         if (account == null) {
-            throw new NullAccount_Exception(accountNumber, "Account not found.");
+            throw new NullAccountException(accountNumber, "Account not found.");
         }
 
         System.out.println("\nAccount Number: " + account.getAccountNumber());
@@ -306,29 +278,46 @@ public class Manager {
      *
      * @param accountNumber     account number associated with the reservation
      * @param reservationNumber reservation number to find
-     * @throws NullReservation_Exception if the account or reservation cannot be found
+     * @throws NullReservationException if the account or reservation cannot be found
      */
-    public void findReservation(String accountNumber, String reservationNumber) throws NullReservation_Exception {
+    public void findReservation(String accountNumber, String reservationNumber) throws NullReservationException {
         String normalizedAccountNumber = accountNumber.trim().toUpperCase();
         String normalizedReservationNumber = reservationNumber.trim().toUpperCase();
 
         Account account = accounts.get(normalizedAccountNumber);
         if (account == null) {
-            account = loadAccountIfExists(accountNumber);
+            account = loadAccountIfExists(normalizedAccountNumber);
         }
         if (account == null) {
-            throw new NullReservation_Exception(accountNumber, reservationNumber,
+            throw new NullReservationException(accountNumber, reservationNumber,
                     "Account not found for this reservation.");
         }
 
         Reservation reservation = account.getReservation(normalizedReservationNumber);
         if (reservation == null) {
-            try {
-                reservation = loadReservationFromFile(accountNumber, reservationNumber);
-                account.addReservation(reservation);
-            } catch (IllegalLoad_Exception e) {
-                throw new NullReservation_Exception(accountNumber, reservationNumber, "Reservation not found.");
+            File reservationFile = new File(
+                    dataDirectory()
+                            + "/"
+                            + normalizedAccountNumber
+                            + "/Reservations/"
+                            + normalizedReservationNumber
+                            + ".txt"
+            );
+
+            if (!reservationFile.exists()) {
+                throw new NullReservationException(
+                        accountNumber,
+                        reservationNumber,
+                        "Reservation not found."
+                );
             }
+
+            reservation = loadReservationFromFile(
+                    normalizedAccountNumber,
+                    normalizedReservationNumber
+            );
+
+            account.addLoadedReservation(reservation);
         }
 
         System.out.println("\nReservation Number: " + reservationNumber);
@@ -339,22 +328,26 @@ public class Manager {
      * Attempts to load an account from disk if the expected account file exists.
      *
      * @param accountNumber account number to load
-     * @return loaded account, or {@code null} if not found or load fails
+     * @return loaded account, or {@code null} if the account file does not exist
+     * @throws IllegalLoadException if the account file exists but cannot be loaded
      */
     private Account loadAccountIfExists(String accountNumber) {
-        File accountFile = new File(dataDirectory() + "/" + accountNumber + "/acc-" + accountNumber + ".txt");
+        String normalizedAccountNumber = accountNumber.trim().toUpperCase();
+
+        File accountFile = new File(
+                dataDirectory()
+                        + "/"
+                        + normalizedAccountNumber
+                        + "/acc-"
+                        + normalizedAccountNumber
+                        + ".txt"
+        );
 
         if (!accountFile.exists()) {
             return null;
         }
 
-        try {
-            Account account = loadAccountFromFile(accountFile);
-            accounts.put(accountNumber, account);
-            return account;
-        } catch (IllegalLoad_Exception e) {
-            return null;
-        }
+        return loadAccountFromFile(accountFile);
     }
 
     /**
@@ -380,30 +373,31 @@ public class Manager {
     }
 
     /**
-     * Adds an account to the system and persists it.
+     * Adds a new account to the system and persists it.
      *
-     * @param account input account (used as a source of address/phone/email)
-     * @throws DuplicateObject_Exception if the account number already exists
-     * @throws IllegalSave_Exception     if persistence fails
+     * @param account account to add
+     * @throws DuplicateObjectException if the account number already exists
+     * @throws IllegalSaveException if the account cannot be persisted
      */
-    public void addAccount(Account account) throws DuplicateObject_Exception, IllegalSave_Exception {
-        String newAccountNumber;
-        if (account.getAccountNumber().startsWith("A9")) {
-            newAccountNumber = account.getAccountNumber();
-        } else {
-            newAccountNumber = generateAccountNumber();
+    public void addAccount(Account account)
+            throws DuplicateObjectException, IllegalSaveException {
+
+        if (account == null) {
+            throw new IllegalArgumentException("Account cannot be null.");
         }
 
-        if (accounts.containsKey(newAccountNumber)) {
-            throw new DuplicateObject_Exception(newAccountNumber, "N/A");
+        String accountNumber =
+                account.getAccountNumber().trim().toUpperCase();
+
+        if (accounts.containsKey(accountNumber)) {
+            throw new DuplicateObjectException(
+                    "Account already exists.",
+                    accountNumber
+            );
         }
 
-        Account newAccount = new Account(newAccountNumber, account.getAddress(),
-                account.getPhoneNumber(), account.getEmail());
-
-        accounts.put(newAccountNumber, newAccount);
-        saveAccountToFile(newAccount);
-        reloadAccounts();
+        saveAccountToFile(account);
+        accounts.put(accountNumber, account);
     }
 
     /**
@@ -411,14 +405,16 @@ public class Manager {
      *
      * @param accountNumber account to update
      * @throws IllegalArgumentException if the account is not present in memory
-     * @throws IllegalSave_Exception    if persistence fails
+     * @throws IllegalSaveException    if persistence fails
      */
-    public void updateAccount(String accountNumber) throws IllegalArgumentException, IllegalSave_Exception {
-        if (!accounts.containsKey(accountNumber)) {
+    public void updateAccount(String accountNumber) throws IllegalArgumentException, IllegalSaveException {
+        String normalizedAccountNumber = accountNumber.trim().toUpperCase();
+
+        if (!accounts.containsKey(normalizedAccountNumber)) {
             throw new IllegalArgumentException("Account does not exist.");
         }
 
-        Account account = accounts.get(accountNumber);
+        Account account = accounts.get(normalizedAccountNumber);
         saveAccountToFile(account);
     }
 
@@ -426,19 +422,19 @@ public class Manager {
      * Writes an account record to disk, ensuring required directories exist.
      *
      * @param account account to persist
-     * @throws IllegalSave_Exception if writing fails
+     * @throws IllegalSaveException if writing fails
      */
-    private void saveAccountToFile(Account account) throws IllegalSave_Exception {
+    private void saveAccountToFile(Account account) throws IllegalSaveException {
         File accountDir = new File(dataDirectory(), account.getAccountNumber());
         File reservationsDir = new File(accountDir, "Reservations");
 
         if (!accountDir.exists() && !accountDir.mkdirs()) {
-            throw new IllegalSave_Exception("Account Directory", accountDir.getAbsolutePath(),
+            throw new IllegalSaveException("Account Directory", accountDir.getAbsolutePath(),
                     account.getAccountNumber());
         }
 
         if (!reservationsDir.exists() && !reservationsDir.mkdirs()) {
-            throw new IllegalSave_Exception("Reservations Directory",
+            throw new IllegalSaveException("Reservations Directory",
                     reservationsDir.getAbsolutePath(), account.getAccountNumber());
         }
 
@@ -448,7 +444,12 @@ public class Manager {
             writer.write(account.toString());
             writer.newLine();
         } catch (IOException e) {
-            throw new IllegalSave_Exception("Account", accountFile.getName(), account.getAccountNumber());
+            throw new IllegalSaveException(
+                    "Account",
+                    accountFile.getName(),
+                    account.getAccountNumber(),
+                    e
+            );
         }
     }
 
@@ -508,41 +509,33 @@ public class Manager {
      * </p>
      *
      * @param reservation reservation to persist
-     * @throws IllegalSave_Exception if saving fails
+     * @throws IllegalSaveException if saving fails
      */
     public static void saveReservationToFile(Reservation reservation)
-            throws IllegalSave_Exception {
+            throws IllegalSaveException {
 
         if (reservation == null) {
-            throw new IllegalSave_Exception("Reservation", "Unknown",
+            throw new IllegalSaveException("Reservation", "Unknown",
                     "Cannot save a null reservation.");
         }
 
         File reservationsDir = ensureAccountDirectoriesExist(reservation.getAccountNumber());
 
-        if (reservation instanceof CabinReservation) {
-            prefix = "CAB";
-        } else if (reservation instanceof HotelReservation) {
-            prefix = "HOT";
-        } else if (reservation instanceof HouseReservation) {
-            prefix = "HOU";
-        } else {
-            throw new IllegalParameter_Exception(reservation.getAccountNumber(),
-                    reservation.getReservationNumber(),
-                    "Unknown reservation type: " + reservation.getClass().getSimpleName());
-        }
-
-        String formattedReservationNumber =
-                normalizeReservationNumber(reservation.getReservationNumber(), prefix);
-
-        File reservationFile = new File(reservationsDir, formattedReservationNumber + ".txt");
+        File reservationFile = new File(
+                reservationsDir,
+                reservation.getReservationNumber() + ".txt"
+        );
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(reservationFile, false))) {
             writer.write(reservation.toString());
             writer.newLine();
         } catch (IOException e) {
-            throw new IllegalSave_Exception("Reservation", reservationFile.getName(),
-                    reservation.getAccountNumber());
+            throw new IllegalSaveException(
+                    "Reservation",
+                    reservationFile.getName(),
+                    reservation.getAccountNumber(),
+                    e
+            );
         }
     }
 
@@ -551,39 +544,22 @@ public class Manager {
      *
      * @param accountNumber account number
      * @return the {@code Reservations/} directory file handle
-     * @throws IllegalSave_Exception if directory creation fails
+     * @throws IllegalSaveException if directory creation fails
      */
-    private static File ensureAccountDirectoriesExist(String accountNumber) throws IllegalSave_Exception {
+    private static File ensureAccountDirectoriesExist(String accountNumber) throws IllegalSaveException {
         File accountDir = new File(dataDirectory(), accountNumber);
         File reservationsDir = new File(accountDir, "Reservations");
 
         if (!accountDir.exists() && !accountDir.mkdirs()) {
-            throw new IllegalSave_Exception("Account Directory", accountDir.getAbsolutePath(), accountNumber);
+            throw new IllegalSaveException("Account Directory", accountDir.getAbsolutePath(), accountNumber);
         }
 
         if (!reservationsDir.exists() && !reservationsDir.mkdirs()) {
-            throw new IllegalSave_Exception("Reservations Directory",
+            throw new IllegalSaveException("Reservations Directory",
                     reservationsDir.getAbsolutePath(), accountNumber);
         }
 
         return reservationsDir;
-    }
-
-    /**
-     * Normalizes reservation number formatting to: {@code res-<PREFIX><digits>}.
-     * <p>
-     * Ensures {@code res-} is lowercase and the type prefix (CAB/HOT/HOU) is uppercase.
-     * </p>
-     *
-     * @param reservationNumber raw reservation number
-     * @param prefix            type prefix (CAB/HOT/HOU)
-     * @return normalized reservation number
-     */
-    private static String normalizeReservationNumber(String reservationNumber, String prefix) {
-        if (reservationNumber == null || reservationNumber.isEmpty()) {
-            return reservationNumber;
-        }
-        return "res-" + prefix.toUpperCase() + reservationNumber.substring(7);
     }
 
     /**

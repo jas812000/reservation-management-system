@@ -1,6 +1,6 @@
 package com.jamesstevens.rms;
 
-import com.jamesstevens.rms.exceptions.IllegalParameter_Exception;
+import com.jamesstevens.rms.exceptions.IllegalParameterException;
 
 /**
  * Represents a physical mailing or lodging address.
@@ -13,7 +13,7 @@ public class Address {
     private String street;
     private String city;
     private String state;
-    private int zipCode;
+    private String zipCode;
 
     /**
      * Constructs a new {@code Address}.
@@ -22,14 +22,14 @@ public class Address {
      * @param city    city name (required)
      * @param state   2-letter state abbreviation (required)
      * @param zipCode 5-digit zip code
-     * @throws IllegalParameter_Exception if any field is invalid
+     * @throws IllegalParameterException if any field is invalid
      */
-    public Address(String street, String city, String state, int zipCode) {
+    public Address(String street, String city, String state, String zipCode) {
         validateAddress(street, city, state, zipCode);
-        this.street = street;
-        this.city = city;
-        this.state = state;
-        this.zipCode = zipCode;
+        this.street = street.trim();
+        this.city = city.trim();
+        this.state = state.trim().toUpperCase();
+        this.zipCode = zipCode.trim();
     }
 
     /**
@@ -64,7 +64,7 @@ public class Address {
      *
      * @return zip code
      */
-    public int getZipCode() {
+    public String getZipCode() {
         return zipCode;
     }
 
@@ -75,14 +75,14 @@ public class Address {
      * @param city    city name (required)
      * @param state   2-letter state abbreviation (required)
      * @param zipCode 5-digit zip code
-     * @throws IllegalParameter_Exception if any field is invalid
+     * @throws IllegalParameterException if any field is invalid
      */
-    public void setAddress(String street, String city, String state, int zipCode) {
+    public void setAddress(String street, String city, String state, String zipCode) {
         validateAddress(street, city, state, zipCode);
-        this.street = street;
-        this.city = city;
-        this.state = state;
-        this.zipCode = zipCode;
+        this.street = street.trim();
+        this.city = city.trim();
+        this.state = state.trim().toUpperCase();
+        this.zipCode = zipCode.trim();
     }
 
     /**
@@ -91,21 +91,24 @@ public class Address {
      * @param street  street name and number
      * @param city    city name
      * @param state   2-letter state abbreviation
-     * @param zipCode zip code as a 5-digit integer
-     * @throws IllegalParameter_Exception if any parameter is invalid
+     * @param zipCode 5-digit zip code
+     * @throws IllegalParameterException if any parameter is invalid
      */
-    private void validateAddress(String street, String city, String state, int zipCode) {
-        if (street == null || street.isEmpty()) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Street cannot be empty.");
+    private void validateAddress(String street, String city, String state, String zipCode) {
+        if (street == null || street.isBlank()) {
+            throw new IllegalParameterException("N/A", "N/A", "Street cannot be empty.");
         }
-        if (city == null || city.isEmpty()) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "City cannot be empty.");
+
+        if (city == null || city.isBlank()) {
+            throw new IllegalParameterException("N/A", "N/A", "City cannot be empty.");
         }
-        if (state == null || state.length() != 2) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "State must be a valid 2-letter abbreviation.");
+
+        if (state == null || !state.trim().matches("[A-Za-z]{2}")) {
+            throw new IllegalParameterException("N/A", "N/A", "State must be a valid 2-letter abbreviation.");
         }
-        if (zipCode < 500 || zipCode > 99999) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Zip code must be a 5-digit number.");
+
+        if (zipCode == null || !zipCode.trim().matches("\\d{5}")) {
+            throw new IllegalParameterException("N/A", "N/A", "Zip code must be a 5-digit number.");
         }
     }
 

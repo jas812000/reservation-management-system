@@ -2,7 +2,8 @@ package com.jamesstevens.rms.reservation;
 
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.enums.ReservationStatus;
-import com.jamesstevens.rms.exceptions.IllegalLoad_Exception;
+import com.jamesstevens.rms.exceptions.IllegalLoadException;
+import com.jamesstevens.rms.exceptions.IllegalParameterException;
 
 import java.time.LocalDate;
 
@@ -63,6 +64,15 @@ public class HotelReservation extends Reservation {
                 lodgingSizeSqFt,
                 lodgingPrice
         );
+
+        if (!reservationNumber.trim().startsWith("res-HOT")) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    reservationNumber,
+                    "Hotel reservation number must use the HOT prefix."
+            );
+        }
+
         this.kitchenetteAvailable = kitchenetteAvailable;
     }
 
@@ -81,19 +91,18 @@ public class HotelReservation extends Reservation {
      * @param kitchenetteAvailable new value
      */
     public void setKitchenetteAvailable(boolean kitchenetteAvailable) {
+        ensureModifiable();
         this.kitchenetteAvailable = kitchenetteAvailable;
+        this.lodgingPrice = calculatePricePerNight();
     }
 
     /**
      * Calculates the price per night for a hotel reservation.
      *
-     * @return nightly price (0.00 if canceled)
+     * @return computed nightly price
      */
     @Override
     public double calculatePricePerNight() {
-        if (status == ReservationStatus.CANCELLED) {
-            return 0.00;
-        }
 
         double basePrice = 120.0;
         if (lodgingSizeSqFt > 900) {
@@ -146,12 +155,12 @@ public class HotelReservation extends Reservation {
      *
      * @param data persisted record line
      * @return parsed {@code HotelReservation}
-     * @throws IllegalLoad_Exception if the record format is invalid or cannot be parsed
+     * @throws IllegalLoadException if the persisted record structure is invalid
      */
     public static HotelReservation fromString(String data) {
         String[] parts = splitCsvPreservingQuotes(data);
         if (parts.length < 14) {
-            throw new IllegalLoad_Exception("HotelReservation Data", "N/A",
+            throw new IllegalLoadException("HotelReservation Data", "N/A",
                     "Invalid data format. Found: " + parts.length);
         }
 
@@ -174,7 +183,7 @@ public class HotelReservation extends Reservation {
                 Boolean.parseBoolean(parts[13].trim())
         );
 
-        reservation.setStatus(parsedStatus);
+        reservation.restoreStatus(parsedStatus);
         return reservation;
     }
 
@@ -198,19 +207,19 @@ public class HotelReservation extends Reservation {
      *
      * @param parts tokenized reservation record
      * @return parsed mailing {@link Address}, or {@code null} if not provided
-     * @throws IllegalLoad_Exception if the field is present but not in the expected format
+     * @throws IllegalLoadException if the field is present but not in the expected format
      */
     private static Address parseMailingAddress(String[] parts) {
         if (!parts[4].trim().equals("N/A")) {
             String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
             if (mailingAddressParts.length < 4) {
-                throw new IllegalLoad_Exception("HotelReservation Address", "N/A", "Invalid mailing address format.");
+                throw new IllegalLoadException("HotelReservation Address", "N/A", "Invalid mailing address format.");
             }
             return new Address(
                     mailingAddressParts[0],
                     mailingAddressParts[1],
                     mailingAddressParts[2],
-                    Integer.parseInt(mailingAddressParts[3])
+                    mailingAddressParts[3]
             );
         }
         return null;
@@ -225,18 +234,18 @@ public class HotelReservation extends Reservation {
      *
      * @param parts tokenized reservation record
      * @return parsed physical {@link Address}
-     * @throws IllegalLoad_Exception if the physical address field is missing or not in the expected format
+     * @throws IllegalLoadException if the physical address field is missing or not in the expected format
      */
     private static Address parsePhysicalAddress(String[] parts) {
         String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
         if (physicalAddressParts.length < 4) {
-            throw new IllegalLoad_Exception("HotelReservation Address", "N/A", "Invalid physical address format.");
+            throw new IllegalLoadException("HotelReservation Address", "N/A", "Invalid physical address format.");
         }
         return new Address(
                 physicalAddressParts[0],
                 physicalAddressParts[1],
                 physicalAddressParts[2],
-                Integer.parseInt(physicalAddressParts[3])
+                physicalAddressParts[3]
         );
     }
 }

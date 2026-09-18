@@ -1,13 +1,19 @@
 package com.jamesstevens.rms.tests;
 
 import com.jamesstevens.rms.Address;
-import com.jamesstevens.rms.exceptions.IllegalOperation_Exception;
+import com.jamesstevens.rms.enums.ReservationStatus;
+import com.jamesstevens.rms.exceptions.IllegalOperationException;
 import com.jamesstevens.rms.reservation.CabinReservation;
 import com.jamesstevens.rms.reservation.HotelReservation;
 import com.jamesstevens.rms.reservation.HouseReservation;
+import com.jamesstevens.rms.reservation.Reservation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import com.jamesstevens.rms.exceptions.IllegalStateException;
+import com.jamesstevens.rms.exceptions.IllegalParameterException;
+import com.jamesstevens.rms.exceptions.IllegalLoadException;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +38,9 @@ public class ReservationTest {
     private CabinReservation cabinReservation;
     private HouseReservation houseReservation;
 
+    @TempDir
+    Path tempDir;
+
     /**
      * Initializes sample reservations before each test.
      * <p>
@@ -41,18 +50,21 @@ public class ReservationTest {
      */
     @BeforeEach
     public void setUp() {
+
+        System.setProperty("RMS_DATA_DIR", tempDir.toString());
+
         Address physicalAddress = new Address(
                 "43-179 Day Mountain Road",
                 "Temple",
                 "ME",
-                4984
+                "04984"
         );
 
         Address mailingAddress = new Address(
                 "PO Box 43179",
                 "Waterville",
                 "ME",
-                4901
+                "04901"
         );
 
         cabinReservation = new CabinReservation(
@@ -124,12 +136,12 @@ public class ReservationTest {
         assertEquals("43-179 Day Mountain Road", physical.getStreet());
         assertEquals("Temple", physical.getCity());
         assertEquals("ME", physical.getState());
-        assertEquals(4984, physical.getZipCode());
+        assertEquals("04984", physical.getZipCode());
 
         assertEquals("PO Box 43179", mailing.getStreet());
         assertEquals("Waterville", mailing.getCity());
         assertEquals("ME", mailing.getState());
-        assertEquals(4901, mailing.getZipCode());
+        assertEquals("04901", mailing.getZipCode());
     }
 
     /**
@@ -156,8 +168,8 @@ public class ReservationTest {
      */
     @Test
     public void testCabinMailingCanDivergeFromPhysical() {
-        cabinReservation.setLodgingPhysicalAddress("10 Pine", "Portland", "ME", 4101);
-        cabinReservation.setLodgingMailingAddress("PO Box 77", "Bangor", "ME", 4401);
+        cabinReservation.setLodgingPhysicalAddress("10 Pine", "Portland", "ME", "04101");
+        cabinReservation.setLodgingMailingAddress("PO Box 77", "Bangor", "ME", "04401");
 
         assertNotEquals(
                 cabinReservation.getLodgingPhysicalAddress().toString(),
@@ -200,15 +212,15 @@ public class ReservationTest {
      */
     @Test
     public void testHotelMailingCannotDivergeFromPhysical() {
-        hotelReservation.setLodgingPhysicalAddress("1 Main", "Dallas", "TX", 75001);
+        hotelReservation.setLodgingPhysicalAddress("1 Main", "Dallas", "TX", "75001");
 
         assertEquals(
                 hotelReservation.getLodgingPhysicalAddress().toString(),
                 hotelReservation.getLodgingMailingAddress().toString()
         );
 
-        assertThrows(IllegalOperation_Exception.class, () ->
-                hotelReservation.setLodgingMailingAddress("PO Box 9", "Dallas", "TX", 75002)
+        assertThrows(IllegalOperationException.class, () ->
+                hotelReservation.setLodgingMailingAddress("PO Box 9", "Dallas", "TX", "75002")
         );
     }
 
@@ -246,11 +258,190 @@ public class ReservationTest {
      */
     @Test
     public void testHouseMailingCannotDivergeFromPhysical() {
-        houseReservation.setLodgingPhysicalAddress("2 Oak", "Austin", "TX", 73301);
+        houseReservation.setLodgingPhysicalAddress("2 Oak", "Austin", "TX", "73301");
 
         assertEquals(
                 houseReservation.getLodgingPhysicalAddress().toString(),
                 houseReservation.getLodgingMailingAddress().toString()
         );
+    }
+
+    /**
+     * Verifies that a completed reservation is locked against further modification.
+     */
+    @Test
+    public void testCompletedReservationCannotBeModified() {
+        hotelReservation.completeReservation();
+
+        assertTrue(hotelReservation.isLocked());
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> hotelReservation.setNumNights(10)
+        );
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> hotelReservation.setKitchenetteAvailable(false)
+        );
+    }
+
+    /**
+     * Verifies that a canceled reservation is locked against further modification.
+     */
+    @Test
+    public void testCancelledReservationCannotBeModified() {
+        cabinReservation.cancelReservation();
+
+        assertTrue(cabinReservation.isLocked());
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> cabinReservation.setStartDate(LocalDate.of(2025, 9, 1))
+        );
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> cabinReservation.setFullKitchenAvailable(false)
+        );
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> cabinReservation.setLoftAvailable(false)
+        );
+    }
+
+    /**
+     * Verifies that reservation numbers must use the canonical format.
+     */
+    @Test
+    public void testInvalidReservationNumberIsRejected() {
+        assertThrows(
+                IllegalParameterException.class,
+                () -> new CabinReservation(
+                        "invalid",
+                        "A900000000",
+                        new Address("1 Main", "Dallas", "TX", "75001"),
+                        new Address("1 Main", "Dallas", "TX", "75001"),
+                        LocalDate.of(2025, 7, 10),
+                        1,
+                        1,
+                        1,
+                        1,
+                        500,
+                        100.0,
+                        false,
+                        false
+                )
+        );
+    }
+
+    /**
+     * Verifies that a reservation number must match its reservation subtype.
+     */
+    @Test
+    public void testReservationNumberMustMatchSubtype() {
+        assertThrows(
+                IllegalParameterException.class,
+                () -> new CabinReservation(
+                        "res-HOT90000000",
+                        "A900000000",
+                        new Address("1 Main", "Dallas", "TX", "75001"),
+                        new Address("1 Main", "Dallas", "TX", "75001"),
+                        LocalDate.of(2025, 7, 10),
+                        1,
+                        1,
+                        1,
+                        1,
+                        500,
+                        100.0,
+                        false,
+                        false
+                )
+        );
+    }
+
+    /**
+     * Verifies that cancelling a reservation preserves its recorded lodging price.
+     */
+    @Test
+    public void testCancelledReservationPreservesLodgingPrice() {
+        double originalPrice = cabinReservation.getLodgingPrice();
+
+        cabinReservation.cancelReservation();
+
+        assertEquals(ReservationStatus.CANCELLED, cabinReservation.getStatus());
+        assertEquals(originalPrice, cabinReservation.getLodgingPrice());
+    }
+
+    /**
+     * Verifies that changing square footage recalculates the stored lodging price.
+     */
+    @Test
+    public void testSquareFootageChangeRecalculatesLodgingPrice() {
+        cabinReservation.setLodgingSizeSqFt(901);
+
+        assertEquals(
+                cabinReservation.calculatePricePerNight(),
+                cabinReservation.getLodgingPrice()
+        );
+    }
+
+    /**
+     * Verifies that changing the cabin kitchen option recalculates the stored lodging price.
+     */
+    @Test
+    public void testCabinKitchenChangeRecalculatesLodgingPrice() {
+        cabinReservation.setFullKitchenAvailable(true);
+
+        assertEquals(
+                cabinReservation.calculatePricePerNight(),
+                cabinReservation.getLodgingPrice()
+        );
+    }
+
+    /**
+     * Verifies that changing the hotel kitchenette option recalculates the stored lodging price.
+     */
+    @Test
+    public void testHotelKitchenetteChangeRecalculatesLodgingPrice() {
+        hotelReservation.setKitchenetteAvailable(true);
+
+        assertEquals(
+                hotelReservation.calculatePricePerNight(),
+                hotelReservation.getLodgingPrice()
+        );
+    }
+
+    /**
+     * Verifies that cancellation preserves the historical lodging price
+     * and does not alter the reservation's pricing calculation.
+     */
+    @Test
+    public void testCancellationDoesNotChangePricingCalculation() {
+        double originalLodgingPrice = cabinReservation.getLodgingPrice();
+        double calculatedPrice = cabinReservation.calculatePricePerNight();
+
+        cabinReservation.cancelReservation();
+
+        assertEquals(originalLodgingPrice, cabinReservation.getLodgingPrice());
+        assertEquals(calculatedPrice, cabinReservation.calculatePricePerNight());
+    }
+
+    /**
+     * Verifies that malformed persisted reservation data is reported as a load
+     * failure while preserving the underlying parsing or validation exception.
+     */
+    @Test
+    public void testMalformedPersistedReservationPreservesCause() {
+        String malformedData = cabinReservation.toString()
+                .replace("res-CAB90000000", "invalid");
+
+        IllegalLoadException exception = assertThrows(
+                IllegalLoadException.class,
+                () -> Reservation.fromString(malformedData)
+        );
+
+        assertNotNull(exception.getCause());
     }
 }

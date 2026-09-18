@@ -2,8 +2,8 @@ package com.jamesstevens.rms.reservation;
 
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.enums.ReservationStatus;
-import com.jamesstevens.rms.exceptions.IllegalLoad_Exception;
-import com.jamesstevens.rms.exceptions.IllegalParameter_Exception;
+import com.jamesstevens.rms.exceptions.IllegalLoadException;
+import com.jamesstevens.rms.exceptions.IllegalParameterException;
 
 import java.time.LocalDate;
 
@@ -36,7 +36,7 @@ public class HouseReservation extends Reservation {
      * @param lodgingSizeSqFt        square footage (positive)
      * @param lodgingPrice           price per night (non-negative)
      * @param numFloors              number of floors (positive)
-     * @throws IllegalParameter_Exception if {@code numFloors} is not positive
+     * @throws IllegalParameterException if {@code numFloors} is not positive
      */
     public HouseReservation(
             String reservationNumber,
@@ -66,8 +66,16 @@ public class HouseReservation extends Reservation {
                 lodgingPrice
         );
 
+        if (!reservationNumber.trim().startsWith("res-HOU")) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    reservationNumber,
+                    "House reservation number must use the HOU prefix."
+            );
+        }
+
         if (numFloors <= 0) {
-            throw new IllegalParameter_Exception(
+            throw new IllegalParameterException(
                     "N/A",
                     "N/A",
                     "A house cannot have zero or negative floors. Please enter a valid number."
@@ -90,11 +98,13 @@ public class HouseReservation extends Reservation {
      * Updates the number of floors.
      *
      * @param numFloors new number of floors (must be positive)
-     * @throws IllegalParameter_Exception if {@code numFloors} is not positive
+     * @throws IllegalParameterException if {@code numFloors} is not positive
      */
     public void setNumFloors(int numFloors) {
+        ensureModifiable();
+
         if (numFloors <= 0) {
-            throw new IllegalParameter_Exception(
+            throw new IllegalParameterException(
                     "N/A",
                     "N/A",
                     "A house cannot have zero or negative floors. Please enter a valid number."
@@ -106,13 +116,10 @@ public class HouseReservation extends Reservation {
     /**
      * Calculates the price per night for a house reservation.
      *
-     * @return nightly price (0.00 if canceled)
+     * @return computed nightly price
      */
     @Override
     public double calculatePricePerNight() {
-        if (status == ReservationStatus.CANCELLED) {
-            return 0.00;
-        }
 
         double basePrice = 120.0;
         if (lodgingSizeSqFt > 900) {
@@ -158,12 +165,12 @@ public class HouseReservation extends Reservation {
      *
      * @param data persisted record line
      * @return parsed {@code HouseReservation}
-     * @throws IllegalLoad_Exception if the record format is invalid or cannot be parsed
+     * @throws IllegalLoadException if the persisted record structure is invalid
      */
     public static HouseReservation fromString(String data) {
         String[] parts = splitCsvPreservingQuotes(data);
         if (parts.length < 14) {
-            throw new IllegalLoad_Exception(
+            throw new IllegalLoadException(
                     "HouseReservation Data",
                     "N/A",
                     "Invalid data format. Found: " + parts.length
@@ -189,7 +196,7 @@ public class HouseReservation extends Reservation {
                 Integer.parseInt(parts[13].trim())
         );
 
-        reservation.setStatus(parsedStatus);
+        reservation.restoreStatus(parsedStatus);
         return reservation;
     }
 
@@ -213,19 +220,19 @@ public class HouseReservation extends Reservation {
      *
      * @param parts tokenized reservation record
      * @return parsed mailing {@link Address}, or {@code null} if not provided
-     * @throws IllegalLoad_Exception if the field is present but not in the expected format
+     * @throws IllegalLoadException if the field is present but not in the expected format
      */
     private static Address parseMailingAddress(String[] parts) {
         if (!parts[4].trim().equals("N/A")) {
             String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
             if (mailingAddressParts.length < 4) {
-                throw new IllegalLoad_Exception("HouseReservation Address", "N/A", "Invalid mailing address format.");
+                throw new IllegalLoadException("HouseReservation Address", "N/A", "Invalid mailing address format.");
             }
             return new Address(
                     mailingAddressParts[0],
                     mailingAddressParts[1],
                     mailingAddressParts[2],
-                    Integer.parseInt(mailingAddressParts[3])
+                    mailingAddressParts[3]
             );
         }
         return null;
@@ -240,18 +247,18 @@ public class HouseReservation extends Reservation {
      *
      * @param parts tokenized reservation record
      * @return parsed physical {@link Address}
-     * @throws IllegalLoad_Exception if the physical address field is missing or not in the expected format
+     * @throws IllegalLoadException if the physical address field is missing or not in the expected format
      */
     private static Address parsePhysicalAddress(String[] parts) {
         String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
         if (physicalAddressParts.length < 4) {
-            throw new IllegalLoad_Exception("HouseReservation Address", "N/A", "Invalid physical address format.");
+            throw new IllegalLoadException("HouseReservation Address", "N/A", "Invalid physical address format.");
         }
         return new Address(
                 physicalAddressParts[0],
                 physicalAddressParts[1],
                 physicalAddressParts[2],
-                Integer.parseInt(physicalAddressParts[3])
+                physicalAddressParts[3]
         );
     }
 }

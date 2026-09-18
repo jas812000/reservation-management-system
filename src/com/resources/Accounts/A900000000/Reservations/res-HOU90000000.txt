@@ -1,1 +1,0 @@
-HouseReservation,res-HOU90000000,A900000000,"43-179 Day Mountain Road;Temple;ME;4984","PO Box 43179;Waterville;ME;4901",2025-08-01,10,4,3,3,1200,300.00,DRAFT,2

@@ -1,1 +1,0 @@
-CabinReservation,res-CAB90000000,A900000000,"43-179 Day Mountain Road;Temple;ME;4984","PO Box 43179;Waterville;ME;4901",2025-07-10,7,3,2,2,800,200.00,DRAFT,true,true

@@ -7,15 +7,15 @@ package com.jamesstevens.rms.exceptions;
  * database, or any system enforcing unique keys.
  * </p>
  */
-public class DuplicateObject_Exception extends RuntimeException {
+public class DuplicateObjectException extends RuntimeException {
 
     /**
-     * Creates a new {@code DuplicateObject_Exception}.
+     * Creates a new {@code DuplicateObjectException}.
      *
      * @param accountNumber     the account number associated with the duplicate object
      * @param reservationNumber the reservation number associated with the duplicate object
      */
-    public DuplicateObject_Exception(String accountNumber, String reservationNumber) {
+    public DuplicateObjectException(String accountNumber, String reservationNumber) {
         super("Duplicate entry detected | Account: " + accountNumber + ", Reservation: " + reservationNumber);
     }
 }

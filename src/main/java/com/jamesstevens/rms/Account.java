@@ -1,6 +1,7 @@
 package com.jamesstevens.rms;
 
 import com.jamesstevens.rms.exceptions.*;
+import com.jamesstevens.rms.exceptions.IllegalStateException;
 import com.jamesstevens.rms.reservation.Reservation;
 
 import java.util.*;
@@ -14,7 +15,7 @@ import java.util.*;
  */
 public class Account {
 
-    private String accountNumber;
+    private final String accountNumber;
     private final Address address;
     private String phoneNumber;
     private String email;
@@ -27,50 +28,63 @@ public class Account {
      * @param address       mailing address associated with the account
      * @param phoneNumber   contact phone number
      * @param email         contact email address
-     * @throws IllegalParameter_Exception if any required parameter is invalid
+     * @throws IllegalParameterException if any required parameter is invalid
      */
     public Account(String accountNumber, Address address, String phoneNumber, String email) {
-        if (accountNumber == null || accountNumber.isEmpty()) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Account number cannot be empty.");
-        }
         if (address == null) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Mailing address cannot be empty.");
-        }
-        if (phoneNumber == null || phoneNumber.isEmpty()) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Phone number cannot be empty.");
-        }
-        if (email == null || !email.contains("@")) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Invalid email address.");
+            throw new IllegalParameterException(
+                    "N/A",
+                    "N/A",
+                    "Mailing address cannot be empty."
+            );
         }
 
-        this.accountNumber = accountNumber;
+        this.accountNumber = validateAccountNumber(accountNumber);
         this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
+        this.phoneNumber = validatePhoneNumber(phoneNumber, this.accountNumber);
+        this.email = validateEmail(email, this.accountNumber);
         this.reservations = new HashMap<>();
     }
 
     /**
      * Creates an {@code Account} instance from a serialized account record.
+     * <p>
+     * Invalid or malformed persisted data is reported as an
+     * {@link IllegalLoadException}. If parsing or domain validation fails,
+     * the original exception is preserved as the cause.
+     * </p>
      *
      * @param data comma-separated account data
      * @return parsed {@code Account} instance
-     * @throws IllegalLoad_Exception if the data format is invalid
+     * @throws IllegalLoadException if the account record cannot be loaded or parsed
      */
-    public static Account fromString(String data) throws IllegalLoad_Exception {
-        String[] parts = data.split(",");
-        if (parts.length < 7) {
-            throw new IllegalLoad_Exception("Account", "N/A", "Data corrupted");
+    public static Account fromString(String data) throws IllegalLoadException {
+        try {
+            String[] parts = data.split(",");
+
+            if (parts.length < 7) {
+                throw new IllegalLoadException("Account", "N/A", "Data corrupted");
+            }
+
+            Address address = new Address(
+                    parts[1],
+                    parts[2],
+                    parts[3],
+                    parts[4]
+            );
+
+            return new Account(parts[0], address, parts[5], parts[6]);
+
+        } catch (IllegalLoadException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new IllegalLoadException(
+                    "Account",
+                    "N/A",
+                    "N/A",
+                    e
+            );
         }
-
-        Address address = new Address(
-                parts[1],
-                parts[2],
-                parts[3],
-                Integer.parseInt(parts[4])
-        );
-
-        return new Account(parts[0], address, parts[5], parts[6]);
     }
 
     /**
@@ -80,19 +94,6 @@ public class Account {
      */
     public String getAccountNumber() {
         return accountNumber;
-    }
-
-    /**
-     * Assigns the account number if it has not already been set.
-     *
-     * @param accountNumber generated account number
-     * @throws IllegalStateException if the account number is already assigned
-     */
-    public void setAccountNumber(String accountNumber) {
-        if (this.accountNumber != null) {
-            throw new IllegalStateException("Account number cannot be changed once assigned.");
-        }
-        this.accountNumber = accountNumber;
     }
 
     /**
@@ -139,11 +140,11 @@ public class Account {
      * Updates the account mailing address.
      *
      * @param newAddress new address
-     * @throws IllegalParameter_Exception if {@code newAddress} is null
+     * @throws IllegalParameterException if {@code newAddress} is null
      */
     public void updateAddress(Address newAddress) {
         if (newAddress == null) {
-            throw new IllegalParameter_Exception(accountNumber, "N/A", "Address cannot be null.");
+            throw new IllegalParameterException(accountNumber, "N/A", "Address cannot be null.");
         }
 
         address.setAddress(
@@ -159,10 +160,11 @@ public class Account {
      *
      * @param street  street name
      * @param city    city
-     * @param state   state
-     * @param zipCode zip code
+     * @param state   two-letter state abbreviation
+     * @param zipCode five-digit ZIP code
+     * @throws IllegalParameterException if any address field is invalid
      */
-    public void updateAddress(String street, String city, String state, int zipCode) {
+    public void updateAddress(String street, String city, String state, String zipCode) {
         address.setAddress(street, city, state, zipCode);
     }
 
@@ -179,13 +181,11 @@ public class Account {
      * Updates the account phone number.
      *
      * @param newPhoneNumber new phone number
-     * @throws IllegalParameter_Exception if the value is invalid
+     * @throws IllegalParameterException if the phone number is null, blank, or does not contain exactly 10 digits
+     *
      */
     public void setPhoneNumber(String newPhoneNumber) {
-        if (newPhoneNumber == null || newPhoneNumber.isEmpty()) {
-            throw new IllegalParameter_Exception(accountNumber, "N/A", "Phone number cannot be empty.");
-        }
-        phoneNumber = newPhoneNumber;
+        phoneNumber = validatePhoneNumber(newPhoneNumber, accountNumber);
     }
 
     /**
@@ -201,54 +201,92 @@ public class Account {
      * Updates the account email address.
      *
      * @param newEmail new email address
-     * @throws IllegalParameter_Exception if the email is invalid
+     * @throws IllegalParameterException if the email address is null, blank, or has an invalid format
+     *
      */
     public void setEmail(String newEmail) {
-        if (newEmail == null || !newEmail.contains("@")) {
-            throw new IllegalParameter_Exception(accountNumber, "N/A", "Invalid email address.");
-        }
-        email = newEmail;
+        email = validateEmail(newEmail, accountNumber);
     }
 
     /**
-     * Adds a reservation to this account.
+     * Adds a reservation to this account and persists it to storage.
      *
      * @param reservation reservation to add
-     * @throws IllegalParameter_Exception if {@code reservation} is null
+     * @throws IllegalParameterException if {@code reservation} is null or belongs to a different account
+     * @throws DuplicateObjectException if the reservation already exists
+     * @throws IllegalSaveException if the reservation cannot be persisted
      */
     public void addReservation(Reservation reservation) {
         if (reservation == null) {
-            throw new IllegalParameter_Exception("N/A", "N/A", "Reservation cannot be null.");
+            throw new IllegalParameterException("N/A", "N/A", "Reservation cannot be null.");
+        }
+
+        if (!accountNumber.equals(reservation.getAccountNumber())) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    reservation.getReservationNumber(),
+                    "Reservation account number does not match this account."
+            );
         }
 
         String key = reservation.getReservationNumber().trim().toUpperCase();
         if (reservations.containsKey(key)) {
-            return;
+            throw new DuplicateObjectException(accountNumber, key);
         }
 
         reservations.put(key, reservation);
 
         try {
             Manager.saveReservationToFile(reservation);
-        } catch (IllegalSave_Exception e) {
-            System.out.println("Error saving reservation: " + e.getMessage());
+        } catch (IllegalSaveException e) {
+            reservations.remove(key);
+            throw e;
         }
+    }
+
+    /**
+     * Adds an existing persisted reservation to this account in memory
+     * without writing the reservation back to disk.
+     *
+     * @param reservation reservation loaded from persistent storage
+     * @throws IllegalParameterException if {@code reservation} is null or belongs to a different account
+     */
+    void addLoadedReservation(Reservation reservation) {
+        if (reservation == null) {
+            throw new IllegalParameterException("N/A", "N/A", "Reservation cannot be null.");
+        }
+
+        if (!accountNumber.equals(reservation.getAccountNumber())) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    reservation.getReservationNumber(),
+                    "Reservation account number does not match this account."
+            );
+        }
+
+        String key = reservation.getReservationNumber().trim().toUpperCase();
+
+        if (reservations.containsKey(key)) {
+            return;
+        }
+
+        reservations.put(key, reservation);
     }
 
     /**
      * Updates an existing reservation with new details.
      *
-     * @param reservationNumber reservation identifier
+     * @param reservationNumber  reservation identifier
      * @param updatedReservation reservation containing updated values
-     * @throws IllegalState_Exception if the reservation cannot be updated
-     * @throws IllegalOperation_Exception if the reservation does not exist
+     * @throws IllegalParameterException   if the reservation number is null or blank
+     * @throws NullReservationException    if the reservation does not exist
+     * @throws IllegalStateException       if the reservation cannot be updated in its current state
      */
     public void updateReservation(String reservationNumber, Reservation updatedReservation)
-            throws IllegalState_Exception, IllegalOperation_Exception {
+            throws IllegalParameterException, NullReservationException, IllegalStateException {
 
         if (reservationNumber == null || reservationNumber.trim().isEmpty()) {
-            throw new IllegalOperation_Exception(
-                    "Update Reservation",
+            throw new IllegalParameterException(
                     accountNumber,
                     "N/A",
                     "Reservation number is required."
@@ -259,8 +297,7 @@ public class Account {
         Reservation currentReservation = reservations.get(key);
 
         if (currentReservation == null) {
-            throw new IllegalOperation_Exception(
-                    "Update Reservation",
+            throw new NullReservationException(
                     accountNumber,
                     key,
                     "Reservation does not exist."
@@ -268,23 +305,81 @@ public class Account {
         }
 
         if (currentReservation.isLocked()) {
-            throw new IllegalState_Exception(
+            throw new IllegalStateException(
                     accountNumber,
                     key,
                     "Cannot update a completed or cancelled reservation."
             );
         }
 
-        boolean changed = currentReservation.updateDetailsFrom(updatedReservation);
+        Reservation updatedCopy = Reservation.fromString(currentReservation.toString());
+
+        boolean changed = updatedCopy.updateDetailsFrom(updatedReservation);
+
         if (!changed) {
             return;
         }
 
-        try {
-            Manager.saveReservationToFile(currentReservation);
-        } catch (IllegalSave_Exception e) {
-            System.out.println("Error saving updated reservation: " + e.getMessage());
+        Manager.saveReservationToFile(updatedCopy);
+        reservations.put(key, updatedCopy);
+
+    }
+
+    private static String validateAccountNumber(String accountNumber) {
+        if (accountNumber == null || accountNumber.isBlank()) {
+            throw new IllegalParameterException(
+                    "N/A",
+                    "N/A",
+                    "Account number cannot be empty."
+            );
         }
+
+        return accountNumber.trim().toUpperCase();
+    }
+
+    private static String validatePhoneNumber(String phoneNumber, String accountNumber) {
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    "N/A",
+                    "Phone number cannot be empty."
+            );
+        }
+
+        String normalizedPhoneNumber = phoneNumber.trim();
+        String digits = normalizedPhoneNumber.replaceAll("\\D", "");
+
+        if (digits.length() != 10) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    "N/A",
+                    "Phone number must contain exactly 10 digits."
+            );
+        }
+
+        return normalizedPhoneNumber;
+    }
+
+    private static String validateEmail(String email, String accountNumber) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    "N/A",
+                    "Invalid email address."
+            );
+        }
+
+        String normalizedEmail = email.trim();
+
+        if (!normalizedEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    "N/A",
+                    "Invalid email address."
+            );
+        }
+
+        return normalizedEmail;
     }
 
     /**
@@ -295,7 +390,7 @@ public class Account {
     @Override
     public String toString() {
         return String.format(
-                "%s,%s,%s,%s,%d,%s,%s",
+                "%s,%s,%s,%s,%s,%s,%s",
                 accountNumber,
                 address.getStreet(),
                 address.getCity(),
