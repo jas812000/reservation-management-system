@@ -1,22 +1,23 @@
 package com.jamesstevens.rms.exceptions;
 
 /**
- * Runtime exception thrown when a reservation is missing, not found, or otherwise unavailable.
+ * Runtime exception thrown when a required reservation cannot be found
+ * or is otherwise unavailable.
  * <p>
- * Common cases include attempting to access or modify a reservation that does not exist, or attempting
- * to add a {@code null} reservation reference.
+ * This is typically raised when an operation targets a reservation
+ * identifier that does not exist for the specified account.
  * </p>
  */
-public class NullReservation_Exception extends RuntimeException {
+public class NullReservationException extends RuntimeException {
 
   /**
-   * Creates a new {@code NullReservation_Exception}.
+   * Creates a new {@code NullReservationException}.
    *
    * @param accountNumber      the account number associated with the failure
    * @param reservationNumber  the reservation number associated with the failure, or {@code "N/A"} if unknown
    * @param reason             a human-readable explanation of why the operation is not allowed
    */
-  public NullReservation_Exception(String accountNumber, String reservationNumber, String reason) {
+  public NullReservationException(String accountNumber, String reservationNumber, String reason) {
     super("Reservation error: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
   }
 }

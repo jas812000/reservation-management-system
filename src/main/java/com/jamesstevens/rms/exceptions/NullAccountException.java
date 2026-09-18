@@ -7,15 +7,15 @@ package com.jamesstevens.rms.exceptions;
  * persistence-related actions require an account that is not present.
  * </p>
  */
-public class NullAccount_Exception extends RuntimeException {
+public class NullAccountException extends RuntimeException {
 
     /**
-     * Creates a new {@code NullAccount_Exception}.
+     * Creates a new {@code NullAccountException}.
      *
      * @param accountNumber the account number associated with the failure, or {@code "N/A"} if unknown
      * @param reason        a human-readable explanation of why the operation is not allowed
      */
-    public NullAccount_Exception(String accountNumber, String reason) {
+    public NullAccountException(String accountNumber, String reason) {
         super("Account error: " + reason + " | Account: " + accountNumber);
     }
 }

@@ -3,7 +3,7 @@ package com.jamesstevens.rms.tests;
 import com.jamesstevens.rms.Account;
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.Manager;
-import com.jamesstevens.rms.exceptions.NullReservation_Exception;
+import com.jamesstevens.rms.exceptions.NullReservationException;
 import com.jamesstevens.rms.reservation.CabinReservation;
 import com.jamesstevens.rms.reservation.HotelReservation;
 import com.jamesstevens.rms.reservation.HouseReservation;
@@ -22,12 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for validating {@link Manager#findReservation(String, String)}.
  * <p>
  * These tests confirm that reservations can be located for an existing account and that a
- * missing reservation triggers {@link NullReservation_Exception}.
+ * missing reservation triggers {@link NullReservationException}.
  * </p>
  */
 public class FindReservationTest {
 
-	private static final String TEST_ACCOUNT_NUMBER = "A900000000";
+	private String testAccountNumber;
 
 	private Manager manager;
 	private Account testAccount;
@@ -50,18 +50,19 @@ public class FindReservationTest {
 
 		manager = new Manager();
 		manager.clearAccounts();
+		testAccountNumber = manager.getNewAccountNumber();
 
-		Address physicalAddress = new Address("43-179 Day Mountain Road", "Temple", "ME", 4984);
-		Address cabinMailingAddress = new Address("PO Box 43179", "Waterville", "ME", 4901);
+		Address physicalAddress = new Address("43-179 Day Mountain Road", "Temple", "ME", "04984");
+		Address cabinMailingAddress = new Address("PO Box 43179", "Waterville", "ME", "04901");
 
 		// Account mailing address is unrelated to lodging mailing address
-		testAccount = new Account(TEST_ACCOUNT_NUMBER, cabinMailingAddress,
+		testAccount = new Account(testAccountNumber, cabinMailingAddress,
 				"123-456-7890", "test@email.com");
 		manager.addAccount(testAccount);
 
 		testCabinReservation = new CabinReservation(
-				"res-CAB900000000",
-				TEST_ACCOUNT_NUMBER,
+				"res-CAB90000000",
+				testAccountNumber,
 				physicalAddress,
 				cabinMailingAddress, // Cabin may diverge
 				LocalDate.of(2025, 12, 12),
@@ -77,8 +78,8 @@ public class FindReservationTest {
 
 		// Hotel: mailing must match physical
 		testHotelReservation = new HotelReservation(
-				"res-HOT900000000",
-				TEST_ACCOUNT_NUMBER,
+				"res-HOT90000000",
+				testAccountNumber,
 				physicalAddress,
 				physicalAddress,
 				LocalDate.of(2025, 12, 12),
@@ -93,8 +94,8 @@ public class FindReservationTest {
 
 		// House: mailing must match physical
 		testHouseReservation = new HouseReservation(
-				"res-HOU900000000",
-				TEST_ACCOUNT_NUMBER,
+				"res-HOU90000000",
+				testAccountNumber,
 				physicalAddress,
 				physicalAddress,
 				LocalDate.of(2025, 12, 12),
@@ -111,7 +112,7 @@ public class FindReservationTest {
 		testAccount.addReservation(testHotelReservation);
 		testAccount.addReservation(testHouseReservation);
 
-		assertNotNull(manager.getAccount(TEST_ACCOUNT_NUMBER),
+		assertNotNull(manager.getAccount(testAccountNumber),
 				"Test account should exist in manager.");
 	}
 
@@ -121,15 +122,17 @@ public class FindReservationTest {
 	@Test
 	public void testFindCabinReservation() {
 		assertDoesNotThrow(() ->
-				manager.findReservation(TEST_ACCOUNT_NUMBER,
-						testCabinReservation.getReservationNumber())
+				manager.findReservation(
+						"  " + testAccountNumber.toLowerCase() + "  ",
+						"  " + testCabinReservation.getReservationNumber().toLowerCase() + "  "
+				)
 		);
 
 		Reservation found = testAccount.getReservation(
 				testCabinReservation.getReservationNumber());
 		assertNotNull(found, "Reservation should exist after findReservation.");
-		assertEquals("res-CAB900000000", found.getReservationNumber());
-		assertEquals(TEST_ACCOUNT_NUMBER, found.getAccountNumber());
+		assertEquals("res-CAB90000000", found.getReservationNumber());
+		assertEquals(testAccountNumber, found.getAccountNumber());
 	}
 
 	/**
@@ -138,15 +141,15 @@ public class FindReservationTest {
 	@Test
 	public void testFindHotelReservation() {
 		assertDoesNotThrow(() ->
-				manager.findReservation(TEST_ACCOUNT_NUMBER,
+				manager.findReservation(testAccountNumber,
 						testHotelReservation.getReservationNumber())
 		);
 
 		Reservation found = testAccount.getReservation(
 				testHotelReservation.getReservationNumber());
 		assertNotNull(found, "Reservation should exist after findReservation.");
-		assertEquals("res-HOT900000000", found.getReservationNumber());
-		assertEquals(TEST_ACCOUNT_NUMBER, found.getAccountNumber());
+		assertEquals("res-HOT90000000", found.getReservationNumber());
+		assertEquals(testAccountNumber, found.getAccountNumber());
 	}
 
 	/**
@@ -155,25 +158,25 @@ public class FindReservationTest {
 	@Test
 	public void testFindHouseReservation() {
 		assertDoesNotThrow(() ->
-				manager.findReservation(TEST_ACCOUNT_NUMBER,
+				manager.findReservation(testAccountNumber,
 						testHouseReservation.getReservationNumber())
 		);
 
 		Reservation found = testAccount.getReservation(
 				testHouseReservation.getReservationNumber());
 		assertNotNull(found, "Reservation should exist after findReservation.");
-		assertEquals("res-HOU900000000", found.getReservationNumber());
-		assertEquals(TEST_ACCOUNT_NUMBER, found.getAccountNumber());
+		assertEquals("res-HOU90000000", found.getReservationNumber());
+		assertEquals(testAccountNumber, found.getAccountNumber());
 	}
 
 	/**
-	 * Verifies that searching for a missing reservation throws {@link NullReservation_Exception}.
+	 * Verifies that searching for a missing reservation throws {@link NullReservationException}.
 	 */
 	@Test
 	public void testFindNonExistentReservation() {
-		NullReservation_Exception ex = assertThrows(
-				NullReservation_Exception.class,
-				() -> manager.findReservation(TEST_ACCOUNT_NUMBER, "res-NONEXISTENT")
+		NullReservationException ex = assertThrows(
+				NullReservationException.class,
+				() -> manager.findReservation(testAccountNumber, "res-NONEXISTENT")
 		);
 
 		assertTrue(ex.getMessage().contains("Reservation not found"));

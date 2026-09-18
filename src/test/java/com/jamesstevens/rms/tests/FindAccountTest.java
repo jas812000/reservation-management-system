@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class FindAccountTest {
 
-    private static final String TEST_ACCOUNT_NUMBER = "A900000000";
+    private String testAccountNumber;
 
     private Manager manager;
 
@@ -30,10 +30,17 @@ public class FindAccountTest {
     @BeforeEach
     public void setUp() {
         System.setProperty("RMS_DATA_DIR", tempDir.toString());
-        manager = new Manager();
 
-        Address address = new Address("123 Main St", "Dallas", "TX", 75001);
-        Account testAccount = new Account(TEST_ACCOUNT_NUMBER, address, "123-456-7890", "test@email.com");
+        manager = new Manager();
+        testAccountNumber = manager.getNewAccountNumber();
+
+        Address address = new Address("123 Main St", "Dallas", "TX", "75001");
+        Account testAccount = new Account(
+                testAccountNumber,
+                address,
+                "123-456-7890",
+                "test@email.com"
+        );
 
         manager.addAccount(testAccount);
     }
@@ -45,9 +52,9 @@ public class FindAccountTest {
     public void testFindAccount() {
         manager.reloadAccounts();
 
-        Account foundAccount = manager.getAccount(TEST_ACCOUNT_NUMBER);
+        Account foundAccount = manager.getAccount(testAccountNumber);
         assertNotNull(foundAccount, "Failed to find test account in system.");
-        assertEquals(TEST_ACCOUNT_NUMBER, foundAccount.getAccountNumber());
+        assertEquals(testAccountNumber, foundAccount.getAccountNumber());
 
         List<String> reservations = foundAccount.getReservationNumbers();
         assertTrue(reservations.isEmpty(), "Test account should have no reservations initially.");

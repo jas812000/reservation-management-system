@@ -20,3 +20,5 @@ out/
 *~
 *.save
 
+# Application runtime data
+/data/

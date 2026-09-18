@@ -7,16 +7,16 @@ package com.jamesstevens.rms.exceptions;
  * or associated with a past date where modifications are disallowed.
  * </p>
  */
-public class IllegalState_Exception extends RuntimeException {
+public class IllegalStateException extends RuntimeException {
 
     /**
-     * Creates a new {@code IllegalState_Exception}.
+     * Creates a new {@code IllegalStateException}.
      *
      * @param accountNumber     the account number associated with the failure
      * @param reservationNumber the reservation number associated with the failure
      * @param reason            a human-readable explanation of why the operation is not allowed
      */
-    public IllegalState_Exception(String accountNumber, String reservationNumber, String reason) {
+    public IllegalStateException(String accountNumber, String reservationNumber, String reason) {
         super("Illegal operation: " + reason + " | Account: " + accountNumber + ", Reservation: " + reservationNumber);
     }
 }

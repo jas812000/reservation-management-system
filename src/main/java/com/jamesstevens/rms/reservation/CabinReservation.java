@@ -2,14 +2,15 @@ package com.jamesstevens.rms.reservation;
 
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.enums.ReservationStatus;
-import com.jamesstevens.rms.exceptions.IllegalLoad_Exception;
+import com.jamesstevens.rms.exceptions.IllegalLoadException;
+import com.jamesstevens.rms.exceptions.IllegalParameterException;
 
 import java.time.LocalDate;
 
 /**
  * Reservation subtype representing a cabin reservation.
  * <p>
- * Adds feature flags for kitchen and loft availability which can influence pricing.
+ * Adds feature flags for full-kitchen and loft availability. Full-kitchen availability affects pricing.
  * </p>
  * <p>
  * Address rule: cabins support a mailing address that may differ from the physical address.
@@ -65,6 +66,15 @@ public class CabinReservation extends Reservation {
                 lodgingSizeSqFt,
                 lodgingPrice
         );
+
+        if (!reservationNumber.trim().startsWith("res-CAB")) {
+            throw new IllegalParameterException(
+                    accountNumber,
+                    reservationNumber,
+                    "Cabin reservation number must use the CAB prefix."
+            );
+        }
+
         this.fullKitchenAvailable = fullKitchenAvailable;
         this.loftAvailable = loftAvailable;
     }
@@ -103,7 +113,9 @@ public class CabinReservation extends Reservation {
      * @param fullKitchenAvailable new value
      */
     public void setFullKitchenAvailable(boolean fullKitchenAvailable) {
+        ensureModifiable();
         this.fullKitchenAvailable = fullKitchenAvailable;
+        this.lodgingPrice = calculatePricePerNight();
     }
 
     /**
@@ -112,19 +124,17 @@ public class CabinReservation extends Reservation {
      * @param loftAvailable new value
      */
     public void setLoftAvailable(boolean loftAvailable) {
+        ensureModifiable();
         this.loftAvailable = loftAvailable;
     }
 
     /**
      * Calculates the price per night for a cabin reservation.
      *
-     * @return nightly price (0.00 if canceled)
+     * @return computed nightly price
      */
     @Override
     public double calculatePricePerNight() {
-        if (status == ReservationStatus.CANCELLED) {
-            return 0.00;
-        }
 
         double basePrice = 120.0;
         if (lodgingSizeSqFt > 900) {
@@ -175,12 +185,12 @@ public class CabinReservation extends Reservation {
      *
      * @param data persisted record line
      * @return parsed {@code CabinReservation}
-     * @throws IllegalLoad_Exception if the record format is invalid or cannot be parsed
+     * @throws IllegalLoadException if the persisted record structure is invalid
      */
     public static CabinReservation fromString(String data) {
         String[] parts = splitCsvPreservingQuotes(data);
         if (parts.length < 15) {
-            throw new IllegalLoad_Exception("CabinReservation Data", "N/A",
+            throw new IllegalLoadException("CabinReservation Data", "N/A",
                     "Invalid data format. Found: " + parts.length);
         }
 
@@ -204,7 +214,7 @@ public class CabinReservation extends Reservation {
                 Boolean.parseBoolean(parts[14].trim())
         );
 
-        reservation.setStatus(parsedStatus);
+        reservation.restoreStatus(parsedStatus);
         return reservation;
     }
 
@@ -228,19 +238,19 @@ public class CabinReservation extends Reservation {
      *
      * @param parts tokenized reservation record
      * @return parsed mailing {@link Address}, or {@code null} if not provided
-     * @throws IllegalLoad_Exception if the field is present but not in the expected format
+     * @throws IllegalLoadException if the field is present but not in the expected format
      */
     private static Address parseMailingAddress(String[] parts) {
         if (!parts[4].trim().equals("N/A")) {
             String[] mailingAddressParts = parts[4].replace("\"", "").split(";");
             if (mailingAddressParts.length < 4) {
-                throw new IllegalLoad_Exception("CabinReservation Address", "N/A", "Invalid mailing address format.");
+                throw new IllegalLoadException("CabinReservation Address", "N/A", "Invalid mailing address format.");
             }
             return new Address(
                     mailingAddressParts[0],
                     mailingAddressParts[1],
                     mailingAddressParts[2],
-                    Integer.parseInt(mailingAddressParts[3])
+                    mailingAddressParts[3]
             );
         }
         return null;
@@ -255,18 +265,18 @@ public class CabinReservation extends Reservation {
      *
      * @param parts tokenized reservation record
      * @return parsed physical {@link Address}
-     * @throws IllegalLoad_Exception if the physical address field is missing or not in the expected format
+     * @throws IllegalLoadException if the physical address field is missing or not in the expected format
      */
     private static Address parsePhysicalAddress(String[] parts) {
         String[] physicalAddressParts = parts[3].replace("\"", "").split(";");
         if (physicalAddressParts.length < 4) {
-            throw new IllegalLoad_Exception("CabinReservation Address", "N/A", "Invalid physical address format.");
+            throw new IllegalLoadException("CabinReservation Address", "N/A", "Invalid physical address format.");
         }
         return new Address(
                 physicalAddressParts[0],
                 physicalAddressParts[1],
                 physicalAddressParts[2],
-                Integer.parseInt(physicalAddressParts[3])
+                physicalAddressParts[3]
         );
     }
 }
