@@ -26,8 +26,8 @@ public class Address {
      */
     public Address(String street, String city, String state, String zipCode) {
         validateAddress(street, city, state, zipCode);
-        this.street = street.trim();
-        this.city = city.trim();
+        this.street = normalize(street);
+        this.city = normalize(city);
         this.state = state.trim().toUpperCase();
         this.zipCode = zipCode.trim();
     }
@@ -79,8 +79,8 @@ public class Address {
      */
     public void setAddress(String street, String city, String state, String zipCode) {
         validateAddress(street, city, state, zipCode);
-        this.street = street.trim();
-        this.city = city.trim();
+        this.street = normalize(street);
+        this.city = normalize(city);
         this.state = state.trim().toUpperCase();
         this.zipCode = zipCode.trim();
     }
@@ -110,6 +110,43 @@ public class Address {
         if (zipCode == null || !zipCode.trim().matches("\\d{5}")) {
             throw new IllegalParameterException("N/A", "N/A", "Zip code must be a 5-digit number.");
         }
+    }
+
+    /**
+     * Normalizes the capitalization of a street or city while preserving
+     * numbers, spaces, hyphens, and apostrophes.
+     * <p>
+     * Each word and each portion following a hyphen or apostrophe begins
+     * with an uppercase letter. Remaining letters are converted to lowercase.
+     * </p>
+     *
+     * @param value address value to normalize
+     * @return normalized address value
+     */
+    private String normalize(String value) {
+        StringBuilder normalized = new StringBuilder();
+        boolean capitalizeNext = true;
+
+        for (char character : value.trim().toLowerCase().toCharArray()) {
+            if (capitalizeNext && Character.isLetter(character)) {
+                normalized.append(Character.toUpperCase(character));
+                capitalizeNext = false;
+            } else {
+                normalized.append(character);
+            }
+
+            if (character == ' '
+                    || character == '-'
+                    || character == '\'') {
+                capitalizeNext = true;
+            }
+        }
+
+        String result = normalized.toString();
+
+        result = result.replaceAll("(?i)\\bPo Box\\b", "PO Box");
+
+        return result;
     }
 
     /**

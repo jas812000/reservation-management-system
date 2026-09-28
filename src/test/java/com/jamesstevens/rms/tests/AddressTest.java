@@ -23,7 +23,8 @@ public class AddressTest {
     }
 
     /**
-     * Verifies that {@link Address#setAddress(String, String, String, String updates all fields.
+     * Verifies that {@link Address#setAddress(String, String, String, String)}
+     * updates all fields.
      */
     @Test
     public void testSetAddress() {
@@ -35,11 +36,14 @@ public class AddressTest {
         assertEquals("90001", address.getZipCode());
     }
 
+    /**
+     * Verifies that address values are trimmed and normalized.
+     */
     @Test
     void testAddressNormalizesValues() {
         Address address = new Address(
-                "  123 Main Street  ",
-                "  Dallas  ",
+                "  123 mAIn sTreet  ",
+                "  dAllas  ",
                 " tx ",
                 " 75001 "
         );
@@ -48,6 +52,44 @@ public class AddressTest {
         assertEquals("Dallas", address.getCity());
         assertEquals("TX", address.getState());
         assertEquals("75001", address.getZipCode());
+    }
+
+    /**
+     * Verifies that normalization preserves and correctly capitalizes
+     * words following hyphens and apostrophes.
+     */
+    @Test
+    void testAddressNormalizesHyphensAndApostrophes() {
+        Address address = new Address(
+                "100 north o'cONNOR rd",
+                "wINSTON-sALEM",
+                "nc",
+                "27101"
+        );
+
+        assertEquals("100 North O'Connor Rd", address.getStreet());
+        assertEquals("Winston-Salem", address.getCity());
+        assertEquals("NC", address.getState());
+        assertEquals("27101", address.getZipCode());
+    }
+
+    /**
+     * Verifies that the standard PO Box abbreviation remains uppercase
+     * during address normalization.
+     */
+    @Test
+    void testAddressNormalizesPoBox() {
+        Address address = new Address(
+                "po box 43179",
+                "wATERVILLE",
+                "me",
+                "04901"
+        );
+
+        assertEquals("PO Box 43179", address.getStreet());
+        assertEquals("Waterville", address.getCity());
+        assertEquals("ME", address.getState());
+        assertEquals("04901", address.getZipCode());
     }
 
     @Test

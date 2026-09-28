@@ -2,6 +2,7 @@ package com.jamesstevens.rms.tests;
 
 import com.jamesstevens.rms.Account;
 import com.jamesstevens.rms.Address;
+import com.jamesstevens.rms.Name;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.jamesstevens.rms.exceptions.IllegalParameterException;
@@ -31,8 +32,17 @@ public class AccountTest {
     @BeforeEach
     public void setUp() {
         System.setProperty("RMS_DATA_DIR", tempDir.toString());
+
+        Name name = new Name("James", "Stevens");
         Address address = new Address("123 Main St", "New York", "NY", "10001");
-        account = new Account("A900000000", address, "123-456-7890", "test@example.com");
+
+        account = new Account(
+                "A900000000",
+                name,
+                address,
+                "123-456-7890",
+                "test@example.com"
+        );
     }
 
     /**
@@ -60,15 +70,17 @@ public class AccountTest {
         assertEquals("789 Pine St", account.getAddress().getStreet());
         assertEquals("San Francisco", account.getAddress().getCity());
         assertEquals("CA", account.getAddress().getState());
-        assertEquals("94102",account.getAddress().getZipCode());
+        assertEquals("94102", account.getAddress().getZipCode());
     }
 
     @Test
     public void testAccountNumberIsNormalized() {
+        Name name = new Name("James", "Stevens");
         Address address = new Address("123 Main St", "New York", "NY", "10001");
 
         Account normalizedAccount = new Account(
                 "  a900000001  ",
+                name,
                 address,
                 "123-456-7890",
                 "test@example.com"
@@ -79,21 +91,35 @@ public class AccountTest {
 
     @Test
     public void testBlankAccountNumberIsRejected() {
+        Name name = new Name("James", "Stevens");
         Address address = new Address("123 Main St", "New York", "NY", "10001");
 
         assertThrows(
                 IllegalParameterException.class,
-                () -> new Account("   ", address, "123-456-7890", "test@example.com")
+                () -> new Account(
+                        "   ",
+                        name,
+                        address,
+                        "123-456-7890",
+                        "test@example.com"
+                )
         );
     }
 
     @Test
     public void testNullAccountNumberIsRejected() {
+        Name name = new Name("James", "Stevens");
         Address address = new Address("123 Main St", "New York", "NY", "10001");
 
         assertThrows(
                 IllegalParameterException.class,
-                () -> new Account(null, address, "123-456-7890", "test@example.com")
+                () -> new Account(
+                        null,
+                        name,
+                        address,
+                        "123-456-7890",
+                        "test@example.com"
+                )
         );
     }
 
@@ -260,7 +286,7 @@ public class AccountTest {
         IllegalLoadException exception = assertThrows(
                 IllegalLoadException.class,
                 () -> Account.fromString(
-                        "A900000001,10 Main St,Bangor,ME,INVALID,207-555-1234,user@example.com"
+                        "A900000001,James,Stevens,10 Main St,Bangor,ME,INVALID,207-555-1234,user@example.com"
                 )
         );
 
@@ -269,9 +295,12 @@ public class AccountTest {
 
     @Test
     public void testSerializationRoundTrip() {
+        Name name = new Name("James", "Santiago-Martinez");
         Address address = new Address("10 Main St", "Bangor", "ME", "04401");
+
         Account original = new Account(
                 "a900000001",
+                name,
                 address,
                 "(207) 555-1234",
                 "user@example.com"
@@ -280,6 +309,8 @@ public class AccountTest {
         Account restored = Account.fromString(original.toString());
 
         assertEquals(original.getAccountNumber(), restored.getAccountNumber());
+        assertEquals(original.getName().getFirstName(), restored.getName().getFirstName());
+        assertEquals(original.getName().getLastName(), restored.getName().getLastName());
         assertEquals(original.getAddress().getStreet(), restored.getAddress().getStreet());
         assertEquals(original.getAddress().getCity(), restored.getAddress().getCity());
         assertEquals(original.getAddress().getState(), restored.getAddress().getState());

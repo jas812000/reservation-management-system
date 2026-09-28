@@ -1,6 +1,7 @@
 package com.jamesstevens.rms.tests;
 
 import com.jamesstevens.rms.Account;
+import com.jamesstevens.rms.Name;
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.Manager;
 import com.jamesstevens.rms.exceptions.NullReservationException;
@@ -55,9 +56,16 @@ public class FindReservationTest {
 		Address physicalAddress = new Address("43-179 Day Mountain Road", "Temple", "ME", "04984");
 		Address cabinMailingAddress = new Address("PO Box 43179", "Waterville", "ME", "04901");
 
-		// Account mailing address is unrelated to lodging mailing address
-		testAccount = new Account(testAccountNumber, cabinMailingAddress,
-				"123-456-7890", "test@email.com");
+		Name name = new Name("James", "Stevens");
+
+		testAccount = new Account(
+				testAccountNumber,
+				name,
+				cabinMailingAddress,
+				"123-456-7890",
+				"test@email.com"
+		);
+
 		manager.addAccount(testAccount);
 
 		testCabinReservation = new CabinReservation(
