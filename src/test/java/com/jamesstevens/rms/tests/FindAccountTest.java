@@ -1,6 +1,7 @@
 package com.jamesstevens.rms.tests;
 
 import com.jamesstevens.rms.Account;
+import com.jamesstevens.rms.Name;
 import com.jamesstevens.rms.Address;
 import com.jamesstevens.rms.Manager;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +35,12 @@ public class FindAccountTest {
         manager = new Manager();
         testAccountNumber = manager.getNewAccountNumber();
 
+        Name name = new Name("James", "Stevens");
         Address address = new Address("123 Main St", "Dallas", "TX", "75001");
+
         Account testAccount = new Account(
                 testAccountNumber,
+                name,
                 address,
                 "123-456-7890",
                 "test@email.com"
@@ -53,10 +57,15 @@ public class FindAccountTest {
         manager.reloadAccounts();
 
         Account foundAccount = manager.getAccount(testAccountNumber);
+
         assertNotNull(foundAccount, "Failed to find test account in system.");
         assertEquals(testAccountNumber, foundAccount.getAccountNumber());
+        assertEquals("James Stevens", foundAccount.getName().toString());
 
         List<String> reservations = foundAccount.getReservationNumbers();
-        assertTrue(reservations.isEmpty(), "Test account should have no reservations initially.");
+        assertTrue(
+                reservations.isEmpty(),
+                "Test account should have no reservations initially."
+        );
     }
 }

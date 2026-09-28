@@ -53,7 +53,7 @@ public class ReservationMenu {
                     case "4" -> updateReservation();
                     case "5" -> cancelReservation();
                     case "6" -> completeReservation();
-                    case "7" -> findAccount();
+                    case "7" -> viewAccount();
                     case "8" -> viewReservation();
                     case "9" -> {
                         System.out.println("Exiting system. Goodbye!");
@@ -77,6 +77,8 @@ public class ReservationMenu {
      * Displays the available reservation management options.
      */
     private void displayMenu() {
+        System.out.println();
+        System.out.println();
         System.out.println("========== Reservation Management System ==========");
         System.out.println("\t1. Create a New Account");
         System.out.println("\t2. Update Existing Account");
@@ -84,7 +86,7 @@ public class ReservationMenu {
         System.out.println("\t4. Update a Reservation");
         System.out.println("\t5. Cancel a Reservation");
         System.out.println("\t6. Complete a Reservation");
-        System.out.println("\t7. Find an Account");
+        System.out.println("\t7. View Existing Account");
         System.out.println("\t8. View a Reservation");
         System.out.println("\t9. Exit");
         System.out.print("\n\tSelect an option (1-9): ");
@@ -96,6 +98,10 @@ public class ReservationMenu {
     private void createAccount() {
         System.out.println("\n========== Create New Account ==========");
 
+        String firstName = readRequiredText("First Name: ");
+        String lastName = readRequiredText("Last Name: ");
+        Name name = new Name(firstName, lastName);
+
         Address address = readAddress();
         String phoneNumber = readPhoneNumber();
         String email = readEmail();
@@ -104,6 +110,7 @@ public class ReservationMenu {
 
         Account account = new Account(
                 accountNumber,
+                name,
                 address,
                 phoneNumber,
                 email
@@ -298,8 +305,11 @@ public class ReservationMenu {
      * Prompts for an account number and displays the matching account information.
      * Reservation information is not displayed as part of the account lookup.
      */
-    private void findAccount() {
-        System.out.println("\n========== Find Account ==========");
+    /**
+     * Retrieves and displays an existing account without modifying it.
+     */
+    private void viewAccount() {
+        System.out.println("\n========== View Existing Account ==========");
 
         Account account = readExistingAccount();
 
@@ -769,6 +779,10 @@ public class ReservationMenu {
                 "Account Number: " + account.getAccountNumber()
         );
 
+        System.out.println(
+                "Name: " + account.getName()
+        );
+
         displayAddress("Address", account.getAddress());
 
         System.out.println(
@@ -794,6 +808,16 @@ public class ReservationMenu {
                 "Account Number: "
                         + reservation.getAccountNumber()
         );
+
+        Account account = manager.getAccount(
+                reservation.getAccountNumber()
+        );
+
+        if (account != null) {
+            System.out.println(
+                    "Customer Name: " + account.getName()
+            );
+        }
 
         System.out.println(
                 "Reservation Type: "

@@ -12,7 +12,9 @@ The system supports three lodging types—cabins, hotels, and houses—each with
 
 ## Features
 
-- Create, update, and find customer accounts
+- Create, update, and view customer accounts
+- Store and display normalized customer names
+- Normalize street and city capitalization for consistent address data
 - Create and update lodging reservations
 - View reservations directly by reservation number
 - Browse reservations associated with an account
@@ -20,11 +22,51 @@ The system supports three lodging types—cabins, hotels, and houses—each with
 - Calculate lodging prices using reservation-specific pricing rules
 - Complete and cancel reservations through controlled lifecycle transitions
 - Prevent modification of completed or cancelled reservations
-- Validate account, address, contact, and reservation data
+- Validate account, name, address, contact, and reservation data
 - Persist accounts and reservations using structured text files
 - Reload persisted application data between executions
 - Handle invalid operations with custom exception types
 - Verify domain and application behavior with JUnit tests
+
+---
+
+## Application Preview
+
+The command-line interface provides account management, reservation management, lookup, and reservation lifecycle operations.
+
+### Main Menu
+
+![Reservation Management System main menu](docs/screenshots/main-menu.png)
+
+### Create Account
+
+Customer accounts include a normalized first and last name, mailing address, phone number, and email address.
+
+![Create a customer account](docs/screenshots/create-account.png)
+
+### View Existing Account
+
+Account information can be retrieved using the generated account number. Names and addresses are displayed using normalized capitalization.
+
+![View an existing customer account](docs/screenshots/find-account.png)
+
+### Create Reservation
+
+Reservations are associated with an existing customer account. The example below creates a Cabin reservation with separate physical and mailing addresses.
+
+![Create a cabin reservation](docs/screenshots/create-reservation.png)
+
+### Reservation Details
+
+Reservation details include the associated customer, reservation status, lodging information, addresses, dates, pricing information, and type-specific attributes.
+
+![View reservation details](docs/screenshots/reservation-details.png)
+
+### Reservation Lifecycle
+
+Reservations begin in the `DRAFT` state and may transition to `COMPLETED` or `CANCELLED`. Completed and cancelled reservations are protected against further modification.
+
+![Completed reservation](docs/screenshots/reservation-lifecycle.png)
 
 ---
 
@@ -125,12 +167,41 @@ Represents a customer account and manages its associated reservations.
 
 Responsibilities include:
 
-- Customer contact information
+- Customer identity and contact information
 - Reservation ownership
 - Adding reservations
 - Updating reservations
 - Reservation retrieval
 - Coordinating reservation persistence
+
+### `Name`
+
+Represents a customer's first and last name.
+
+Name values are validated and normalized when created. Each name component is converted to consistent title-style capitalization while valid internal hyphens and apostrophes are preserved.
+
+Examples include:
+
+```text
+jAMES             -> James
+sANTIAGO-mARTINEZ -> Santiago-Martinez
+o'bRIEN           -> O'Brien
+```
+
+### `Address`
+
+Represents a physical or mailing address.
+
+Street and city values are normalized for consistent display while state abbreviations are stored in uppercase. Address normalization preserves numbers, spaces, hyphens, and apostrophes and handles the standard `PO Box` abbreviation.
+
+Examples include:
+
+```text
+123 mAIn sTreet -> 123 Main Street
+bROKEN bOW      -> Broken Bow
+po box 125      -> PO Box 125
+tx              -> TX
+```
 
 ### `Reservation`
 
@@ -156,6 +227,7 @@ Each subtype extends the shared reservation model with lodging-specific properti
 Additional application components include:
 
 - `Address`
+- `Name`
 - `ReservationStatus`
 - Custom exception types for validation, persistence, duplicate objects, invalid operations, and missing domain objects
 
@@ -172,6 +244,8 @@ data/
 ```
 
 Accounts are stored in account-specific directories, with reservation information persisted alongside the associated account data.
+
+Persisted account records include the account number, customer name, mailing address, phone number, and email address.
 
 Persisted data is loaded when the application starts, allowing accounts and reservations to survive between application executions.
 
@@ -197,6 +271,14 @@ This is useful for testing or maintaining separate datasets.
 
 ```text
 reservation-management-system/
+├── docs/
+│   └── screenshots/
+│       ├── create-account.png
+│       ├── create-reservation.png
+│       ├── find-account.png
+│       ├── main-menu.png
+│       ├── reservation-details.png
+│       └── reservation-lifecycle.png
 ├── src/
 │   ├── main/
 │   │   └── java/
@@ -206,6 +288,7 @@ reservation-management-system/
 │   │           ├── Manager.java
 │   │           ├── Account.java
 │   │           ├── Address.java
+│   │           ├── Name.java
 │   │           ├── enums/
 │   │           │   └── ReservationStatus.java
 │   │           ├── exceptions/
@@ -217,6 +300,12 @@ reservation-management-system/
 │   └── test/
 │       └── java/
 │           └── com/jamesstevens/rms/tests/
+│               ├── AccountTest.java
+│               ├── AddressTest.java
+│               ├── FindAccountTest.java
+│               ├── FindReservationTest.java
+│               ├── NameTest.java
+│               └── ReservationTest.java
 ├── .gitignore
 ├── LICENSE
 ├── pom.xml
@@ -294,14 +383,13 @@ The main menu provides the following operations:
 
 ```text
 ========== Reservation Management System ==========
-
     1. Create a New Account
     2. Update Existing Account
     3. Add a Reservation
     4. Update a Reservation
     5. Cancel a Reservation
     6. Complete a Reservation
-    7. Find an Account
+    7. View Existing Account
     8. View a Reservation
     9. Exit
 ```
@@ -316,9 +404,13 @@ The application allows users to:
 
 - Create an account
 - Update an existing account
-- Find and display account information
+- View an existing account
 
-Account information includes the account number, address, phone number, and email address.
+Account information includes the account number, customer name, mailing address, phone number, and email address.
+
+Customer names are represented by the `Name` value object and normalized when an account is created or loaded.
+
+Address values are also normalized to provide consistent street, city, state, and `PO Box` formatting.
 
 ### Reservations
 
@@ -329,6 +421,8 @@ The application supports:
 - Cabin reservations
 - Hotel reservations
 - House reservations
+
+Each reservation belongs to an account. When reservation details are displayed, the associated customer's name is retrieved from that account rather than duplicated in the reservation itself.
 
 ### Viewing Reservations
 
@@ -363,7 +457,10 @@ Validation is enforced throughout the domain and application layers.
 Examples include:
 
 - Required values
+- Customer name validation
+- Name capitalization and normalization
 - Address validation
+- Address capitalization and normalization
 - State and ZIP code validation
 - Phone-number validation
 - Email validation
@@ -382,15 +479,16 @@ The project defines custom exception types for these failure categories so inval
 
 Automated tests are implemented with JUnit 5.
 
-The current test suite contains five test classes:
+The current test suite contains six test classes:
 
 - `AccountTest`
 - `AddressTest`
 - `FindAccountTest`
 - `FindReservationTest`
+- `NameTest`
 - `ReservationTest`
 
-The suite currently contains **54 automated tests** covering account behavior, address validation, reservation behavior, lookup operations, lifecycle rules, and related application logic.
+The suite currently contains **66 automated tests** covering account behavior, name validation and normalization, address validation and normalization, reservation behavior, lookup operations, persistence, lifecycle rules, and related application logic.
 
 Run all tests with:
 
@@ -398,7 +496,14 @@ Run all tests with:
 mvn clean test
 ```
 
-In addition to automated testing, the command-line workflows have been manually verified for account management, reservation creation and updates, reservation lookup, lifecycle transitions, validation behavior, and persistence across application restarts.
+A successful test run should report:
+
+```text
+Tests run: 66, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+In addition to automated testing, the command-line workflows have been manually verified for account management, reservation creation and updates, account and reservation lookup, lifecycle transitions, validation behavior, and persistence across application restarts.
 
 ---
 
@@ -434,7 +539,9 @@ This project demonstrates practical Java software-engineering concepts including
 - Object-oriented design
 - Abstraction, inheritance, and polymorphism
 - Encapsulation of domain rules
+- Value-object modeling
 - Input and state validation
+- Data normalization
 - Controlled object lifecycle transitions
 - File persistence
 - Error handling with custom exception types

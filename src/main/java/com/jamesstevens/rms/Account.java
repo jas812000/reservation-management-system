@@ -16,6 +16,7 @@ import java.util.*;
 public class Account {
 
     private final String accountNumber;
+    private final Name name;
     private final Address address;
     private String phoneNumber;
     private String email;
@@ -25,12 +26,21 @@ public class Account {
      * Constructs a new {@code Account}.
      *
      * @param accountNumber unique account identifier
+     * @param name          name associated with the account
      * @param address       mailing address associated with the account
      * @param phoneNumber   contact phone number
      * @param email         contact email address
      * @throws IllegalParameterException if any required parameter is invalid
      */
-    public Account(String accountNumber, Address address, String phoneNumber, String email) {
+    public Account(String accountNumber, Name name, Address address, String phoneNumber, String email) {
+        if (name == null) {
+            throw new IllegalParameterException(
+                    "N/A",
+                    "N/A",
+                    "Name cannot be empty."
+            );
+        }
+
         if (address == null) {
             throw new IllegalParameterException(
                     "N/A",
@@ -40,6 +50,7 @@ public class Account {
         }
 
         this.accountNumber = validateAccountNumber(accountNumber);
+        this.name = name;
         this.address = address;
         this.phoneNumber = validatePhoneNumber(phoneNumber, this.accountNumber);
         this.email = validateEmail(email, this.accountNumber);
@@ -62,18 +73,29 @@ public class Account {
         try {
             String[] parts = data.split(",");
 
-            if (parts.length < 7) {
+            if (parts.length < 9) {
                 throw new IllegalLoadException("Account", "N/A", "Data corrupted");
             }
 
-            Address address = new Address(
+            Name name = new Name(
                     parts[1],
-                    parts[2],
-                    parts[3],
-                    parts[4]
+                    parts[2]
             );
 
-            return new Account(parts[0], address, parts[5], parts[6]);
+            Address address = new Address(
+                    parts[3],
+                    parts[4],
+                    parts[5],
+                    parts[6]
+            );
+
+            return new Account(
+                    parts[0],
+                    name,
+                    address,
+                    parts[7],
+                    parts[8]
+            );
 
         } catch (IllegalLoadException e) {
             throw e;
@@ -95,6 +117,14 @@ public class Account {
     public String getAccountNumber() {
         return accountNumber;
     }
+
+
+    /**
+     * Returns the name associated with this account.
+     *
+     * @return account holder's name
+     */
+    public Name getName() { return name; }
 
     /**
      * Returns all reservation numbers associated with this account.
@@ -390,8 +420,10 @@ public class Account {
     @Override
     public String toString() {
         return String.format(
-                "%s,%s,%s,%s,%s,%s,%s",
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s",
                 accountNumber,
+                name.getFirstName(),
+                name.getLastName(),
                 address.getStreet(),
                 address.getCity(),
                 address.getState(),
